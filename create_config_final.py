@@ -53,7 +53,6 @@ if seq_type == "WGS":
         raise Exception("Error: Wrong Kit for WGS. Options are SQK-RBK114-24, SQK-NBD114.24, SQK-LSK114")
 
 if seq_type == "RNA":
-    print(kit)
     toml_config['dorado']['mm2_opts'] = "-ax splice:hq -uf"
     if kit not in ["SQK-PCB114-24"]:
         raise Exception("Error: Wrong Kit for Whole Transcriptome. Options are SQK-PCB114-24")
