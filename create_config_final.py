@@ -36,7 +36,7 @@ else:
 path = toml_config["general"]["project_path"]
 if path.endswith('/'):
     new_path = path[0:-1]
-    toml_config.update({"general": {"project_path": new_path}})
+    toml_config["general"]["project_path"] = new_path
 
 # Add Dorado options
 ## general options
