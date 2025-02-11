@@ -1,5 +1,7 @@
 import argparse
 import toml
+import os
+from glob import glob
 
 parser = argparse.ArgumentParser(
     prog="PipelineLongReads",
@@ -37,6 +39,24 @@ path = toml_config["general"]["project_path"]
 if path.endswith('/'):
     new_path = path[0:-1]
     toml_config["general"]["project_path"] = new_path
+else:
+    new_path = path
+
+# Making directory structure
+directories = ["main_reports", "reads", "scripts", "alignments", "results", "qc"]
+for d in directories:
+    if not os.path.exists(new_path + "/" + d):
+        os.makedirs(new_path + "/" + d)
+
+# Move main reports files to corresponding directory
+reports = ["barcode_alignment", "final_summary", "pore_activity", "report", "sample_sheet", "sequencing_summary", "throughput"]
+for r in reports:
+    f = glob(os.path.join(new_path, r + "*"))
+    if f != []: # if the file exist in the main directory
+        for i in range(0, len(f)): # if one or more file starts with the report name
+            f2 = f[i]
+            name = f2.split("/")[-1]
+            os.rename(f2, os.path.join(new_path, "main_reports", name)) # move to main_reports
 
 # Add Dorado options
 ## general options
