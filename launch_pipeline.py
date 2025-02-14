@@ -110,13 +110,43 @@ def get_reference(ref, tool):
     return reference
 
 
-def dorado(toml_config):
-    title("dorado")
+def create_script(tool, cores, memory, time, output, email, command):
+    project_name = "" # output.split() # TO-DO
+    job = output + "/scripts/" + tool + ".slurm"
 
+    with open("/home/shared/tools/LongReadSequencingONT/sbatch_template.txt", "r") as f:
+        slurm = f.read()
+        
+        slurm_filled = slurm.format(cores, memory, time, "dorado", project_name, email)
+        
+        if tool in ["clair3", "clair3_rna", "flair", "isoquant", "lapa", "meow", "nanoqc", "pycoqc", "sniffles2", "spliceai", "straglr", "trgt", "whatshap"]:
+            slurm_filled += "source activate base\nconda activate /home/shared/tools/" + tool
+        else :
+            slurm_filled += "# not conda environment necessary"
+        slurm_filled += "\n#\n### Calling " + tool + "\n#\n"
+        slurm_filled += command
+        slurm_filled += "\n"
+
+        with open(job, "w") as o:
+            o.write(slurm_filled)
+        
+        return job
+
+
+def dorado(toml_config):
+    tool = "dorado"
+    title(tool)
+    
     output = toml_config["general"]["project_path"]
+    project_name = "" # TO-DO get from output
+    email = toml_config["general"]["email"]
     genome = get_reference(toml_config["general"]["reference"], "dorado")["fasta"]
     reads = "/home/shared/data/2025-01-15_FXN-Batch4/FRDA14_21-UTMAB-06_2/20250115_2147_P2S-02441-B_PBA20836_7fce705b/pod5/PBA20836_7fce705b_9c89ba7b_66.pod5"
     
+    cores = 8
+    memory = 32
+    time = "02-23:59"
+
     command = ["dorado", "basecaller", "--verbose", "--device", "cuda:0", "--min-qscore", str(toml_config["dorado"]["min_q_score"]), "-o", output, "--reference", genome, "--sample-sheet", output + "/" + toml_config["dorado"]["sample_sheet"], "--trim", toml_config["dorado"]["trim"], "--kit-name", toml_config["general"]["kit"], "--mm2-opts", toml_config["dorado"]["mm2_opts"]]
     
     if toml_config["dorado"]["barcode_both_ends"] in ["true", "True", "yes", "Yes"]:
@@ -130,14 +160,17 @@ def dorado(toml_config):
 
     command.extend(["sup", reads])
     
-    print(command)
     command_str = " ".join(command)  
     print(f">>> {command_str}\n")
     
-    # launch job instantly. WILL NEED TO LAUNCH A JOB.
-    subprocess.run(command, check=True)
-
-    #saving(toml_config, "dorado")
+    # Create slurm job
+    job = create_script(tool, cores, memory, time, output, email, command_str)
+    
+    # Launch slurm job
+    subprocess.run(["bash", job], check=True)
+    
+    # Mark too as done
+    #saving(toml_config, tool)
 
 
 if __name__ == "__main__":
