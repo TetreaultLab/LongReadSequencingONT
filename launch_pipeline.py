@@ -140,7 +140,7 @@ def dorado(toml_config):
     output = toml_config["general"]["project_path"]
     project_name = "" # TO-DO get from output
     email = toml_config["general"]["email"]
-    genome = get_reference(toml_config["general"]["reference"], "dorado")["fasta"]
+    genome = get_reference(toml_config["general"]["reference"], tool)["fasta"]
     reads = "/home/shared/data/2025-01-15_FXN-Batch4/FRDA14_21-UTMAB-06_2/20250115_2147_P2S-02441-B_PBA20836_7fce705b/pod5/PBA20836_7fce705b_9c89ba7b_66.pod5"
     
     cores = 8
@@ -167,10 +167,35 @@ def dorado(toml_config):
     job = create_script(tool, cores, memory, time, output, email, command_str)
     
     # Launch slurm job
-    subprocess.run(["bash", job], check=True)
+    subprocess.run(["bash", job], check=True) # put sbatch instead of bash when on beluga
     
-    # Mark too as done
+    # Mark tool as done
     #saving(toml_config, tool)
+
+
+def clair3(toml_config):
+    if toml_config["general"]["seq_type"] == "RNA":
+        tool = "clair3_rna"
+    else:
+        tool = "clair3"
+    
+    title(tool)
+
+    output = toml_config["general"]["project_path"]
+    ref = get_reference(toml_config["general"]["reference"], tool)["fasta"] # same ref for RNA + DNA ?
+    bam = output + ".bam" # complete with file name from dorado
+    model = "" # set or as parameter in config?
+    platform_rna = "" # Possible options: {ont_dorado_drna004, ont_guppy_drna002, ont_guppy_cdna, hifi_sequel2_pbmm2, hifi_sequel2_minimap2, hifi_mas_pbmm2, hifi_sequel2_minimap2}.
+    platform_dna = "ont"
+
+    threads = "8"
+
+    if toml_config["general"]["seq_type"] == "RNA":
+        command = ["run_clair3_rna", "--bam_fn", bam, "--ref_fn", ref, "--threads", threads, "--platform", platform_rna, "--output_dir", output]
+        # add --enable_phasing_model ?
+    else:
+        command = ["run_clair3.sh", "-b", bam, "-f", ref, "-m", model, "-t", threads, "-p", platform_dna, "-o", output]
+
 
 
 if __name__ == "__main__":
