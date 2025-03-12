@@ -63,9 +63,19 @@ def main():
         function_queue.append(dorado)
     
     # SNP calling
-    if "clair3" not in done | "clair3_rna" not in done:
+    if "clair3" not in done and "clair3_rna" not in done:
         print(">>> Variant calling - SNP: Clair3 (?)")
         function_queue.append(clair3)
+
+    # Phasing
+    if "whatshap" not in done:
+        print(">>> Variant phasing: WhatsHap (?)")
+        function_queue.append(whatshap)
+
+    # SV calling
+    # if "sniffles2" not in done:
+    #     print(">>> Variant calling - SV: Sniffles2 (?)")
+    #     function_queue.append(sniffles2)
 
     # Other tools ...
 
@@ -198,11 +208,67 @@ def clair3(toml_config):
     time = "00-23:59"
     email = toml_config["general"]["email"]
 
-    if toml_config["general"]["seq_type"] == "RNA":
+    if tool == "clair3_rna":
         command = ["run_clair3_rna", "--bam_fn", bam, "--ref_fn", ref, "--threads", threads, "--platform", platform_rna, "--output_dir", output]
         # add --enable_phasing_model ?
     else:
         command = ["run_clair3.sh", "-b", bam, "-f", ref, "-m", model, "-t", threads, "-p", platform_dna, "-o", output]
+
+    command_str = " ".join(command)  
+    print(f">>> {command_str}\n")
+
+    # Create slurm job
+    job = create_script(tool, threads, memory, time, output, email, command_str)
+    
+    # Launch slurm job
+    subprocess.run(["bash", job], check=True) # put sbatch instead of bash when on beluga
+    
+    # Mark tool as done
+    saving(toml_config, tool)
+
+
+def whatshap(toml_config):
+    tool = "whatshap"
+    title(tool)
+
+    output = toml_config["general"]["project_path"] 
+    output_vcf = output + "/phased.vcf"
+    input_vcf = output + "/merge_output.vcf.gz"
+    bam = "/home/shared/data/2024-10-16_Lapiana_n17/no_sample_id/20241016_1653_X2_FAV26227_d404da0e/alignment/minimap2_sup/B1540_sorted.bam"
+    ref = get_reference(toml_config["general"]["reference"], tool)["fasta"]
+
+    threads = "8"
+    memory = "32"
+    time = "00-23:59"
+    email = toml_config["general"]["email"]
+
+    command = ["whatshap", "phase", "--ignore-read-groups", "-o", output_vcf, "--reference", ref, input_vcf, bam]
+
+    command_str = " ".join(command)  
+    print(f">>> {command_str}\n")
+
+    # Create slurm job
+    job = create_script(tool, threads, memory, time, output, email, command_str)
+    
+    # Launch slurm job
+    subprocess.run(["bash", job], check=True) # put sbatch instead of bash when on beluga
+    
+    # Mark tool as done
+    saving(toml_config, tool)
+
+
+def sniffles2(toml_config):
+    tool = "sniffles2"
+    title(tool)
+
+    output = toml_config["general"]["project_path"]
+    threads = "8"
+    memory = "32"
+    time = "00-23:59"
+    email = toml_config["general"]["email"]
+
+    # to-do
+    command = []
 
     command_str = " ".join(command)  
     print(f">>> {command_str}\n")
