@@ -169,7 +169,7 @@ def dorado(toml_config):
     subprocess.run(["bash", job], check=True) # put sbatch instead of bash when on beluga
     
     # Mark tool as done
-    #saving(toml_config, tool)
+    saving(toml_config, tool)
 
 
 def clair3(toml_config):
