@@ -61,6 +61,11 @@ def main():
     if "dorado" not in done:
         print(">>> Base calling: Dorado (?)")
         function_queue.append(dorado)
+    
+    # SNP calling
+    if "clair3" not in done | "clair3_rna" not in done:
+        print(">>> Variant calling - SNP: Clair3 (?)")
+        function_queue.append(clair3)
 
     # Other tools ...
 
