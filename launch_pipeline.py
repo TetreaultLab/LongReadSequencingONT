@@ -73,9 +73,9 @@ def main():
         function_queue.append(whatshap)
 
     # SV calling
-    # if "sniffles2" not in done:
-    #     print(">>> Variant calling - SV: Sniffles2 (?)")
-    #     function_queue.append(sniffles2)
+    if "sniffles2" not in done:
+        print(">>> Variant calling - SV: Sniffles2 (?)")
+        function_queue.append(sniffles2)
 
     # Other tools ...
 
@@ -262,13 +262,16 @@ def sniffles2(toml_config):
     title(tool)
 
     output = toml_config["general"]["project_path"]
+    bam = "/home/shared/data/2024-10-16_Lapiana_n17/no_sample_id/20241016_1653_X2_FAV26227_d404da0e/alignment/minimap2_sup/B1540_sorted.bam"
+    vcf = output + "/sniffles2_SV.vcf"
+    ref = get_reference(toml_config["general"]["reference"], tool)["fasta"]
+
     threads = "8"
     memory = "32"
     time = "00-23:59"
     email = toml_config["general"]["email"]
 
-    # to-do
-    command = []
+    command = ["sniffles", "--threads", threads, "--reference", ref, "--input", bam, "--vcf", vcf]
 
     command_str = " ".join(command)  
     print(f">>> {command_str}\n")
@@ -280,7 +283,8 @@ def sniffles2(toml_config):
     subprocess.run(["bash", job], check=True) # put sbatch instead of bash when on beluga
     
     # Mark tool as done
-    #saving(toml_config, tool)
+    saving(toml_config, tool)
+
 
 if __name__ == "__main__":
     main()
