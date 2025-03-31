@@ -1,5 +1,6 @@
 [general]
     project_path = "" #
+	barcode = #
     samples = [] # 
     conditions = [] # matching conditions to samples
     seq_type = "" # WGS, RNA, Meth, Targeted
