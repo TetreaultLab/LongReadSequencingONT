@@ -156,7 +156,7 @@ def create_script(tool, cores, memory, time, output, email, command):
     job = output + "/scripts/" + tool + ".slurm"
     rm_prefix = output.replace('/lustre03/project/6019267/shared/projects/Nanopore_Dock/', '')
     path_list = rm_prefix.split("/")
-    project_name = path_list[1]
+    project_name = path_list[0]
 
     with open("/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/LongReadSequencingONT/sbatch_template.txt", "r") as f:
         slurm = f.read()
