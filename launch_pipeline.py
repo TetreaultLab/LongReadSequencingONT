@@ -117,7 +117,7 @@ def create_sample_sheet(toml_config):
     path_list = rm_prefix.split("/")
     project_name_date = path_list[1].split("_")
     project_name = project_name_date[1]
-    flow_cell = path_list[3]
+    flow_cell = path_list[2]
     flow_cell_id_list = flow_cell.split("_")
     flow_cell_id = flow_cell_id_list[3] + "_" + flow_cell_id_list[4]
     kit = toml_config["general"]["kit"]
