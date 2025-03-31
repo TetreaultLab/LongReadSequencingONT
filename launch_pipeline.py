@@ -68,9 +68,9 @@ def main():
         function_queue.append(clair3)
 
     # Phasing
-    if "whatshap" not in done:
-        print(">>> Variant phasing: WhatsHap (?)")
-        function_queue.append(whatshap)
+    # if "whatshap" not in done:
+    #     print(">>> Variant phasing: WhatsHap (?)")
+    #     function_queue.append(whatshap)
 
     # SV calling
     if "sniffles2" not in done:
@@ -109,17 +109,14 @@ def saving(toml_config, tool):
         steps.write("\n")
 
 
-### TO CHANGE
 def get_reference(ref, tool):
-    path = "/home/shared/tools/reference_files/"
+    path = "/lustre03/project/6019267/shared/tools/database_files/hg38/"
     reference: {}  # type: ignore
     match ref:
         case "grch38":
             reference = {
-                "fasta": path + "hg38/gencode.v38.p13.genome.fa",
-                "index": path + "index_" + tool + "/" + ref,
-                "gtf": path + "Homo_sapiens.GRCh37.87.gtf",
-                "gff3": path + "Homo_sapiens.GRCh37.87.gff3.gz",
+                "fasta": path + "gencode.v38.p13.genome.fa",
+                "gtf": path + "gencode.v38.annotation.gtf",
             }
 
     return reference
@@ -129,18 +126,19 @@ def create_script(tool, cores, memory, time, output, email, command):
     project_name = "" # output.split() # TO-DO
     job = output + "/scripts/" + tool + ".slurm"
 
-    with open("/home/shared/tools/LongReadSequencingONT/sbatch_template.txt", "r") as f:
+    with open("/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/LongReadSequencingONT/sbatch_template.txt", "r") as f:
         slurm = f.read()
-        
         slurm_filled = slurm.format(cores, memory, time, tool, project_name, email)
         
-        if tool in ["clair3", "clair3_rna", "flair", "isoquant", "lapa", "meow", "nanoqc", "pycoqc", "sniffles2", "spliceai", "straglr", "trgt", "whatshap"]:
-            slurm_filled += "source activate base\nconda activate /home/shared/tools/" + tool
-        else :
-            slurm_filled += "# not conda environment necessary"
+        slurm_filled += "module load StdEnv/2023 dorado/0.8.3 apptainer"
+
         slurm_filled += "\n#\n### Calling " + tool + "\n#\n"
-        slurm_filled += command
-        slurm_filled += "\n"
+	if tool in ["clair3", "clair3_rna", "whatshap"]:
+        	slurm_filled += "apptainer run -C -W ${SLURM_TMPDIR} --nv -B /project -B /scratch /lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_" + tool + ".sif " + command
+	else: 
+		slurm_filled += command
+	
+	slurm_filled += "\n"
 
         with open(job, "w") as o:
             o.write(slurm_filled)
@@ -155,7 +153,7 @@ def dorado(toml_config):
     output = toml_config["general"]["project_path"]
     email = toml_config["general"]["email"]
     genome = get_reference(toml_config["general"]["reference"], tool)["fasta"]
-    reads = "/home/shared/data/2025-01-15_FXN-Batch4/FRDA14_21-UTMAB-06_2/20250115_2147_P2S-02441-B_PBA20836_7fce705b/pod5/PBA20836_7fce705b_9c89ba7b_66.pod5"
+	reads = output + "/pod5/"
     
     cores = 8
     memory = 32
@@ -181,7 +179,7 @@ def dorado(toml_config):
     job = create_script(tool, cores, memory, time, output, email, command_str)
     
     # Launch slurm job
-    subprocess.run(["bash", job], check=True) # put sbatch instead of bash when on beluga
+    subprocess.run(["sbatch", job], check=True) # put sbatch instead of bash when on beluga
     
     # Mark tool as done
     saving(toml_config, tool)
@@ -197,8 +195,8 @@ def clair3(toml_config):
 
     output = toml_config["general"]["project_path"]
     ref = get_reference(toml_config["general"]["reference"], tool)["fasta"] # same ref for RNA + DNA ?
-    #bam = output + ".bam" # complete with file name from dorado
-    bam = "/home/shared/data/2024-10-16_Lapiana_n17/no_sample_id/20241016_1653_X2_FAV26227_d404da0e/alignment/minimap2_sup/B1540_sorted.bam"
+    bam = output + ".bam" # complete with file name from dorado
+    #bam = "/home/shared/data/2024-10-16_Lapiana_n17/no_sample_id/20241016_1653_X2_FAV26227_d404da0e/alignment/minimap2_sup/B1540_sorted.bam"
     model = "/home/shared/tools/clair3/Clair3/models/r1041_e82_400bps_sup_v420" # https://www.bio8.cs.hku.hk/clair3/clair3_models/
     platform_rna = "ont_dorado_drna004" # Possible options: {ont_dorado_drna004, ont_guppy_drna002, ont_guppy_cdna, hifi_sequel2_pbmm2, hifi_sequel2_minimap2, hifi_mas_pbmm2, hifi_sequel2_minimap2}.
     platform_dna = "ont"
@@ -234,6 +232,7 @@ def whatshap(toml_config):
     output = toml_config["general"]["project_path"] 
     output_vcf = output + "/phased.vcf"
     input_vcf = output + "/merge_output.vcf.gz"
+	bam = output + "_sorted.bam" # complete with file name from dorado
     bam = "/home/shared/data/2024-10-16_Lapiana_n17/no_sample_id/20241016_1653_X2_FAV26227_d404da0e/alignment/minimap2_sup/B1540_sorted.bam"
     ref = get_reference(toml_config["general"]["reference"], tool)["fasta"]
 
