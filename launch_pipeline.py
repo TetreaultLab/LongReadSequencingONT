@@ -191,7 +191,7 @@ def dorado(toml_config):
     memory = 32
     time = "02-23:59"
 
-    command = ["dorado", "basecaller", "--verbose", "--device", "cuda:0", "--min-qscore", str(toml_config["dorado"]["min_q_score"]), "-o", output, "--reference", genome, "--sample-sheet", output + "/" + toml_config["dorado"]["sample_sheet"], "--trim", toml_config["dorado"]["trim"], "--kit-name", toml_config["general"]["kit"], "--mm2-opts", toml_config["dorado"]["mm2_opts"]]
+    command = ["dorado", "basecaller", "--verbose", "--device", "cuda:auto", "--min-qscore", str(toml_config["dorado"]["min_q_score"]), "-o", output, "--reference", genome, "--sample-sheet", output + "/" + toml_config["dorado"]["sample_sheet"], "--trim", toml_config["dorado"]["trim"], "--kit-name", toml_config["general"]["kit"], "--mm2-opts", toml_config["dorado"]["mm2_opts"]]
     
     if toml_config["dorado"]["barcode_both_ends"] in ["true", "True", "yes", "Yes"]:
         command.extend(["--barcode-both-ends"])
