@@ -38,6 +38,9 @@ def main():
     
     output = toml_config["general"]["project_path"]
 
+    # Create sample_sheet.csv
+    create_sample_sheet(toml_config)
+
     # Open file for steps done
     steps = open(output + "/steps_done.txt", "a")
     steps.write("\nLoading ENV\n")
@@ -108,6 +111,36 @@ def saving(toml_config, tool):
         steps.write(tool)
         steps.write("\n")
 
+def create_sample_sheet(toml_config):
+    path = toml_config["general"]["project_path"]
+    rm_prefix = path.replace('/lustre03/project/6019267/shared/projects/Nanopore_Dock/', '')
+    path_list = rm_prefix.str.split("/")
+    project_name_date = path_list[1].str.split("_")
+    project_name = project_name_date[1]
+    flow_cell = path_list[3]
+    flow_cell_id_list = flow_cell.str.split("_")
+    flow_cell_id = flow_cell_id_list[3] + "_" + flow_cell_id_list[4]
+    kit = toml_config["general"]["kit"]
+    samples = toml_config["general"]["samples"]
+    conditions = toml_config["general"]["conditions"]
+    barcode_initial = toml_config["general"]["barcode"]
+
+    columns = ["flow_cell_id","experiment_id","kit","alias","type","barcode"]
+
+    
+    d = {'flow_cell_id': flow_cell_id, 
+         'experiment_id': project_name, 
+         'kit': kit, 
+         'alias': samples, 
+         'type': conditions, 
+         'barcode': range(barcode_initial, barcode_initial + len(samples))}
+
+    df = pd.DataFrame(data=d)
+    print(df)
+
+    df.to_csv(path+"/samples.csv", sep=",", index=False)
+
+
 
 def get_reference(ref, tool):
     path = "/lustre03/project/6019267/shared/tools/database_files/hg38/"
@@ -123,7 +156,6 @@ def get_reference(ref, tool):
 
 
 def create_script(tool, cores, memory, time, output, email, command):
-    project_name = "" # output.split() # TO-DO
     job = output + "/scripts/" + tool + ".slurm"
 
     with open("/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/LongReadSequencingONT/sbatch_template.txt", "r") as f:
@@ -133,15 +165,15 @@ def create_script(tool, cores, memory, time, output, email, command):
         slurm_filled += "module load StdEnv/2023 dorado/0.8.3 apptainer"
 
         slurm_filled += "\n#\n### Calling " + tool + "\n#\n"
-	if tool in ["clair3", "clair3_rna", "whatshap"]:
-        	slurm_filled += "apptainer run -C -W ${SLURM_TMPDIR} --nv -B /project -B /scratch /lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_" + tool + ".sif " + command
-	else: 
-		slurm_filled += command
+        if tool in ["clair3", "clair3_rna", "whatshap"]:
+       	    slurm_filled += "apptainer run -C -W ${SLURM_TMPDIR} --nv -B /project -B /scratch /lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_" + tool + ".sif " + command
+        else:
+	        slurm_filled += command
 	
-	slurm_filled += "\n"
+        slurm_filled += "\n"
 
-        with open(job, "w") as o:
-            o.write(slurm_filled)
+    with open(job, "w") as o:
+        o.write(slurm_filled)
         
         return job
 
