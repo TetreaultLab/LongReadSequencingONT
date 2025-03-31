@@ -109,7 +109,6 @@ def saving(toml_config, tool):
         steps.write("\n")
 
 
-### TO CHANGE
 def get_reference(ref, tool):
     path = "/lustre03/project/6019267/shared/tools/database_files/hg38/"
     reference: {}  # type: ignore
@@ -134,7 +133,7 @@ def create_script(tool, cores, memory, time, output, email, command):
         slurm_filled += "module load StdEnv/2023 dorado/0.8.3 apptainer"
 
         slurm_filled += "\n#\n### Calling " + tool + "\n#\n"
-        slurm_filled += command
+        slurm_filled += "apptainer run -C -W ${SLURM_TMPDIR} --nv -B /project -B /scratch " + command
         slurm_filled += "\n"
 
         with open(job, "w") as o:
@@ -150,6 +149,7 @@ def dorado(toml_config):
     output = toml_config["general"]["project_path"]
     email = toml_config["general"]["email"]
     genome = get_reference(toml_config["general"]["reference"], tool)["fasta"]
+	reads = "/lustre03/project/6019267/shared/projects/Nanopore_Dock/pod5"
     #reads = "/home/shared/data/2025-01-15_FXN-Batch4/FRDA14_21-UTMAB-06_2/20250115_2147_P2S-02441-B_PBA20836_7fce705b/pod5/PBA20836_7fce705b_9c89ba7b_66.pod5"
     
     cores = 8
@@ -204,10 +204,10 @@ def clair3(toml_config):
     email = toml_config["general"]["email"]
 
     if tool == "clair3_rna":
-        command = ["apptainer", "run", "-W", "${SLURM_TMPDIR}", "run_clair3_rna", "--bam_fn", bam, "--ref_fn", ref, "--threads", threads, "--platform", platform_rna, "--output_dir", output]
+        command = ["run_clair3_rna", "--bam_fn", bam, "--ref_fn", ref, "--threads", threads, "--platform", platform_rna, "--output_dir", output]
         # add --enable_phasing_model ?
     else:
-        command = ["apptainer", "run", "-W", "${SLURM_TMPDIR}", "run_clair3.sh", "-b", bam, "-f", ref, "-m", model, "-t", threads, "-p", platform_dna, "-o", output]
+        command = ["run_clair3.sh", "-b", bam, "-f", ref, "-m", model, "-t", threads, "-p", platform_dna, "-o", output]
 
     command_str = " ".join(command)  
     print(f">>> {command_str}\n")
@@ -238,7 +238,7 @@ def whatshap(toml_config):
     time = "00-23:59"
     email = toml_config["general"]["email"]
 
-    command = ["apptainer", "run", "-W", "${SLURM_TMPDIR}", "whatshap", "phase", "--ignore-read-groups", "-o", output_vcf, "--reference", ref, input_vcf, bam]
+    command = ["whatshap", "phase", "--ignore-read-groups", "-o", output_vcf, "--reference", ref, input_vcf, bam]
 
     command_str = " ".join(command)  
     print(f">>> {command_str}\n")
@@ -264,7 +264,7 @@ def sniffles2(toml_config):
     email = toml_config["general"]["email"]
 
     # to-do
-    command = ["apptainer", "run", "-W", "${SLURM_TMPDIR}", ]
+    command = []
 
     command_str = " ".join(command)  
     print(f">>> {command_str}\n")
