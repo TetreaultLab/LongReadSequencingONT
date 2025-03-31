@@ -66,9 +66,9 @@ def main():
         function_queue.append(dorado)
     
     # SNP calling
-    if "clair3" not in done and "clair3_rna" not in done:
-        print(">>> Variant calling - SNP: Clair3 (?)")
-        function_queue.append(clair3)
+    # if "clair3" not in done and "clair3_rna" not in done:
+    #    print(">>> Variant calling - SNP: Clair3 (?)")
+    #    function_queue.append(clair3)
 
     # Phasing
     # if "whatshap" not in done:
@@ -76,9 +76,9 @@ def main():
     #     function_queue.append(whatshap)
 
     # SV calling
-    if "sniffles2" not in done:
-        print(">>> Variant calling - SV: Sniffles2 (?)")
-        function_queue.append(sniffles2)
+    # if "sniffles2" not in done:
+    #    print(">>> Variant calling - SV: Sniffles2 (?)")
+    #    function_queue.append(sniffles2)
 
     # Other tools ...
 
@@ -183,15 +183,16 @@ def dorado(toml_config):
     title(tool)
     
     output = toml_config["general"]["project_path"]
+    reads = output + "/pod5"
+    final = output + "/alignments/"
     email = toml_config["general"]["email"]
     genome = get_reference(toml_config["general"]["reference"], tool)["fasta"]
-    reads = output + "/pod5"
     
     cores = 8
     memory = 32
     time = "02-23:59"
 
-    command = ["dorado", "basecaller", "--verbose", "--device", "cuda:auto", "--min-qscore", str(toml_config["dorado"]["min_q_score"]), "-o", output, "--reference", genome, "--sample-sheet", output + "/" + toml_config["dorado"]["sample_sheet"], "--trim", toml_config["dorado"]["trim"], "--kit-name", toml_config["general"]["kit"], "--mm2-opts", toml_config["dorado"]["mm2_opts"]]
+    command = ["dorado", "basecaller", "--verbose", "--device", "cuda:auto", "--min-qscore", str(toml_config["dorado"]["min_q_score"]), "-o", final, "--reference", genome, "--sample-sheet", output + "/" + toml_config["dorado"]["sample_sheet"], "--trim", toml_config["dorado"]["trim"], "--kit-name", toml_config["general"]["kit"], "--mm2-opts", toml_config["dorado"]["mm2_opts"]]
     
     if toml_config["dorado"]["barcode_both_ends"] in ["true", "True", "yes", "Yes"]:
         command.extend(["--barcode-both-ends"])
@@ -227,7 +228,7 @@ def clair3(toml_config):
 
     output = toml_config["general"]["project_path"]
     ref = get_reference(toml_config["general"]["reference"], tool)["fasta"] # same ref for RNA + DNA ?
-    bam = output + ".bam" # complete with file name from dorado
+    bam = output + "/alignments" # complete with file name from dorado
     #bam = "/home/shared/data/2024-10-16_Lapiana_n17/no_sample_id/20241016_1653_X2_FAV26227_d404da0e/alignment/minimap2_sup/B1540_sorted.bam"
     model = "/home/shared/tools/clair3/Clair3/models/r1041_e82_400bps_sup_v420" # https://www.bio8.cs.hku.hk/clair3/clair3_models/
     platform_rna = "ont_dorado_drna004" # Possible options: {ont_dorado_drna004, ont_guppy_drna002, ont_guppy_cdna, hifi_sequel2_pbmm2, hifi_sequel2_minimap2, hifi_mas_pbmm2, hifi_sequel2_minimap2}.
