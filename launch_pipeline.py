@@ -125,9 +125,6 @@ def create_sample_sheet(toml_config):
     conditions = toml_config["general"]["conditions"]
     barcode_initial = toml_config["general"]["barcode"]
 
-    columns = ["flow_cell_id","experiment_id","kit","alias","type","barcode"]
-
-    
     d = {'flow_cell_id': flow_cell_id, 
          'experiment_id': project_name, 
          'kit': kit, 
@@ -157,6 +154,9 @@ def get_reference(ref, tool):
 
 def create_script(tool, cores, memory, time, output, email, command):
     job = output + "/scripts/" + tool + ".slurm"
+    rm_prefix = output.replace('/lustre03/project/6019267/shared/projects/Nanopore_Dock/', '')
+    path_list = rm_prefix.str.split("/")
+    project_name = path_list[1]
 
     with open("/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/LongReadSequencingONT/sbatch_template.txt", "r") as f:
         slurm = f.read()
@@ -169,13 +169,13 @@ def create_script(tool, cores, memory, time, output, email, command):
        	    slurm_filled += "apptainer run -C -W ${SLURM_TMPDIR} --nv -B /project -B /scratch /lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_" + tool + ".sif " + command
         else:
 	        slurm_filled += command
-	
+        
         slurm_filled += "\n"
 
-    with open(job, "w") as o:
-        o.write(slurm_filled)
+        with open(job, "w") as o:
+            o.write(slurm_filled)
         
-        return job
+            return job
 
 
 def dorado(toml_config):
@@ -264,8 +264,8 @@ def whatshap(toml_config):
     output = toml_config["general"]["project_path"] 
     output_vcf = output + "/phased.vcf"
     input_vcf = output + "/merge_output.vcf.gz"
-	bam = output + "_sorted.bam" # complete with file name from dorado
-    bam = "/home/shared/data/2024-10-16_Lapiana_n17/no_sample_id/20241016_1653_X2_FAV26227_d404da0e/alignment/minimap2_sup/B1540_sorted.bam"
+    bam = output + "_sorted.bam" # complete with file name from dorado
+    # bam = "/home/shared/data/2024-10-16_Lapiana_n17/no_sample_id/20241016_1653_X2_FAV26227_d404da0e/alignment/minimap2_sup/B1540_sorted.bam"
     ref = get_reference(toml_config["general"]["reference"], tool)["fasta"]
 
     threads = "8"
