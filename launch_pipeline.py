@@ -114,11 +114,11 @@ def saving(toml_config, tool):
 def create_sample_sheet(toml_config):
     path = toml_config["general"]["project_path"]
     rm_prefix = path.replace('/lustre03/project/6019267/shared/projects/Nanopore_Dock/', '')
-    path_list = rm_prefix.str.split("/")
+    path_list = rm_prefix.split("/")
     project_name_date = path_list[1].str.split("_")
     project_name = project_name_date[1]
     flow_cell = path_list[3]
-    flow_cell_id_list = flow_cell.str.split("_")
+    flow_cell_id_list = flow_cell.split("_")
     flow_cell_id = flow_cell_id_list[3] + "_" + flow_cell_id_list[4]
     kit = toml_config["general"]["kit"]
     samples = toml_config["general"]["samples"]
