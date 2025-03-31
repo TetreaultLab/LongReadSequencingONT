@@ -68,9 +68,9 @@ def main():
         function_queue.append(clair3)
 
     # Phasing
-    if "whatshap" not in done:
-        print(">>> Variant phasing: WhatsHap (?)")
-        function_queue.append(whatshap)
+    # if "whatshap" not in done:
+    #     print(">>> Variant phasing: WhatsHap (?)")
+    #     function_queue.append(whatshap)
 
     # SV calling
     # if "sniffles2" not in done:
@@ -133,8 +133,12 @@ def create_script(tool, cores, memory, time, output, email, command):
         slurm_filled += "module load StdEnv/2023 dorado/0.8.3 apptainer"
 
         slurm_filled += "\n#\n### Calling " + tool + "\n#\n"
-        slurm_filled += "apptainer run -C -W ${SLURM_TMPDIR} --nv -B /project -B /scratch " + command
-        slurm_filled += "\n"
+	if tool in ["clair3", "clair3_rna", "whatshap"]:
+        	slurm_filled += "apptainer run -C -W ${SLURM_TMPDIR} --nv -B /project -B /scratch /lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_" + tool + ".sif " + command
+	else: 
+		slurm_filled += command
+	
+	slurm_filled += "\n"
 
         with open(job, "w") as o:
             o.write(slurm_filled)
