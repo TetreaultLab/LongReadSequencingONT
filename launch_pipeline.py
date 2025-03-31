@@ -149,8 +149,7 @@ def dorado(toml_config):
     output = toml_config["general"]["project_path"]
     email = toml_config["general"]["email"]
     genome = get_reference(toml_config["general"]["reference"], tool)["fasta"]
-	reads = "/lustre03/project/6019267/shared/projects/Nanopore_Dock/pod5"
-    #reads = "/home/shared/data/2025-01-15_FXN-Batch4/FRDA14_21-UTMAB-06_2/20250115_2147_P2S-02441-B_PBA20836_7fce705b/pod5/PBA20836_7fce705b_9c89ba7b_66.pod5"
+	reads = output + "/pod5/"
     
     cores = 8
     memory = 32
@@ -176,7 +175,7 @@ def dorado(toml_config):
     job = create_script(tool, cores, memory, time, output, email, command_str)
     
     # Launch slurm job
-    subprocess.run(["bash", job], check=True) # put sbatch instead of bash when on beluga
+    subprocess.run(["sbatch", job], check=True) # put sbatch instead of bash when on beluga
     
     # Mark tool as done
     saving(toml_config, tool)
