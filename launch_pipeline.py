@@ -185,7 +185,7 @@ def dorado(toml_config):
     output = toml_config["general"]["project_path"]
     email = toml_config["general"]["email"]
     genome = get_reference(toml_config["general"]["reference"], tool)["fasta"]
-	reads = output + "/pod5/"
+    reads = output + "/pod5/"
     
     cores = 8
     memory = 32
