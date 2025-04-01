@@ -11,6 +11,15 @@ from glob import glob
 
 def main():
     start = get_time()
+
+    # Start of pipeline
+    start_str = ">>> LRS pipeline starting at {}.".format(
+        start
+    )
+    print(
+        "=" * len(start_str) + "\n" + start_str + "\n" + "=" * len(start_str),
+        file=sys.stdout,
+    )
     
     parser = argparse.ArgumentParser(
         prog="PipelineLong",
@@ -23,28 +32,11 @@ def main():
 
     args = parser.parse_args()
     
-    # Loading TOML config
-    toml_config = create_config_final(args.config)
-    print(toml_config)
+    # Loading initial TOML config
+    with open(args.config, "r") as f:
+        toml_config = toml.load(f)
 
-    # Start of pipeline
-    start_str = ">>> LRS pipeline starting at {}.".format(
-        start
-    )
-    print(
-        "=" * len(start_str) + "\n" + start_str + "\n" + "=" * len(start_str),
-        file=sys.stdout,
-    )
-    
     output = toml_config["general"]["project_path"]
-
-    # Create sample_sheet.csv
-    create_sample_sheet(toml_config)
-
-    # Open file for steps done
-    steps = open(output + "/steps_done.txt", "a")
-    steps.write("\nLoading ENV\n")
-    steps.close()
     
     # Create list of steps already done from the file steps_done.txt
     done = []
@@ -52,6 +44,20 @@ def main():
         for line in f:
             done.append(line.strip())
 
+    # Creat config and sample sheet
+    if "Loading ENV" not in done:
+        # Create final TOML config
+        toml_config = create_config_final(args.config)
+        print(toml_config)
+
+        # Create sample_sheet.csv
+        create_sample_sheet(toml_config)
+
+        # Open file for steps done
+        steps = open(output + "/steps_done.txt", "a")
+        steps.write("\nLoading ENV\n")
+        steps.close()
+    
 
     # Get tools and versions
     function_queue = []
@@ -302,7 +308,7 @@ def dorado(toml_config):
     job = create_script(tool, cores, memory, time, output, email, command_str)
     
     # Launch slurm job
-    subprocess.run(["sbatch", job], check=True) # put sbatch instead of bash when on beluga
+    #subprocess.run(["sbatch", job], check=True) # put sbatch instead of bash when on beluga
     
     # Mark tool as done
     #saving(toml_config, tool)
