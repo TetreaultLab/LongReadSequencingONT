@@ -39,6 +39,7 @@ def main():
     output = toml_config["general"]["project_path"]
     
     # Create list of steps already done from the file steps_done.txt
+    steps = open(output + "/steps_done.txt", "a").close()
     done = []
     with open(output + "/steps_done.txt", "r") as f:
         for line in f:
@@ -55,7 +56,7 @@ def main():
 
         # Open file for steps done
         steps = open(output + "/steps_done.txt", "a")
-        steps.write("\nLoading ENV\n")
+        steps.write("Loading ENV\n")
         steps.close()
     
 
