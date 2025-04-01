@@ -166,20 +166,27 @@ def create_config_final(filename):
     ## parameters depending on sequencing type
     if seq_type == "WGS":
         toml_config['dorado']['mm2_opts'] = "'-ax lr:hq'"
+        toml_config['dorado']['model'] = "dna_r10.4.1_e8.2_400bps_sup@v5.0.0"
         if kit not in ["SQK-RBK114-24", "SQK-NBD114.24", "SQK-LSK114"]:
             raise Exception("Error: Wrong Kit for WGS. Options are SQK-RBK114-24, SQK-NBD114.24, SQK-LSK114")
 
     if seq_type == "RNA":
         toml_config['dorado']['mm2_opts'] = "'-ax splice:hq -uf'"
+        toml_config['dorado']['model'] = "rna004_130bps_sup@v5.1.0"
         if kit not in ["SQK-PCB114-24"]:
             raise Exception("Error: Wrong Kit for Whole Transcriptome. Options are SQK-PCB114-24")
 
     if methylation_status:
         toml_config['dorado']['modified_bases'] = "5mCG_5hmCG"
         toml_config['dorado']['modified_bases_threshold'] = 0.05
+        if seq_type == "RNA":
+            toml_config['dorado']['model'] = toml_config['dorado']['model'] + "_m5C@v1"
+        elif seq_type == "WGS":
+            toml_config['dorado']['model'] = toml_config['dorado']['model'] + "_5mCG_5hmCG@v2.0.1"
 
     if seq_type == "Targeted":
         toml_config['dorado']['mm2_opts'] = "'-ax splice --junc-bed anno.bed12'"
+        toml_config['dorado']['model'] = "" # TO-DO
         if kit not in ["SQK-NBD114-24"]:
             raise Exception("Error: Wrong Kit for Targeted Sequencing. Options are SQK-NBD114-24")
 
@@ -242,6 +249,7 @@ def create_script(tool, cores, memory, time, output, email, command):
 
     with open("/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/LongReadSequencingONT/sbatch_template.txt", "r") as f:
         slurm = f.read()
+        # TO-DO: def-tetreaum for dorado and rrg-tetreaum for the rest
         slurm_filled = slurm.format(cores, memory, time, tool, project_name, email)
         
         slurm_filled += "module load StdEnv/2023 dorado/0.8.3 apptainer"
@@ -285,7 +293,7 @@ def dorado(toml_config):
     if "polya" in toml_config["general"]["analysis"]:
         command.extend(["--estimate-poly-a"])
 
-    command.extend(["sup", reads])
+    command.extend([toml_config['dorado']['model'], reads])
     
     command_str = " ".join(command)  
     print(f">>> {command_str}\n")
