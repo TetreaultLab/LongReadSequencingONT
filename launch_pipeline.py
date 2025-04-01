@@ -302,7 +302,7 @@ def dorado(toml_config):
     job = create_script(tool, cores, memory, time, output, email, command_str)
     
     # Launch slurm job
-    subprocess.run(["bash", job], check=True) # put sbatch instead of bash when on beluga
+    subprocess.run(["sbatch", job], check=True) # put sbatch instead of bash when on beluga
     
     # Mark tool as done
     #saving(toml_config, tool)
