@@ -175,31 +175,25 @@ def create_config_final(filename):
     toml_config['dorado']['sample_sheet'] = "samples.csv"
     toml_config['dorado']['barcode_both_ends'] = True
     toml_config['dorado']['trim'] = "all"
+    toml_config['dorado']['model'] = "dna_r10.4.1_e8.2_400bps_sup@v5.0.0"
 
     ## parameters depending on sequencing type
     if seq_type == "WGS":
         toml_config['dorado']['mm2_opts'] = "'-ax lr:hq'"
-        toml_config['dorado']['model'] = "dna_r10.4.1_e8.2_400bps_sup@v5.0.0"
         if kit not in ["SQK-RBK114-24", "SQK-NBD114.24", "SQK-LSK114"]:
             raise Exception("Error: Wrong Kit for WGS. Options are SQK-RBK114-24, SQK-NBD114.24, SQK-LSK114")
 
     if seq_type == "RNA":
         toml_config['dorado']['mm2_opts'] = "'-ax splice:hq -uf'"
-        toml_config['dorado']['model'] = "rna004_130bps_sup@v5.1.0"
         if kit not in ["SQK-PCB114-24"]:
             raise Exception("Error: Wrong Kit for Whole Transcriptome. Options are SQK-PCB114-24")
 
     if methylation_status:
         toml_config['dorado']['modified_bases'] = "5mCG_5hmCG"
         toml_config['dorado']['modified_bases_threshold'] = 0.05
-        if seq_type == "RNA":
-            toml_config['dorado']['model'] = toml_config['dorado']['model'] + "_m5C@v1"
-        elif seq_type == "WGS":
-            toml_config['dorado']['model'] = toml_config['dorado']['model'] + "_5mCG_5hmCG@v2.0.1"
 
     if seq_type == "Targeted":
         toml_config['dorado']['mm2_opts'] = "'-ax splice --junc-bed anno.bed12'"
-        toml_config['dorado']['model'] = "" # TO-DO
         if kit not in ["SQK-NBD114-24"]:
             raise Exception("Error: Wrong Kit for Targeted Sequencing. Options are SQK-NBD114-24")
 
@@ -290,11 +284,11 @@ def dorado(toml_config):
     email = toml_config["general"]["email"]
     genome = get_reference(toml_config["general"]["reference"], tool)["fasta"]
     
-    cores = 8
-    memory = 32
+    cores = 16
+    memory = 128
     time = "01-23:59"
 
-    command = ["dorado", "basecaller", "--verbose", "--device", "cuda:auto", "--models-directory", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/dorado_models", "--min-qscore", str(toml_config["dorado"]["min_q_score"]), "--output-dir", final, "--reference", genome, "--sample-sheet", output + "/" + toml_config["dorado"]["sample_sheet"], "--trim", toml_config["dorado"]["trim"], "--kit-name", toml_config["general"]["kit"], "--mm2-opts", toml_config["dorado"]["mm2_opts"]]
+    command = ["dorado", "basecaller", "--verbose", "--device", "cuda:auto", "--min-qscore", str(toml_config["dorado"]["min_q_score"]), "--output-dir", final, "--reference", genome, "--sample-sheet", output + "/" + toml_config["dorado"]["sample_sheet"], "--trim", toml_config["dorado"]["trim"], "--kit-name", toml_config["general"]["kit"], "--mm2-opts", toml_config["dorado"]["mm2_opts"]]
     
     if toml_config["dorado"]["barcode_both_ends"] in ["true", "True", "yes", "Yes"]:
         command.extend(["--barcode-both-ends"])
@@ -305,7 +299,7 @@ def dorado(toml_config):
     if "polya" in toml_config["general"]["analysis"]:
         command.extend(["--estimate-poly-a"])
 
-    command.extend([toml_config['dorado']['model'], reads])
+    command.extend(["/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/dorado_models/" + toml_config['dorado']['model'], reads])
     
     command_str = " ".join(command)  
     print(f">>> {command_str}\n")
@@ -330,7 +324,7 @@ def clair3(toml_config):
 
     output = toml_config["general"]["project_path"]
     ref = get_reference(toml_config["general"]["reference"], tool)["fasta"] # same ref for RNA + DNA ?
-    bam = output + "/alignments" # complete with file name from dorado
+    bam = output + "/alignments/" # complete with file name from dorado
     #bam = "/home/shared/data/2024-10-16_Lapiana_n17/no_sample_id/20241016_1653_X2_FAV26227_d404da0e/alignment/minimap2_sup/B1540_sorted.bam"
     model = "/home/shared/tools/clair3/Clair3/models/r1041_e82_400bps_sup_v420" # https://www.bio8.cs.hku.hk/clair3/clair3_models/
     platform_rna = "ont_dorado_drna004" # Possible options: {ont_dorado_drna004, ont_guppy_drna002, ont_guppy_cdna, hifi_sequel2_pbmm2, hifi_sequel2_minimap2, hifi_mas_pbmm2, hifi_sequel2_minimap2}.
