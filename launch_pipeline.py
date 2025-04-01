@@ -59,7 +59,7 @@ def main():
         steps.write("Loading ENV\n")
         steps.close()
 
-        print("\n\n\nWARNING\nIF YOU WANT TO CHANGE THE CONFIG PARAMETERS\n\t\tPRESS CTRL+C NOW!\nOTHERWISE IT WILL RUN WITH DEFAULT PARAMETERS\n\n")
+        print("\n\n\n!!! WARNING !!!\nIf you to change the parameters: Press CTRL+C now!\nModify config_final.toml and launch_pipeline with that config file.\n\nOtherwise it will run with default parameters.\n\n")
         time.sleep(60)
 
     else:
