@@ -24,10 +24,7 @@ def main():
     args = parser.parse_args()
     
     # Loading TOML config
-    with open(args.config, "r") as f:
-        toml_config_initial = toml.load(f)
-    
-    toml_config = create_config_final(toml_config_initial)
+    toml_config = create_config_final(args.config)
     print(toml_config)
 
     # Start of pipeline
@@ -114,9 +111,9 @@ def saving(toml_config, tool):
         steps.write(tool)
         steps.write("\n")
 
-def create_config_final(toml_config):
+def create_config_final(filename):
     # Read initial config file
-    with open(toml_config, "r") as f:
+    with open(filename, "r") as f:
         toml_config = toml.load(f)
 
     ## Which analysis are possible for each seq-type. Make a if to fill the analysis field and check if some error are made in analysis was not empty
