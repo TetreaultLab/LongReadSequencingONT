@@ -275,9 +275,9 @@ def dorado(toml_config):
     
     cores = 8
     memory = 32
-    time = "02-23:59"
+    time = "01-23:59"
 
-    command = ["dorado", "basecaller", "--verbose", "--device", "cuda:auto", "--min-qscore", str(toml_config["dorado"]["min_q_score"]), "-o", final, "--reference", genome, "--sample-sheet", output + "/" + toml_config["dorado"]["sample_sheet"], "--trim", toml_config["dorado"]["trim"], "--kit-name", toml_config["general"]["kit"], "--mm2-opts", toml_config["dorado"]["mm2_opts"]]
+    command = ["dorado", "basecaller", "--verbose", "--device", "cuda:auto", "--min-qscore", str(toml_config["dorado"]["min_q_score"]), "--output-dir", final, "--reference", genome, "--sample-sheet", output + "/" + toml_config["dorado"]["sample_sheet"], "--trim", toml_config["dorado"]["trim"], "--kit-name", toml_config["general"]["kit"], "--mm2-opts", toml_config["dorado"]["mm2_opts"]]
     
     if toml_config["dorado"]["barcode_both_ends"] in ["true", "True", "yes", "Yes"]:
         command.extend(["--barcode-both-ends"])
@@ -300,7 +300,7 @@ def dorado(toml_config):
     subprocess.run(["bash", job], check=True) # put sbatch instead of bash when on beluga
     
     # Mark tool as done
-    saving(toml_config, tool)
+    #saving(toml_config, tool)
 
 
 def clair3(toml_config):
