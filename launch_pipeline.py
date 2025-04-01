@@ -1,5 +1,6 @@
 import argparse
 import toml
+import time
 from datetime import datetime
 import subprocess
 import sys
@@ -34,9 +35,9 @@ def main():
     
     # Loading initial TOML config
     with open(args.config, "r") as f:
-        toml_config = toml.load(f)
+        toml_config_initial = toml.load(f)
 
-    output = toml_config["general"]["project_path"]
+    output = toml_config_initial["general"]["project_path"]
     
     # Create list of steps already done from the file steps_done.txt
     steps = open(output + "/steps_done.txt", "a").close()
@@ -49,7 +50,6 @@ def main():
     if "Loading ENV" not in done:
         # Create final TOML config
         toml_config = create_config_final(args.config)
-        print(toml_config)
 
         # Create sample_sheet.csv
         create_sample_sheet(toml_config)
@@ -58,6 +58,12 @@ def main():
         steps = open(output + "/steps_done.txt", "a")
         steps.write("Loading ENV\n")
         steps.close()
+
+        print("\n\n\nWARNING\nIF YOU WANT TO CHANGE THE CONFIG PARAMETERS\n\t\tPRESS CTRL+C NOW!\nOTHERWISE IT WILL RUN WITH DEFAULT PARAMETERS\n\n")
+        time.sleep(60)
+
+    else:
+        toml_config = toml_config_initial
     
 
     # Get tools and versions
@@ -229,7 +235,6 @@ def create_sample_sheet(toml_config):
          'barcode': range(barcode_initial, barcode_initial + len(samples))}
 
     df = pd.DataFrame(data=d)
-    print(df)
 
     df.to_csv(path+"/samples.csv", sep=",", index=False)
 
