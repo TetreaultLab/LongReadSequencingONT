@@ -262,9 +262,12 @@ def create_script(tool, cores, memory, time, output, email, command):
     with open("/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/LongReadSequencingONT/sbatch_template.txt", "r") as f:
         slurm = f.read()
         # TO-DO: def-tetreaum for dorado and rrg-tetreaum for the rest
-        slurm_filled = slurm.format(cores, memory, time, tool, project_name, email)
-        
-        slurm_filled += "module load StdEnv/2023 dorado/0.8.3 apptainer"
+        if tool == "dorado":
+            slurm_filled = slurm.format(cores, "#SBATCH --gres=gpu:1", memory, time, tool, project_name, "def", email)
+            slurm_filled += "module load StdEnv/2023 dorado/0.8.3"
+        else: 
+            slurm_filled = slurm.format(cores, "", memory, time, tool, project_name, "rrg", email)
+            slurm_filled += "module load StdEnv/2023 apptainer"
 
         slurm_filled += "\n#\n### Calling " + tool + "\n#\n"
         if tool in ["clair3", "clair3_rna", "whatshap"]:
