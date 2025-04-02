@@ -226,7 +226,7 @@ def create_sample_sheet(toml_config):
          'kit': kit, 
          'alias': samples, 
          'type': conditions, 
-         'barcode': range(barcode_initial, barcode_initial + len(samples))}
+         'barcode': "barcode0" + range(barcode_initial, barcode_initial + len(samples))} # Change if more than 9 barcodes
 
     df = pd.DataFrame(data=d)
 
@@ -305,7 +305,7 @@ def dorado(toml_config):
 
     model = "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/dorado_models/" + toml_config['dorado']['model']
     command.extend([model, reads])
-    command.extend([">" + final + project_name + ".bam"])
+    command.extend(["> " + final + project_name + ".bam"])
     
     command_str = " ".join(command)  
     print(f">>> {command_str}\n")
