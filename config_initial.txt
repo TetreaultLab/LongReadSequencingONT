@@ -6,6 +6,6 @@
     seq_type = "" # WGS, RNA, Meth, Targeted
     kit = "" # WGS: [], RNA: [], Meth: [], Targeted: []
     email = "" # You e-mail address to receive notification
-    analysis = [] # select which downstream analysis is needed. If empty, run everything. Ex: analysis = ["splicing", "methylation", "variants", "polya", "repeats"]
+    analysis = [] # select which downstream analysis is needed. If empty, run everything. Ex: analysis = ["splicing", "methylation", "SNP", "SV", "polya", "repeats"]
     file_type = "pod5" # change if using something else
     reference = "grch38" # change if using something else

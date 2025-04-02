@@ -78,9 +78,13 @@ def main():
         function_queue.append(dorado)
     
     # SNP calling
-    if "clair3" not in done and "clair3_rna" not in done:
-        print(">>> Variant calling - SNP: Clair3 (?)")
-        function_queue.append(clair3)
+    if "SNP" in toml_config["general"]["analysis"]:
+        if "clair3" not in done:
+            print(">>> Variant calling - SNP: Clair3 (?)")
+            function_queue.append(clair3)
+        elif "clair3_rna" not in done:
+            print(">>> Variant calling - SNP: Clair3 RNA (?)")
+            function_queue.append(clair3)
 
     # Phasing
     # if "whatshap" not in done:
