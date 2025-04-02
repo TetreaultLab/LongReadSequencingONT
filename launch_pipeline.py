@@ -67,11 +67,10 @@ def main():
     
 
     # Get tools and versions
-    function_queue = []
-
     genome = get_reference(toml_config["general"]["reference"], "")["fasta"]
     print(f">>> Reference genome version: {genome}")
-    
+
+    function_queue = []
     # Setting up list of steps
     # Base calling
     if "dorado" not in done:
@@ -79,9 +78,9 @@ def main():
         function_queue.append(dorado)
     
     # SNP calling
-    # if "clair3" not in done and "clair3_rna" not in done:
-    #    print(">>> Variant calling - SNP: Clair3 (?)")
-    #    function_queue.append(clair3)
+    if "clair3" not in done and "clair3_rna" not in done:
+        print(">>> Variant calling - SNP: Clair3 (?)")
+        function_queue.append(clair3)
 
     # Phasing
     # if "whatshap" not in done:
@@ -96,10 +95,16 @@ def main():
     # Other tools ...
 
 
+    # Create main.sh
+    with open(output + "/main.sh", "w") as f:
+        steps.write("#!/bin/sh")
+
     # Calling each steps
     for func in function_queue:
         func(toml_config)
-            
+
+    # Call main.sh
+    # TO-DO
 
     end = get_time()
     total_time = end - start
@@ -289,8 +294,8 @@ def dorado(toml_config):
     path_list = rm_prefix.split("/")
     project_name = path_list[0]
     
-    cores = 1
-    memory = 12
+    cores = 4
+    memory = 32
     time = "00-15:59"
 
     command = ["dorado", "basecaller", "--verbose", "--device", "cuda:auto", "--min-qscore", str(toml_config["dorado"]["min_q_score"]), "--reference", genome, "--sample-sheet", output + "/" + toml_config["dorado"]["sample_sheet"], "--trim", toml_config["dorado"]["trim"], "--kit-name", toml_config["general"]["kit"], "--mm2-opts", toml_config["dorado"]["mm2_opts"]]
@@ -314,8 +319,11 @@ def dorado(toml_config):
     # Create slurm job
     job = create_script(tool, cores, memory, time, output, email, command_str)
     
-    # Launch slurm job
-    subprocess.run(["sbatch", job], check=True) # put sbatch instead of bash when on beluga
+    # Add slurm job to main.sh
+    with open(output + "/main.sh", "a") as f:
+        f.write("dorado=$(sbatch --parsable " + job + ")")
+
+    #subprocess.run(["JOBID1=$(sbatch", job, ")"], check=True) # put sbatch instead of bash when on beluga
     
     # Mark tool as done
     #saving(toml_config, tool)
@@ -354,11 +362,15 @@ def clair3(toml_config):
     # Create slurm job
     job = create_script(tool, threads, memory, time, output, email, command_str)
     
+    # Add slurm job to main.sh
+    with open(output + "/main.sh", "a") as f:
+        f.write("sbatch --dependency=afterok:$dorado " + job)
+
     # Launch slurm job
-    subprocess.run(["bash", job], check=True) # put sbatch instead of bash when on beluga
+    # subprocess.run(["bash", job], check=True) # put sbatch instead of bash when on beluga
     
     # Mark tool as done
-    saving(toml_config, tool)
+    # saving(toml_config, tool)
 
 
 def whatshap(toml_config):
