@@ -101,7 +101,7 @@ def main():
 
     # Create main.sh
     with open(output + "/main.sh", "w") as f:
-        steps.write("#!/bin/sh")
+        f.write("#!/bin/sh")
 
     # Calling each steps
     for func in function_queue:
