@@ -284,9 +284,9 @@ def dorado(toml_config):
     email = toml_config["general"]["email"]
     genome = get_reference(toml_config["general"]["reference"], tool)["fasta"]
     
-    cores = 16
-    memory = 128
-    time = "01-23:59"
+    cores = 1
+    memory = 12
+    time = "00-10:59"
 
     command = ["dorado", "basecaller", "--verbose", "--device", "cuda:auto", "--min-qscore", str(toml_config["dorado"]["min_q_score"]), "--output-dir", final, "--reference", genome, "--sample-sheet", output + "/" + toml_config["dorado"]["sample_sheet"], "--trim", toml_config["dorado"]["trim"], "--kit-name", toml_config["general"]["kit"], "--mm2-opts", toml_config["dorado"]["mm2_opts"]]
     
@@ -308,7 +308,7 @@ def dorado(toml_config):
     job = create_script(tool, cores, memory, time, output, email, command_str)
     
     # Launch slurm job
-    #subprocess.run(["sbatch", job], check=True) # put sbatch instead of bash when on beluga
+    subprocess.run(["sbatch", job], check=True) # put sbatch instead of bash when on beluga
     
     # Mark tool as done
     #saving(toml_config, tool)
