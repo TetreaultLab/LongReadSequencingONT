@@ -179,12 +179,12 @@ def create_config_final(filename):
 
     ## parameters depending on sequencing type
     if seq_type == "WGS":
-        toml_config['dorado']['mm2_opts'] = "'-ax lr:hq'"
+        toml_config['dorado']['mm2_opts'] = '"-ax lr:hq"'
         if kit not in ["SQK-RBK114-24", "SQK-NBD114.24", "SQK-LSK114"]:
             raise Exception("Error: Wrong Kit for WGS. Options are SQK-RBK114-24, SQK-NBD114.24, SQK-LSK114")
 
     if seq_type == "RNA":
-        toml_config['dorado']['mm2_opts'] = "'-ax splice:hq -uf'"
+        toml_config['dorado']['mm2_opts'] = '"-ax splice:hq -uf"'
         if kit not in ["SQK-PCB114-24"]:
             raise Exception("Error: Wrong Kit for Whole Transcriptome. Options are SQK-PCB114-24")
 
@@ -193,7 +193,7 @@ def create_config_final(filename):
         toml_config['dorado']['modified_bases_threshold'] = 0.05
 
     if seq_type == "Targeted":
-        toml_config['dorado']['mm2_opts'] = "'-ax splice --junc-bed anno.bed12'"
+        toml_config['dorado']['mm2_opts'] = '"-ax splice --junc-bed anno.bed12"'
         if kit not in ["SQK-NBD114-24"]:
             raise Exception("Error: Wrong Kit for Targeted Sequencing. Options are SQK-NBD114-24")
 
@@ -299,7 +299,8 @@ def dorado(toml_config):
     if "polya" in toml_config["general"]["analysis"]:
         command.extend(["--estimate-poly-a"])
 
-    command.extend(["/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/dorado_models/" + toml_config['dorado']['model'], reads])
+    model = "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/dorado_models/" + toml_config['dorado']['model']
+    command.extend([model, reads])
     
     command_str = " ".join(command)  
     print(f">>> {command_str}\n")
