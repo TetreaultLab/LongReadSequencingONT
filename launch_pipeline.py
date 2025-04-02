@@ -100,15 +100,15 @@ def main():
 
 
     # Create main.sh
-    with open(output + "/main.sh", "w") as f:
-        f.write("#!/bin/sh")
+    with open(output + "/scripts/main.sh", "w") as f:
+        f.write("#!/bin/sh\n")
 
     # Calling each steps
     for func in function_queue:
         func(toml_config)
 
     # Call main.sh
-    # TO-DO
+    subprocess.run(["bash", output + "/scripts/main.sh"])
 
     end = get_time()
     total_time = end - start
@@ -328,8 +328,8 @@ def dorado(toml_config):
     job = create_script(tool, cores, memory, time, output, email, command_str)
     
     # Add slurm job to main.sh
-    with open(output + "/main.sh", "a") as f:
-        f.write("dorado=$(sbatch --parsable " + job + ")")
+    with open(output + "/scripts/main.sh", "a") as f:
+        f.write("dorado=$(sbatch --parsable " + job + ")\n")
 
     #subprocess.run(["JOBID1=$(sbatch", job, ")"], check=True) # put sbatch instead of bash when on beluga
     
@@ -371,8 +371,8 @@ def clair3(toml_config):
     job = create_script(tool, threads, memory, time, output, email, command_str)
     
     # Add slurm job to main.sh
-    with open(output + "/main.sh", "a") as f:
-        f.write("sbatch --dependency=afterok:$dorado " + job)
+    with open(output + "/scripts/main.sh", "a") as f:
+        f.write("sbatch --dependency=afterok:$dorado " + job + "\n")
 
     # Launch slurm job
     # subprocess.run(["bash", job], check=True) # put sbatch instead of bash when on beluga
