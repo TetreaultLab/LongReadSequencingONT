@@ -386,7 +386,8 @@ def clair3(toml_config):
     with open(output + "/steps_done.txt", "r") as f:
         for line in f:
             done.append(line.strip())
-    if dorado not in done:
+    
+    if "dorado" not in done:
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("sbatch --dependency=afterok:$dorado " + job + "\n")
     else:
