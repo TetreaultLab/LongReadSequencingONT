@@ -68,7 +68,6 @@ def main():
     function_queue = []
     # Setting up list of steps
     # Base calling
-    # If bam not in alignments/ or dorado in done: function.append, else: skip and and dorado in done
     if "dorado" not in done:
         function_queue.append(dorado)
     
@@ -325,7 +324,7 @@ def clair3(toml_config):
     command2 = ["samtools", "index", "-o", bam + ".bai", bam ,"\n\n"]
 
     if tool == "clair3_rna":
-        command3 = ["apptainer", "run", "-C", "-W", "${SLURM_TMPDIR}", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_" + tool + ".sif ", "Clair3-RNA/run_clair3_rna", "--bam_fn", bam, "--ref_fn", ref, "--threads", threads, "--platform", platform_rna, "--output_dir", output + "/results/"]
+        command3 = ["apptainer", "run", "-C", "-W", "${SLURM_TMPDIR}", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_" + tool + ".sif ", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/Clair3-RNA/run_clair3_rna", "--bam_fn", bam, "--ref_fn", ref, "--threads", threads, "--platform", platform_rna, "--output_dir", output + "/results/"]
         # add --enable_phasing_model ?
     else:
         command3 = ["apptainer", "run", "-C", "-W", "${SLURM_TMPDIR}", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_" + tool + ".sif ", "run_clair3.sh", "-b", bam, "-f", ref, "-m", model, "-t", threads, "-p", platform_dna, "-o", output + "/results/"]
