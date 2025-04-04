@@ -361,8 +361,8 @@ def clair3(toml_config):
     time = "00-23:59"
     email = toml_config["general"]["email"]
 
-    command1 = ["samtools", "sort", bam_dorado, "-o", bam, "\n\n"]
-    command2 = ["samtools", "index", bam, "-o", bam + ".bai", "\n\n"]
+    command1 = ["samtools", "sort", "-o", bam, bam_dorado, "\n\n"]
+    command2 = ["samtools", "index", "-o", bam + ".bai", bam ,"\n\n"]
 
     if tool == "clair3_rna":
         command3 = ["apptainer", "run", "-C", "-W", "${SLURM_TMPDIR}", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_" + tool + ".sif ", "Clair3-RNA/run_clair3_rna", "--bam_fn", bam, "--ref_fn", ref, "--threads", threads, "--platform", platform_rna, "--output_dir", output]
