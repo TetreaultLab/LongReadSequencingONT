@@ -274,19 +274,15 @@ def create_script(tool, cores, memory, time, output, email, command):
 
     with open("/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/LongReadSequencingONT/sbatch_template.txt", "r") as f:
         slurm = f.read()
-        # TO-DO: def-tetreaum for dorado and rrg-tetreaum for the rest
         if tool == "dorado":
             slurm_filled = slurm.format(cores, "#SBATCH --gres=gpu:1", memory, time, tool, project_name, "def", email)
             slurm_filled += "module load StdEnv/2023 dorado/0.8.3"
         else: 
             slurm_filled = slurm.format(cores, "", memory, time, tool, project_name, "rrg", email)
-            slurm_filled += "module load StdEnv/2023 apptainer"
+            slurm_filled += "module load StdEnv/2023 apptainer samtools"
 
         slurm_filled += "\n#\n### Calling " + tool + "\n#\n"
-        if tool in ["clair3", "clair3_rna", "whatshap"]:
-       	    slurm_filled += "apptainer run -C -W ${SLURM_TMPDIR} --nv -B /project -B /scratch /lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_" + tool + ".sif " + command
-        else:
-	        slurm_filled += command
+        slurm_filled += command
         
         slurm_filled += "\n"
 
@@ -369,13 +365,16 @@ def clair3(toml_config):
     command2 = ["samtools", "index", "-o", bam + ".bai", bam, "\n"]
 
     if tool == "clair3_rna":
-        command3 = ["run_clair3_rna", "--bam_fn", bam, "--ref_fn", ref, "--threads", threads, "--platform", platform_rna, "--output_dir", output]
+        command3 = ["apptainer", "run", "-C", "-W", "${SLURM_TMPDIR}", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_" + tool + ".sif ", "Clair3-RNA/run_clair3_rna", "--bam_fn", bam, "--ref_fn", ref, "--threads", threads, "--platform", platform_rna, "--output_dir", output]
         # add --enable_phasing_model ?
     else:
-        command3 = ["run_clair3.sh", "-b", bam, "-f", ref, "-m", model, "-t", threads, "-p", platform_dna, "-o", output]
+        command3 = ["apptainer", "run", "-C", "-W", "${SLURM_TMPDIR}", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_" + tool + ".sif ", "run_clair3.sh", "-b", bam, "-f", ref, "-m", model, "-t", threads, "-p", platform_dna, "-o", output]
 
-    command = command1 + command2 + command3
-    command_str = " ".join(command)
+    command_str1 = " ".join(command1)
+    command_str2 = " ".join(command2)
+    command_str3 = " ".join(command3)
+    
+    command_str = command_str1 + command_str2 + command_str3
     print(f">>> {command_str}\n")
 
     # Create slurm job
