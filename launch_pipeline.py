@@ -133,6 +133,16 @@ def saving(toml_config, tool):
         steps.write(tool)
         steps.write("\n")
 
+
+def get_project_name(output):
+    rm_prefix = output.replace('/lustre03/project/6019267/shared/projects/Nanopore_Dock/', '')
+    path_list = rm_prefix.split("/")
+    project_name_date = path_list[0].split("_", 1)
+    project_name = project_name_date[1]
+
+    return project_name
+
+
 def create_config_final(filename):
     # Read initial config file
     with open(filename, "r") as f:
@@ -260,9 +270,7 @@ def get_reference(ref, tool):
 
 def create_script(tool, cores, memory, time, output, email, command):
     job = output + "/scripts/" + tool + ".slurm"
-    rm_prefix = output.replace('/lustre03/project/6019267/shared/projects/Nanopore_Dock/', '')
-    path_list = rm_prefix.split("/")
-    project_name = path_list[0]
+    project_name = get_project_name(output)
 
     with open("/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/LongReadSequencingONT/sbatch_template.txt", "r") as f:
         slurm = f.read()
@@ -298,9 +306,7 @@ def dorado(toml_config):
     email = toml_config["general"]["email"]
     genome = get_reference(toml_config["general"]["reference"], tool)["fasta"]
 
-    rm_prefix = output.replace('/lustre03/project/6019267/shared/projects/Nanopore_Dock/', '')
-    path_list = rm_prefix.split("/")
-    project_name = path_list[0]
+    project_name = get_project_name(output)
     
     cores = 4
     memory = 32
@@ -346,10 +352,11 @@ def clair3(toml_config):
     title(tool)
 
     output = toml_config["general"]["project_path"]
+    project_name = get_project_name(output)
     ref = get_reference(toml_config["general"]["reference"], tool)["fasta"] # same ref for RNA + DNA ?
-    bam = output + "/alignments/" # complete with file name from dorado
-    #bam = "/home/shared/data/2024-10-16_Lapiana_n17/no_sample_id/20241016_1653_X2_FAV26227_d404da0e/alignment/minimap2_sup/B1540_sorted.bam"
-    model = "/home/shared/tools/clair3/Clair3/models/r1041_e82_400bps_sup_v420" # https://www.bio8.cs.hku.hk/clair3/clair3_models/
+    bam_dorado = output + "/alignments/" + project_name + ".bam"
+    bam = output + "/alignments/" + project_name + "_sorted.bam"
+    model = "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/Clair3/models/r1041_e82_400bps_sup_v420" # https://www.bio8.cs.hku.hk/clair3/clair3_models/
     platform_rna = "ont_dorado_drna004" # Possible options: {ont_dorado_drna004, ont_guppy_drna002, ont_guppy_cdna, hifi_sequel2_pbmm2, hifi_sequel2_minimap2, hifi_mas_pbmm2, hifi_sequel2_minimap2}.
     platform_dna = "ont"
 
@@ -358,13 +365,17 @@ def clair3(toml_config):
     time = "00-23:59"
     email = toml_config["general"]["email"]
 
+    command1 = ["samtools", "sort", "-o", bam, bam_dorado, "\n"]
+    command2 = ["samtools", "index", "-o", bam + ".bai", bam, "\n"]
+
     if tool == "clair3_rna":
-        command = ["run_clair3_rna", "--bam_fn", bam, "--ref_fn", ref, "--threads", threads, "--platform", platform_rna, "--output_dir", output]
+        command3 = ["run_clair3_rna", "--bam_fn", bam, "--ref_fn", ref, "--threads", threads, "--platform", platform_rna, "--output_dir", output]
         # add --enable_phasing_model ?
     else:
-        command = ["run_clair3.sh", "-b", bam, "-f", ref, "-m", model, "-t", threads, "-p", platform_dna, "-o", output]
+        command3 = ["run_clair3.sh", "-b", bam, "-f", ref, "-m", model, "-t", threads, "-p", platform_dna, "-o", output]
 
-    command_str = " ".join(command)  
+    command = command1 + command2 + command3
+    command_str = " ".join(command)
     print(f">>> {command_str}\n")
 
     # Create slurm job
