@@ -52,6 +52,7 @@ def main():
     
     ## BAM file
     if os.path.isfile(output + "/alignments/" + project_name + ".bam"):
+        print("Dorado done")
         steps.write("dorado\n")
 
     # SNP - VCF file
@@ -290,7 +291,6 @@ def dorado(toml_config):
     command.extend(["> " + final + project_name + ".bam"])
     
     command_str = " ".join(command)  
-    print(f">>> {command_str}\n")
     
     # Create slurm job
     job = create_script(tool, cores, memory, time, output, email, command_str)
@@ -334,7 +334,6 @@ def clair3(toml_config):
     command_str3 = " ".join(command3)
     
     command_str = command_str1 + command_str2 + command_str3
-    print(f">>> {command_str}\n")
 
     # Create slurm job
     job = create_script(tool, threads, memory, time, output, email, command_str)
