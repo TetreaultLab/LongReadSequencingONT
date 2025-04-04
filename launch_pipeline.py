@@ -11,16 +11,6 @@ import os
 from glob import glob
 
 def main():
-    start = get_time()
-
-    # Start of pipeline
-    start_str = ">>> LRS pipeline starting at {}.".format(
-        start
-    )
-    print(
-        "=" * len(start_str) + "\n" + start_str + "\n" + "=" * len(start_str),
-        file=sys.stdout,
-    )
     
     parser = argparse.ArgumentParser(
         prog="PipelineLong",
@@ -66,34 +56,25 @@ def main():
         toml_config = toml_config_initial
     
 
-    # Get tools and versions
-    genome = get_reference(toml_config["general"]["reference"], "")["fasta"]
-    print(f">>> Reference genome version: {genome}")
-
     function_queue = []
     # Setting up list of steps
     # Base calling
     if "dorado" not in done:
-        print(">>> Base calling: Dorado (?)")
         function_queue.append(dorado)
     
     # SNP calling
     if "SNP" in toml_config["general"]["analysis"]:
         if "clair3" not in done:
-            print(">>> Variant calling - SNP: Clair3 (?)")
             function_queue.append(clair3)
         elif "clair3_rna" not in done:
-            print(">>> Variant calling - SNP: Clair3 RNA (?)")
             function_queue.append(clair3)
 
     # Phasing
     # if "whatshap" not in done:
-    #     print(">>> Variant phasing: WhatsHap (?)")
     #     function_queue.append(whatshap)
 
     # SV calling
     # if "sniffles2" not in done:
-    #    print(">>> Variant calling - SV: Sniffles2 (?)")
     #    function_queue.append(sniffles2)
 
     # Other tools ...
@@ -109,29 +90,6 @@ def main():
 
     # Call main.sh
     subprocess.run(["bash", output + "/scripts/main.sh"])
-
-    end = get_time()
-    total_time = end - start
-    end_str = ">>> LRS-seq pipeline completed in {}.".format(
-        total_time
-    )
-    print("=" * len(end_str) + "\n" + end_str + "\n" + "=" * len(end_str))
-
-
-def get_time():
-    now = datetime.now()
-    return now
-
-
-def title(message):
-    print(f"\n>>> Running {message} [{get_time()}]")
-
-
-def saving(toml_config, tool):
-    print(f"\n>>> Finished running {tool} successfully [{get_time()}]")
-    with open(toml_config["general"]["project_path"] + "/steps_done.txt", "a") as steps:
-        steps.write(tool)
-        steps.write("\n")
 
 
 def get_project_name(output):
@@ -294,7 +252,6 @@ def create_script(tool, cores, memory, time, output, email, command):
 
 def dorado(toml_config):
     tool = "dorado"
-    title(tool)
     
     output = toml_config["general"]["project_path"]
     reads = output + "/pod5"
@@ -333,19 +290,12 @@ def dorado(toml_config):
     with open(output + "/scripts/main.sh", "a") as f:
         f.write("dorado=$(sbatch --parsable " + job + ")\n")
 
-    #subprocess.run(["JOBID1=$(sbatch", job, ")"], check=True) # put sbatch instead of bash when on beluga
-    
-    # Mark tool as done
-    saving(toml_config, tool)
-
 
 def clair3(toml_config):
     if toml_config["general"]["seq_type"] == "RNA":
         tool = "clair3_rna"
     else:
         tool = "clair3"
-    
-    title(tool)
 
     output = toml_config["general"]["project_path"]
     project_name = get_project_name(output)
@@ -386,7 +336,7 @@ def clair3(toml_config):
     with open(output + "/steps_done.txt", "r") as f:
         for line in f:
             done.append(line.strip())
-    
+    ##### TO-DO: find other way to check if dorado is done
     if "dorado" not in done:
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("sbatch --dependency=afterok:$dorado " + job + "\n")
@@ -394,16 +344,9 @@ def clair3(toml_config):
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("sbatch " + job + "\n")
 
-    # Launch slurm job
-    # subprocess.run(["bash", job], check=True) # put sbatch instead of bash when on beluga
-    
-    # Mark tool as done
-    saving(toml_config, tool)
-
 
 def whatshap(toml_config):
     tool = "whatshap"
-    title(tool)
 
     output = toml_config["general"]["project_path"]
     project_name = get_project_name(output)
@@ -428,14 +371,11 @@ def whatshap(toml_config):
     
     # Launch slurm job
     subprocess.run(["bash", job], check=True) # put sbatch instead of bash when on beluga
-    
-    # Mark tool as done
-    saving(toml_config, tool)
+
 
 
 def sniffles2(toml_config):
     tool = "sniffles2"
-    title(tool)
 
     output = toml_config["general"]["project_path"]
     bam = "/home/shared/data/2024-10-16_Lapiana_n17/no_sample_id/20241016_1653_X2_FAV26227_d404da0e/alignment/minimap2_sup/B1540_sorted.bam"
@@ -457,9 +397,6 @@ def sniffles2(toml_config):
     
     # Launch slurm job
     subprocess.run(["bash", job], check=True) # put sbatch instead of bash when on beluga
-    
-    # Mark tool as done
-    saving(toml_config, tool)
 
 
 if __name__ == "__main__":
