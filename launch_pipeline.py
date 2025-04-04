@@ -336,7 +336,7 @@ def dorado(toml_config):
     #subprocess.run(["JOBID1=$(sbatch", job, ")"], check=True) # put sbatch instead of bash when on beluga
     
     # Mark tool as done
-    #saving(toml_config, tool)
+    saving(toml_config, tool)
 
 
 def clair3(toml_config):
@@ -365,10 +365,10 @@ def clair3(toml_config):
     command2 = ["samtools", "index", "-o", bam + ".bai", bam ,"\n\n"]
 
     if tool == "clair3_rna":
-        command3 = ["apptainer", "run", "-C", "-W", "${SLURM_TMPDIR}", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_" + tool + ".sif ", "Clair3-RNA/run_clair3_rna", "--bam_fn", bam, "--ref_fn", ref, "--threads", threads, "--platform", platform_rna, "--output_dir", output]
+        command3 = ["apptainer", "run", "-C", "-W", "${SLURM_TMPDIR}", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_" + tool + ".sif ", "Clair3-RNA/run_clair3_rna", "--bam_fn", bam, "--ref_fn", ref, "--threads", threads, "--platform", platform_rna, "--output_dir", output + "/results/"]
         # add --enable_phasing_model ?
     else:
-        command3 = ["apptainer", "run", "-C", "-W", "${SLURM_TMPDIR}", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_" + tool + ".sif ", "run_clair3.sh", "-b", bam, "-f", ref, "-m", model, "-t", threads, "-p", platform_dna, "-o", output]
+        command3 = ["apptainer", "run", "-C", "-W", "${SLURM_TMPDIR}", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_" + tool + ".sif ", "run_clair3.sh", "-b", bam, "-f", ref, "-m", model, "-t", threads, "-p", platform_dna, "-o", output + "/results/"]
 
     command_str1 = " ".join(command1)
     command_str2 = " ".join(command2)
@@ -398,18 +398,19 @@ def clair3(toml_config):
     # subprocess.run(["bash", job], check=True) # put sbatch instead of bash when on beluga
     
     # Mark tool as done
-    # saving(toml_config, tool)
+    saving(toml_config, tool)
 
 
 def whatshap(toml_config):
     tool = "whatshap"
     title(tool)
 
-    output = toml_config["general"]["project_path"] 
-    output_vcf = output + "/phased.vcf"
-    input_vcf = output + "/merge_output.vcf.gz"
-    bam = output + "_sorted.bam" # complete with file name from dorado
-    # bam = "/home/shared/data/2024-10-16_Lapiana_n17/no_sample_id/20241016_1653_X2_FAV26227_d404da0e/alignment/minimap2_sup/B1540_sorted.bam"
+    output = toml_config["general"]["project_path"]
+    project_name = get_project_name(output)
+    output_vcf = output + "/results/" + project_name + "phased.vcf"
+    input_vcf = output + "/results/" + project_name + ".vcf.gz"
+    bam = output + "/alignments/" + project_name + "_sorted.bam"
+    
     ref = get_reference(toml_config["general"]["reference"], tool)["fasta"]
 
     threads = "8"
