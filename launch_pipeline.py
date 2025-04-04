@@ -28,16 +28,13 @@ def main():
         toml_config_initial = toml.load(f)
 
     output = toml_config_initial["general"]["project_path"]
+    project_name = get_project_name(output)
     
     # Create list of steps already done from the file steps_done.txt
-    steps = open(output + "/steps_done.txt", "a").close()
-    done = []
-    with open(output + "/steps_done.txt", "r") as f:
-        for line in f:
-            done.append(line.strip())
+    steps = open(output + "/steps_done.txt", "a")
 
-    # Creat config and sample sheet
-    if "Loading ENV" not in done:
+    ## config and sample sheet
+    if args.config != "config_final.toml":
         # Create final TOML config
         toml_config = create_config_final(args.config)
 
@@ -45,9 +42,7 @@ def main():
         create_sample_sheet(toml_config)
 
         # Open file for steps done
-        steps = open(output + "/steps_done.txt", "a")
         steps.write("Loading ENV\n")
-        steps.close()
 
         print("\n\n\n!!! WARNING !!!\nIf you to change the parameters: Press CTRL+C now!\nModify config_final.toml and launch_pipeline with that config file.\n\nOtherwise it will run with default parameters.\n\n")
         time.sleep(30)
@@ -55,10 +50,25 @@ def main():
     else:
         toml_config = toml_config_initial
     
+    ## BAM file
+    if os.path.isfile(output + "/alignments/" + project_name + ".bam"):
+        steps.write("dorado\n")
+
+    # SNP - VCF file
+    
+    steps.close()
+
+    done = []
+    with open(output + "/steps_done.txt", "r") as f:
+        for line in f:
+            done.append(line.strip())
+    
+    
 
     function_queue = []
     # Setting up list of steps
     # Base calling
+    # If bam not in alignments/ or dorado in done: function.append, else: skip and and dorado in done
     if "dorado" not in done:
         function_queue.append(dorado)
     
@@ -185,6 +195,7 @@ def create_config_final(filename):
 
     return toml_config
 
+
 def create_sample_sheet(toml_config):
     path = toml_config["general"]["project_path"]
     rm_prefix = path.replace('/lustre03/project/6019267/shared/projects/Nanopore_Dock/', '')
@@ -210,7 +221,6 @@ def create_sample_sheet(toml_config):
     df["barcode"] = "barcode0" + df["barcode"].astype(str) # Change if more than 9 barcodes
 
     df.to_csv(path+"/samples.csv", sep=",", index=False)
-
 
 
 def get_reference(ref, tool):
