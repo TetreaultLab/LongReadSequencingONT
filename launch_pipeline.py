@@ -380,9 +380,18 @@ def clair3(toml_config):
     # Create slurm job
     job = create_script(tool, threads, memory, time, output, email, command_str)
     
+
     # Add slurm job to main.sh
-    with open(output + "/scripts/main.sh", "a") as f:
-        f.write("sbatch --dependency=afterok:$dorado " + job + "\n")
+    done = []
+    with open(output + "/steps_done.txt", "r") as f:
+        for line in f:
+            done.append(line.strip())
+    if dorado not in done:
+        with open(output + "/scripts/main.sh", "a") as f:
+            f.write("sbatch --dependency=afterok:$dorado " + job + "\n")
+    else:
+        with open(output + "/scripts/main.sh", "a") as f:
+            f.write("sbatch " + job + "\n")
 
     # Launch slurm job
     # subprocess.run(["bash", job], check=True) # put sbatch instead of bash when on beluga
