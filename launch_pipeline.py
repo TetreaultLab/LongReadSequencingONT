@@ -305,7 +305,7 @@ def dorado(toml_config):
 
 
 def qc(toml_config):
-    tool=""
+    tool="qc"
     output = toml_config["general"]["project_path"]
     project_name = get_project_name(output)
 
