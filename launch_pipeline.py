@@ -59,6 +59,7 @@ def main():
     
     steps.close()
 
+    # Get steps done
     done = []
     with open(output + "/steps_done.txt", "r") as f:
         for line in f:
@@ -71,6 +72,9 @@ def main():
     # Base calling
     if "dorado" not in done:
         function_queue.append(dorado)
+
+    if "qc" not in done:
+        function_queue.append(qc)
     
     # SNP calling
     if "SNP" in toml_config["general"]["analysis"]:
@@ -275,7 +279,7 @@ def dorado(toml_config):
     memory = 32
     time = "00-15:59"
 
-    command = ["dorado", "basecaller", "--verbose", "--device", "cuda:auto", "--min-qscore", str(toml_config["dorado"]["min_q_score"]), "--reference", genome, "--sample-sheet", output + "/" + toml_config["dorado"]["sample_sheet"], "--trim", toml_config["dorado"]["trim"], "--kit-name", toml_config["general"]["kit"], "--mm2-opts", toml_config["dorado"]["mm2_opts"]]
+    command = ["dorado", "basecaller", "--verbose", "--device", "cuda:auto", "--emit-moves", "--min-qscore", str(toml_config["dorado"]["min_q_score"]), "--reference", genome, "--sample-sheet", output + "/" + toml_config["dorado"]["sample_sheet"], "--trim", toml_config["dorado"]["trim"], "--kit-name", toml_config["general"]["kit"], "--mm2-opts", toml_config["dorado"]["mm2_opts"]]
     
     if toml_config["dorado"]["barcode_both_ends"] in ["true", "True", "yes", "Yes"]:
         command.extend(["--barcode-both-ends"])
@@ -298,6 +302,39 @@ def dorado(toml_config):
     # Add slurm job to main.sh
     with open(output + "/scripts/main.sh", "a") as f:
         f.write("dorado=$(sbatch --parsable " + job + ")\n")
+
+
+def qc(toml_config):
+    tool=""
+    output = toml_config["general"]["project_path"]
+    project_name = get_project_name(output)
+
+    threads = "2"
+    memory = "100"
+    time = "00-2:59"
+    email = toml_config["general"]["email"]
+
+    command = ["apptainer", "run", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_longreadsum.sif", "pod5", "--threads", threads, "-Q", project_name, "-P", output + "/pod5/*.pod5", "-o", output + "/qc", "--basecalls", output + "/alignments/" + project_name + ".bam"]
+
+    if "methylation" in toml_config["general"]["analysis"]:
+        command.extend(["--mod"])
+
+    command_str = " ".join(command)  
+    
+    # Create slurm job
+    job = create_script(tool, threads, memory, time, output, email, command_str)
+
+    done = []
+    with open(output + "/steps_done.txt", "r") as f:
+        for line in f:
+            done.append(line.strip())
+    ##### TO-DO: find other way to check if dorado is done
+    if "dorado" not in done:
+        with open(output + "/scripts/main.sh", "a") as f:
+            f.write("sbatch --dependency=afterok:$dorado " + job + "\n")
+    else:
+        with open(output + "/scripts/main.sh", "a") as f:
+            f.write("sbatch " + job + "\n")
 
 
 def clair3(toml_config):
