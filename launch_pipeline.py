@@ -175,8 +175,8 @@ def create_config_final(filename):
             raise Exception("Error: Wrong Kit for WGS. Options are SQK-RBK114-24, SQK-NBD114.24, SQK-LSK114")
 
     if seq_type == "RNA":
-        toml_config['dorado']['mm2_opts'] = '"-x splice:hq"' # version 0.83
-        # toml_config['dorado']['mm2_opts'] = '"-ax splice:hq -uf"'
+        #toml_config['dorado']['mm2_opts'] = '"-x splice:hq"' # version 0.83
+        toml_config['dorado']['mm2_opts'] = '"-ax splice:hq -uf"' # version 0.95
         if kit not in ["SQK-PCB114-24"]:
             raise Exception("Error: Wrong Kit for Whole Transcriptome. Options are SQK-PCB114-24")
 
@@ -248,7 +248,7 @@ def create_script(tool, cores, memory, time, output, email, command):
         slurm = f.read()
         if tool == "dorado":
             slurm_filled = slurm.format(cores, "#SBATCH --gres=gpu:1", memory, time, tool, project_name, "def", email)
-            slurm_filled += "module load StdEnv/2023 dorado/0.8.3"
+            slurm_filled += "module load StdEnv/2023 dorado/0.9.5"
         else: 
             slurm_filled = slurm.format(cores, "", memory, time, tool, project_name, "rrg", email)
             slurm_filled += "module load StdEnv/2023 apptainer samtools"
