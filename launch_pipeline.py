@@ -57,7 +57,7 @@ def main():
 
     # SNP - VCF file
     if os.path.isfile(output + "/results/" + project_name + ".vcf.gz"):
-        print("Clair3 done)
+        print("Clair3 done")
         steps.write("clair3\n")
 
     # Next tools ...
