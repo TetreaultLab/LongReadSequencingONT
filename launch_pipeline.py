@@ -56,6 +56,11 @@ def main():
         steps.write("dorado\n")
 
     # SNP - VCF file
+    if os.path.isfile(output + "/results/" + project_name + ".vcf.gz"):
+        print("Clair3 done)
+        steps.write("clair3\n")
+
+    # Next tools ...
     
     steps.close()
 
@@ -79,8 +84,6 @@ def main():
     # SNP calling
     if "SNP" in toml_config["general"]["analysis"]:
         if "clair3" not in done:
-            function_queue.append(clair3)
-        elif "clair3_rna" not in done:
             function_queue.append(clair3)
 
     # Phasing
@@ -309,12 +312,12 @@ def qc(toml_config):
     output = toml_config["general"]["project_path"]
     project_name = get_project_name(output)
 
-    threads = "2"
+    threads = "1"
     memory = "100"
-    time = "00-2:59"
+    time = "00-3:59"
     email = toml_config["general"]["email"]
 
-    command = ["apptainer", "run", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_longreadsum.sif", "pod5", "--threads", threads, "--log", output + "/qc/longreadsum.log", "-Q", project_name, "-P", output + "/pod5/*.pod5", "-o", output + "/qc", "--basecalls", output + "/alignments/" + project_name + ".bam"]
+    command = ["apptainer", "run", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_longreadsum.sif", "pod5", "--log", output + "/qc/longreadsum.log", "-Q", '"' + project_name + '"', "-P", '"' + output + "/pod5/*.pod5\"", "-o", output + "/qc", "--basecalls", output + "/alignments/" + project_name + ".bam"]
 
     if "methylation" in toml_config["general"]["analysis"]:
         command.extend(["--mod"])
@@ -361,10 +364,10 @@ def clair3(toml_config):
     command2 = ["samtools", "index", "-o", bam + ".bai", bam ,"\n\n"]
 
     if tool == "clair3_rna":
-        command3 = ["apptainer", "run", "-C", "-W", "${SLURM_TMPDIR}", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_" + tool + ".sif ", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/Clair3-RNA/run_clair3_rna", "--bam_fn", bam, "--ref_fn", ref, "--threads", threads, "--platform", platform_rna, "--output_dir", output + "/results/"]
+        command3 = ["apptainer", "run", "-C", "-W", "${SLURM_TMPDIR}", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_" + tool + ".sif ", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/Clair3-RNA/run_clair3_rna", "--bam_fn", bam, "--ref_fn", ref, "--threads", threads, "--platform", platform_rna, "--output_dir", output + "/results/" + project_name + ".vcf.gz"]
         # add --enable_phasing_model ?
     else:
-        command3 = ["apptainer", "run", "-C", "-W", "${SLURM_TMPDIR}", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_" + tool + ".sif ", "run_clair3.sh", "-b", bam, "-f", ref, "-m", model, "-t", threads, "-p", platform_dna, "-o", output + "/results/"]
+        command3 = ["apptainer", "run", "-C", "-W", "${SLURM_TMPDIR}", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_" + tool + ".sif ", "run_clair3.sh", "-b", bam, "-f", ref, "-m", model, "-t", threads, "-p", platform_dna, "-o", output + "/results/" + project_name + ".vcf.gz"]
 
     command_str1 = " ".join(command1)
     command_str2 = " ".join(command2)
