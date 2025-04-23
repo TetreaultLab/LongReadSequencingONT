@@ -238,6 +238,7 @@ def get_reference(ref, tool):
             reference = {
                 "fasta": path + "gencode.v38.p13.genome.fa",
                 "gtf": path + "gencode.v38.annotation.gtf",
+                "chrom_size": path + "gencode.v38.p13.chrom_sizes.txt"
             }
 
     return reference
