@@ -225,7 +225,7 @@ def create_sample_sheet(toml_config):
          'barcode': range(barcode_initial, barcode_initial + len(samples))}
 
     df = pd.DataFrame(data=d)
-    df["barcode"] = "barcode0" + df["barcode"].astype(str) # Change if more than 9 barcodes
+    df["barcode"] = "barcode" + df["barcode"].astype(int).astype(str).str.zfill(2)
 
     df.to_csv(path+"/samples.csv", sep=",", index=False)
 
