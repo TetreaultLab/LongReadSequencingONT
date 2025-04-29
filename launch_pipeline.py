@@ -163,7 +163,7 @@ def create_config_final(filename):
                 os.rename(f2, os.path.join(new_path, "main_reports", name)) # move to main_reports
 
     # Move pod5 to reads directory
-    os.rename(os.path.join(new_path + "pod5"), os.path.join(new_path, "reads", "pod5"))
+    os.rename(os.path.join(new_path, "pod5"), os.path.join(new_path, "reads", "pod5"))
 
     # Add Dorado options
     ## general options
