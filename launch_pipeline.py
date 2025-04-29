@@ -272,6 +272,7 @@ def dorado(toml_config):
     tool = "dorado"
     
     output = toml_config["general"]["project_path"]
+    project_name = get_project_name(output)
     reads = output + "/pod5"
     final = output + "/alignments/"
     email = toml_config["general"]["email"]
@@ -279,8 +280,6 @@ def dorado(toml_config):
 
     bam_dorado = output + "/alignments/" + project_name + ".bam"
     bam = output + "/alignments/" + project_name + "_sorted.bam"
-
-    project_name = get_project_name(output)
     
     cores = 4
     memory = 32
