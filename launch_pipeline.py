@@ -162,6 +162,9 @@ def create_config_final(filename):
                 name = f2.split("/")[-1]
                 os.rename(f2, os.path.join(new_path, "main_reports", name)) # move to main_reports
 
+    # Move pod5 to reads directory
+    os.rename(os.path.join(new_path + "pod5"), os.path.join(new_path, "reads", "pod5"))
+
     # Add Dorado options
     ## general options
     toml_config["dorado"] = {}
@@ -273,7 +276,7 @@ def dorado(toml_config):
     
     output = toml_config["general"]["project_path"]
     project_name = get_project_name(output)
-    reads = output + "/pod5"
+    reads = output + "/reads/pod5"
     final = output + "/alignments/"
     email = toml_config["general"]["email"]
     genome = get_reference(toml_config["general"]["reference"], tool)["fasta"]
