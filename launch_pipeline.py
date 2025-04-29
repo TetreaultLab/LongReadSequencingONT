@@ -248,8 +248,8 @@ def get_reference(ref, tool):
 
 
 def create_script(tool, cores, memory, time, output, email, command):
-    job = output + "/scripts/" + tool + ".slurm"
     project_name = get_project_name(output)
+    job = output + "/scripts/" + tool + "_" + project_name + ".slurm"
 
     with open("/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/LongReadSequencingONT/sbatch_template.txt", "r") as f:
         slurm = f.read()
@@ -284,7 +284,7 @@ def dorado(toml_config):
     bam_dorado = output + "/alignments/" + project_name + ".bam"
     bam = output + "/alignments/" + project_name + "_sorted.bam"
     
-    cores = 4
+    cores = 2
     memory = 32
     time = "00-15:59"
 
@@ -330,7 +330,7 @@ def qc(toml_config):
     time = "00-3:59"
     email = toml_config["general"]["email"]
 
-    command = ["apptainer", "run", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_longreadsum.sif", "pod5", "--log", output + "/qc/longreadsum.log", "-Q", '"' + project_name + '"', "-P", '"' + output + "/pod5/*.pod5\"", "-o", output + "/qc", "--basecalls", output + "/alignments/" + project_name + "_sorted.bam"]
+    command = ["apptainer", "run", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_longreadsum.sif", "pod5", "--log", output + "/qc/longreadsum.log", "-Q", '"' + project_name + '"', "-P", '"' + output + "/reads/pod5/*.pod5\"", "-o", output + "/qc", "--basecalls", output + "/alignments/" + project_name + "_sorted.bam"]
 
     if "methylation" in toml_config["general"]["analysis"]:
         command.extend(["--mod"])
@@ -344,7 +344,7 @@ def qc(toml_config):
     with open(output + "/steps_done.txt", "r") as f:
         for line in f:
             done.append(line.strip())
-    ##### TO-DO: find other way to check if dorado is done
+    
     if "dorado" not in done:
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("sbatch --dependency=afterok:$dorado " + job + "\n")
