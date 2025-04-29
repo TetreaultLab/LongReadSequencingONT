@@ -126,7 +126,7 @@ def create_config_final(filename):
     ## Which analysis are possible for each seq-type. Make a if to fill the analysis field and check if some error are made in analysis was not empty
     # if analysis list is empty, add all available analysis
     if toml_config["general"]["analysis"] == []:
-        toml_config["general"]["analysis"] = ["methylation", "splicing", "polya", "snp", "sv", "repeats"]
+        toml_config["general"]["analysis"] = ["methylation", "splicing", "polya", "SNP", "SV", "repeats"]
 
     # set kit to variable
     kit = toml_config['general']['kit']
