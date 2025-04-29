@@ -51,7 +51,7 @@ def main():
         toml_config = toml_config_initial
     
     ## BAM file
-    if os.path.isfile(output + "/alignments/" + project_name + ".bam"):
+    if os.path.isfile(output + "/alignments/" + project_name + "_sorted.bam"):
         print("Dorado done")
         steps.write("dorado\n")
 
@@ -252,7 +252,7 @@ def create_script(tool, cores, memory, time, output, email, command):
         slurm = f.read()
         if tool == "dorado":
             slurm_filled = slurm.format(cores, "#SBATCH --gres=gpu:1", memory, time, tool, project_name, "def", email)
-            slurm_filled += "module load StdEnv/2023 dorado/0.9.5"
+            slurm_filled += "module load StdEnv/2023 dorado/0.9.5 samtools"
         else: 
             slurm_filled = slurm.format(cores, "", memory, time, tool, project_name, "rrg", email)
             slurm_filled += "module load StdEnv/2023 apptainer samtools"
@@ -277,6 +277,9 @@ def dorado(toml_config):
     email = toml_config["general"]["email"]
     genome = get_reference(toml_config["general"]["reference"], tool)["fasta"]
 
+    bam_dorado = output + "/alignments/" + project_name + ".bam"
+    bam = output + "/alignments/" + project_name + "_sorted.bam"
+
     project_name = get_project_name(output)
     
     cores = 4
@@ -296,9 +299,16 @@ def dorado(toml_config):
 
     model = "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/dorado_models/" + toml_config['dorado']['model']
     command.extend([model, reads])
-    command.extend(["> " + final + project_name + ".bam"])
+    command.extend(["> " + final + project_name + ".bam", "\n\n"])
+
+    command2 = ["samtools", "sort", "-o", bam, bam_dorado, "\n\n"]
+    command3 = ["samtools", "index", "-o", bam + ".bai", bam]
     
-    command_str = " ".join(command)  
+    command_str1 = " ".join(command)
+    command_str2 = " ".join(command2)
+    command_str3 = " ".join(command3)
+
+    command_str = command_str1 + command_str2 + command_str3
     
     # Create slurm job
     job = create_script(tool, cores, memory, time, output, email, command_str)
@@ -318,7 +328,7 @@ def qc(toml_config):
     time = "00-3:59"
     email = toml_config["general"]["email"]
 
-    command = ["apptainer", "run", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_longreadsum.sif", "pod5", "--log", output + "/qc/longreadsum.log", "-Q", '"' + project_name + '"', "-P", '"' + output + "/pod5/*.pod5\"", "-o", output + "/qc", "--basecalls", output + "/alignments/" + project_name + ".bam"]
+    command = ["apptainer", "run", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_longreadsum.sif", "pod5", "--log", output + "/qc/longreadsum.log", "-Q", '"' + project_name + '"', "-P", '"' + output + "/pod5/*.pod5\"", "-o", output + "/qc", "--basecalls", output + "/alignments/" + project_name + "_sorted.bam"]
 
     if "methylation" in toml_config["general"]["analysis"]:
         command.extend(["--mod"])
@@ -350,7 +360,6 @@ def clair3(toml_config):
     output = toml_config["general"]["project_path"]
     project_name = get_project_name(output)
     ref = get_reference(toml_config["general"]["reference"], tool)["fasta"] # same ref for RNA + DNA ?
-    bam_dorado = output + "/alignments/" + project_name + ".bam"
     bam = output + "/alignments/" + project_name + "_sorted.bam"
     model = "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/Clair3/models/r1041_e82_400bps_sup_v420" # https://www.bio8.cs.hku.hk/clair3/clair3_models/
     platform_rna = "ont_dorado_drna004" # Possible options: {ont_dorado_drna004, ont_guppy_drna002, ont_guppy_cdna, hifi_sequel2_pbmm2, hifi_sequel2_minimap2, hifi_mas_pbmm2, hifi_sequel2_minimap2}.
@@ -361,19 +370,19 @@ def clair3(toml_config):
     time = "00-23:59"
     email = toml_config["general"]["email"]
 
-    command1 = ["samtools", "sort", "-o", bam, bam_dorado, "\n\n"]
-    command2 = ["samtools", "index", "-o", bam + ".bai", bam ,"\n\n"]
-
     if tool == "clair3_rna":
-        command3 = ["apptainer", "run", "-C", "-W", "${SLURM_TMPDIR}", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_" + tool + ".sif ", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/Clair3-RNA/run_clair3_rna", "--bam_fn", bam, "--ref_fn", ref, "--threads", threads, "--platform", platform_rna, "--output_dir", output + "/results/" + project_name + ".vcf.gz"]
+        command = ["apptainer", "run", "-C", "-W", "${SLURM_TMPDIR}", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_" + tool + ".sif ", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/Clair3-RNA/run_clair3_rna", "--bam_fn", bam, "--ref_fn", ref, "--threads", threads, "--platform", platform_rna, "--output_dir", output + "/results/", "\n\n"]
         # add --enable_phasing_model ?
     else:
-        command3 = ["apptainer", "run", "-C", "-W", "${SLURM_TMPDIR}", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_" + tool + ".sif ", "run_clair3.sh", "-b", bam, "-f", ref, "-m", model, "-t", threads, "-p", platform_dna, "-o", output + "/results/" + project_name + ".vcf.gz"]
+        command = ["apptainer", "run", "-C", "-W", "${SLURM_TMPDIR}", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_" + tool + ".sif ", "run_clair3.sh", "-b", bam, "-f", ref, "-m", model, "-t", threads, "-p", platform_dna, "-o", output + "/results/", "\n\n"]
 
-    command_str1 = " ".join(command1)
+    command2 = ["mv", output + "/results/output.vcf.gz", output + "/results/" + project_name + ".vcf.gz", "\n\n"]
+    command3 = ["mv", output + "/results/output.vcf.gz.tbi", output + "/results/" + project_name + ".vcf.gz.tbi"]
+    
+    command_str1 = " ".join(command)
     command_str2 = " ".join(command2)
     command_str3 = " ".join(command3)
-    
+
     command_str = command_str1 + command_str2 + command_str3
 
     # Create slurm job
