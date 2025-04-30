@@ -286,7 +286,10 @@ def dorado(toml_config):
     
     cores = 2
     memory = 32
-    time = "00-15:59"
+    if toml_config["general"]["seq_type"] == "WGS":
+        time = "02-23:59"
+    else:
+        time = "00-15:59"
 
     command = ["dorado", "basecaller", "--verbose", "--device", "cuda:auto", "--emit-moves", "--min-qscore", str(toml_config["dorado"]["min_q_score"]), "--reference", genome, "--sample-sheet", output + "/" + toml_config["dorado"]["sample_sheet"], "--trim", toml_config["dorado"]["trim"], "--kit-name", toml_config["general"]["kit"], "--mm2-opts", toml_config["dorado"]["mm2_opts"]]
     
