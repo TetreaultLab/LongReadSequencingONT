@@ -284,10 +284,10 @@ def dorado(toml_config):
     bam_dorado = output + "/alignments/" + project_name + ".bam"
     bam = output + "/alignments/" + project_name + "_sorted.bam"
     
-    cores = 2
-    memory = 32
+    cores = 4
+    memory = 64
     if toml_config["general"]["seq_type"] == "WGS":
-        time = "02-23:59"
+        time = "04-23:59"
     else:
         time = "00-15:59"
 
