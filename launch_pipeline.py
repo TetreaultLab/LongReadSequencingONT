@@ -328,12 +328,12 @@ def qc(toml_config):
     output = toml_config["general"]["project_path"]
     project_name = get_project_name(output)
 
-    threads = "1"
+    threads = "8"
     memory = "100"
     time = "00-3:59"
     email = toml_config["general"]["email"]
 
-    command = ["apptainer", "run", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_longreadsum.sif", "pod5", "--log", output + "/qc/longreadsum.log", "-Q", '"' + project_name + '"', "-P", '"' + output + "/reads/pod5/*.pod5\"", "-o", output + "/qc", "--basecalls", output + "/alignments/" + project_name + "_sorted.bam"]
+    command = ["apptainer", "run", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_longreadsum.sif", "pod5", "--threads", threads, "--log", output + "/qc/longreadsum.log", "-Q", '"' + project_name + '"', "-P", '"' + output + "/reads/pod5/*.pod5\"", "-o", output + "/qc", "--basecalls", output + "/alignments/" + project_name + "_sorted.bam"]
 
     if "methylation" in toml_config["general"]["analysis"]:
         command.extend(["--mod"])
