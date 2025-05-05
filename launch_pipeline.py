@@ -112,9 +112,13 @@ def main():
 def get_project_name(output):
     rm_prefix = output.replace('/lustre03/project/6019267/shared/projects/Nanopore_Dock/', '')
     path_list = rm_prefix.split("/")
-    project_name_date = path_list[0].split("_", 1)
-    project_name = project_name_date[1]
-
+    
+    if path_list[0].startswith("2"):
+        project_name_date = path_list[0].split("_", 1)
+        project_name = project_name_date[1]
+    else:
+        project_name = path_list[0]
+    
     return project_name
 
 
