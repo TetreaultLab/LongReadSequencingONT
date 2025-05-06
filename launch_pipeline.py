@@ -286,9 +286,8 @@ def dorado(toml_config):
     genome = get_reference(toml_config["general"]["reference"], tool)["fasta"]
 
     bam_dorado = output + "/alignments/" + project_name + ".bam"
-    bam = output + "/alignments/" + project_name + "_sorted.bam"
-    
-    cores = 4
+        
+    cores = 16
     memory = 64
     if toml_config["general"]["seq_type"] == "WGS":
         time = "04-23:59"
@@ -311,9 +310,12 @@ def dorado(toml_config):
     command.extend(["> " + final + project_name + ".bam", "\n\n"])
 
     command2 = ["dorado", "demux", "--no-trim", "--sort-bam", "--output-dir", final, "--no-classify", bam_dorado]
+
+    command3 = ["python", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/LongReadSequencingONT/rename_bam.py", output]
     
     command_str1 = " ".join(command)
     command_str2 = " ".join(command2)
+    command_str3 = " ".join(command3)
 
     command_str = command_str1 + command_str2
     
@@ -329,18 +331,26 @@ def qc(toml_config):
     tool="qc"
     output = toml_config["general"]["project_path"]
     project_name = get_project_name(output)
-
+    df = pd.read_csv(output + "/samples.csv, sep="\t", header=0)
+    df["name"] = df["alias"] + "_" + df["barcode"]
+    fasta = get_reference(toml_config["general"]["reference"], tool)["fasta"]
+    
     threads = "8"
-    memory = "100"
-    time = "00-3:59"
+    memory = "200"
+    time = "00-11:59"
     email = toml_config["general"]["email"]
 
-    command = ["apptainer", "run", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_longreadsum.sif", "pod5", "--threads", threads, "--log", output + "/qc/longreadsum.log", "-Q", '"' + project_name + '"', "-P", '"' + output + "/reads/pod5/*.pod5\"", "-o", output + "/qc", "--basecalls", output + "/alignments/" + project_name + "_sorted.bam"]
+    command_pod5 = command = ["apptainer", "run", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_longreadsum.sif", "pod5", "--threads", threads, "--log", output + "/qc/longreadsum_pod5.log", "-Q", '"' + project_name + '"', "-P", '"' + output + "/reads/pod5/*.pod5\"", "-o", output + "/qc", "--basecalls", output + "/alignments/" + project_name + ".bam"]
 
-    if "methylation" in toml_config["general"]["analysis"]:
-        command.extend(["--mod"])
+    command_str = ""
+    for name in df["name"]:
+        command = ["apptainer", "run", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_longreadsum.sif", "bam", "--threads", threads, "--log", output + "/qc/longreadsum" + name + ".log", "--ref", fasta, "-Q", '"' + name + '"', "-i", output + "/alignments/" + name + ".bam", "-o", output + "/qc"]
 
-    command_str = " ".join(command)  
+        if "methylation" in toml_config["general"]["analysis"]:
+            command.extend(["--mod"])
+        
+        command.extend(["\n\n"])
+        command_str += " ".join(command)
     
     # Create slurm job
     job = create_script(tool, threads, memory, time, output, email, command_str)
