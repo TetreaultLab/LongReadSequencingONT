@@ -309,7 +309,7 @@ def dorado(toml_config):
     command.extend([model, reads])
     command.extend(["> " + final + project_name + ".bam", "\n\n"])
 
-    command2 = ["dorado", "demux", "--no-trim", "--sort-bam", "--output-dir", final, "--no-classify", bam_dorado]
+    command2 = ["dorado", "demux", "--no-trim", "--sort-bam", "--output-dir", final, "--no-classify", bam_dorado, "\n\n"]
 
     command3 = ["python", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/LongReadSequencingONT/rename_bam.py", output]
     
@@ -317,7 +317,7 @@ def dorado(toml_config):
     command_str2 = " ".join(command2)
     command_str3 = " ".join(command3)
 
-    command_str = command_str1 + command_str2
+    command_str = command_str1 + command_str2 + command_str3
     
     # Create slurm job
     job = create_script(tool, cores, memory, time, output, email, command_str)
@@ -332,6 +332,7 @@ def qc(toml_config):
     output = toml_config["general"]["project_path"]
     project_name = get_project_name(output)
     df = pd.read_csv(output + "/samples.csv", sep="\t", header=0)
+    print(df)
     df["name"] = df["alias"] + "_" + df["barcode"]
     fasta = get_reference(toml_config["general"]["reference"], tool)["fasta"]
     
