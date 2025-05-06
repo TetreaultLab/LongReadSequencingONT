@@ -6,7 +6,7 @@ parser = argparse.ArgumentParser(description="Rename BAM and BAI files based on 
 parser.add_argument("directory", type=str, help="Path to the directory containing the BAM/BAI files.")
 
 # Load the CSV file
-df = pd.read_csv(args.directory + "/samples.csv", sep="\t", header=0)
+df = pd.read_csv(args.directory + "/samples.csv", header=0)
 
 # Create a mapping from barcode -> alias
 barcode_to_alias = dict(zip(df["barcode"], df["alias"]))
