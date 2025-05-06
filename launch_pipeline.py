@@ -332,7 +332,6 @@ def qc(toml_config):
     output = toml_config["general"]["project_path"]
     project_name = get_project_name(output)
     df = pd.read_csv(output + "/samples.csv", header=0)
-    print(df)
     df["name"] = df["alias"] + "_" + df["barcode"]
     fasta = get_reference(toml_config["general"]["reference"], tool)["fasta"]
     
