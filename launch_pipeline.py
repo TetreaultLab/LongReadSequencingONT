@@ -45,6 +45,9 @@ def main():
         toml_config = toml_config_initial
     
     # Get steps done
+    f = open(output + "/steps_done.txt", "a")
+    f.close()
+    
     done = []
     with open(output + "/steps_done.txt", "r") as f:
         for line in f:
