@@ -29,9 +29,6 @@ def main():
 
     output = toml_config_initial["general"]["project_path"]
     project_name = get_project_name(output)
-    
-    # Create list of steps already done from the file steps_done.txt
-    steps = open(output + "/steps_done.txt", "a")
 
     ## config and sample sheet
     if args.config != "config_final.toml":
@@ -41,29 +38,12 @@ def main():
         # Create sample_sheet.csv
         create_sample_sheet(toml_config)
 
-        # Open file for steps done
-        steps.write("Loading ENV\n")
-
         print("\n\n\n!!! WARNING !!!\nIf you to change the parameters: Press CTRL+C now!\nModify config_final.toml and launch_pipeline with that config file.\n\nOtherwise it will run with default parameters.\n\n")
-        time.sleep(30)
+        time.sleep(20)
 
     else:
         toml_config = toml_config_initial
     
-    ## BAM file
-    if os.path.isfile(output + "/alignments/" + project_name + "_sorted.bam"):
-        print("Dorado done")
-        steps.write("dorado\n")
-
-    # SNP - VCF file
-    if os.path.isfile(output + "/results/" + project_name + ".vcf.gz"):
-        print("Clair3 done")
-        steps.write("clair3\n")
-
-    # Next tools ...
-    
-    steps.close()
-
     # Get steps done
     done = []
     with open(output + "/steps_done.txt", "r") as f:
@@ -71,7 +51,6 @@ def main():
             done.append(line.strip())
     
     
-
     function_queue = []
     # Setting up list of steps
     # Base calling
@@ -86,13 +65,13 @@ def main():
         if "clair3" not in done:
             function_queue.append(clair3)
 
-    # Phasing
-    # if "whatshap" not in done:
-    #     function_queue.append(whatshap)
+        if "whatshap" not in done: # phasing
+            function_queue.append(whatshap)
 
     # SV calling
-    # if "sniffles2" not in done:
-    #    function_queue.append(sniffles2)
+    if "SV" in toml_config["general"]["analysis"]:
+        if "sniffles2" not in done:
+            function_queue.append(sniffles2)
 
     # Other tools ...
 
@@ -259,15 +238,17 @@ def create_script(tool, cores, memory, time, output, email, command):
         slurm = f.read()
         if tool == "dorado":
             slurm_filled = slurm.format(cores, "#SBATCH --gres=gpu:1", memory, time, tool, project_name, "def", email)
-            slurm_filled += "module load StdEnv/2023 dorado/0.9.5 samtools"
+            slurm_filled += "module load StdEnv/2023 dorado/0.9.5 samtools\n
+            slurm_filled += "source /lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/bin/activate"
+            
         else: 
             slurm_filled = slurm.format(cores, "", memory, time, tool, project_name, "rrg", email)
             slurm_filled += "module load StdEnv/2023 apptainer samtools"
 
         slurm_filled += "\n#\n### Calling " + tool + "\n#\n"
         slurm_filled += command
-        
         slurm_filled += "\n"
+        slurm_filled += 'echo "' + tool + '" >> ' + output + '/steps_done.txt'
 
         with open(job, "w") as o:
             o.write(slurm_filled)
@@ -328,7 +309,7 @@ def dorado(toml_config):
 
 
 def qc(toml_config):
-    tool="qc"
+    tool = "qc"
     output = toml_config["general"]["project_path"]
     project_name = get_project_name(output)
     df = pd.read_csv(output + "/samples.csv", header=0)
@@ -369,10 +350,7 @@ def qc(toml_config):
 
 
 def clair3(toml_config):
-    if toml_config["general"]["seq_type"] == "RNA":
-        tool = "clair3_rna"
-    else:
-        tool = "clair3"
+    tool = "clair3"
 
     output = toml_config["general"]["project_path"]
     project_name = get_project_name(output)
@@ -387,7 +365,7 @@ def clair3(toml_config):
     time = "00-23:59"
     email = toml_config["general"]["email"]
 
-    if tool == "clair3_rna":
+    if toml_config["general"]["seq_type"] == "RNA":
         command = ["apptainer", "run", "-C", "-W", "${SLURM_TMPDIR}", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_" + tool + ".sif ", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/Clair3-RNA/run_clair3_rna", "--bam_fn", bam, "--ref_fn", ref, "--threads", threads, "--platform", platform_rna, "--output_dir", output + "/results/", "\n\n"]
         # add --enable_phasing_model ?
     else:
