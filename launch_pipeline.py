@@ -319,22 +319,25 @@ def qc(toml_config):
     df["name"] = df["alias"] + "_" + df["barcode"]
     fasta = get_reference(toml_config["general"]["reference"], tool)["fasta"]
     
-    threads = "8"
+    threads = "4"
     memory = "200"
-    time = "00-11:59"
+    time = "00-01:59"
     email = toml_config["general"]["email"]
 
-    command_pod5 = command = ["apptainer", "run", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_longreadsum.sif", "pod5", "--threads", threads, "--log", output + "/qc/longreadsum_pod5.log", "-Q", '"' + project_name + '"', "-P", '"' + output + "/reads/pod5/*.pod5\"", "-o", output + "/qc", "--basecalls", output + "/alignments/" + project_name + ".bam"]
-
-    command_str = ""
+    command_pod5 = ["apptainer", "run", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_longreadsum.sif", "pod5", "--threads", threads, "--log", output + "/qc/longreadsum_pod5.log", "-Q", '"' + project_name + '"', "-P", '"' + output + "/reads/pod5/*.pod5\"", "-o", output + "/qc", "--basecalls", output + "/alignments/" + project_name + ".bam", "\n\n"]
+    command_str1 = " ".join(command_pod5)
+    
+    command_str2 = ""
     for name in df["name"]:
-        command = ["apptainer", "run", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_longreadsum.sif", "bam", "--threads", threads, "--log", output + "/qc/longreadsum" + name + ".log", "--ref", fasta, "-Q", '"' + name + '"', "-i", output + "/alignments/" + name + ".bam", "-o", output + "/qc"]
+        command = ["apptainer", "run", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_longreadsum.sif", "bam", "--threads", threads, "--log", output + "/qc/longreadsum_" + name + ".log", "--ref", fasta, "-Q", '"' + name + '_"', "-i", output + "/alignments/" + name + ".bam", "-o", output + "/qc"]
 
         if "methylation" in toml_config["general"]["analysis"]:
             command.extend(["--mod"])
         
         command.extend(["\n\n"])
-        command_str += " ".join(command)
+        command_str2 += " ".join(command)
+
+    command_str = command_str1 + command_str2
     
     # Create slurm job
     job = create_script(tool, threads, memory, time, output, email, command_str)
