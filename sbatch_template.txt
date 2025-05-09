@@ -1,6 +1,5 @@
 #!/bin/sh
 #SBATCH -N 1 #Number of nodes
-#SBATCH --cpus-per-task {0} # number of cores
 {1}
 #SBATCH --mem {2}G # memory pool for all cores
 #SBATCH -t {3} # time (DD-HH:MM)
