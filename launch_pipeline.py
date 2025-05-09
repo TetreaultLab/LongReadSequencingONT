@@ -319,9 +319,9 @@ def qc(toml_config):
     df["name"] = df["alias"] + "_" + df["barcode"]
     fasta = get_reference(toml_config["general"]["reference"], tool)["fasta"]
     
-    threads = "4"
+    threads = "8"
     memory = "200"
-    time = "00-01:59"
+    time = "00-11:59"
     email = toml_config["general"]["email"]
 
     command_pod5 = ["apptainer", "run", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_longreadsum.sif", "pod5", "--threads", threads, "--log", output + "/qc/longreadsum_pod5.log", "-Q", '"' + project_name + '"', "-P", '"' + output + "/reads/pod5/*.pod5\"", "-o", output + "/qc", "--basecalls", output + "/alignments/" + project_name + ".bam", "\n\n"]
