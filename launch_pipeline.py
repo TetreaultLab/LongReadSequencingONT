@@ -240,12 +240,12 @@ def create_script(tool, cores, memory, time, output, email, command):
     with open("/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/LongReadSequencingONT/sbatch_template.txt", "r") as f:
         slurm = f.read()
         if tool == "dorado":
-            slurm_filled = slurm.format("#SBATCH --gpus-per-node=1", memory, time, tool, project_name, "def", email)
+            slurm_filled = slurm.format(cores, "#SBATCH --gpus-per-node=4", memory, time, tool, project_name, "def", email)
             slurm_filled += "module load StdEnv/2023 dorado/0.9.5 samtools\n"
             slurm_filled += "source /lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/bin/activate"
             
         else: 
-            slurm_filled = slurm.format("#SBATCH --cpus-per-task " + cores, memory, time, tool, project_name, "rrg", email)
+            slurm_filled = slurm.format(cores, "", memory, time, tool, project_name, "rrg", email)
             slurm_filled += "module load StdEnv/2023 apptainer samtools"
 
         slurm_filled += "\n#\n### Calling " + tool + "\n#\n"
@@ -270,8 +270,8 @@ def dorado(toml_config):
     genome = get_reference(toml_config["general"]["reference"], tool)["fasta"]
 
     bam_dorado = output + "/alignments/" + project_name + ".bam"
-        
-    memory = 64
+    cores = "8"   
+    memory = "64"
     if toml_config["general"]["seq_type"] == "WGS":
         time = "04-23:59"
     else:
@@ -303,7 +303,7 @@ def dorado(toml_config):
     command_str = command_str1 + command_str2 + command_str3
     
     # Create slurm job
-    job = create_script(tool, "", memory, time, output, email, command_str)
+    job = create_script(tool, cores, memory, time, output, email, command_str)
     
     # Add slurm job to main.sh
     with open(output + "/scripts/main.sh", "a") as f:
@@ -339,7 +339,7 @@ def qc(toml_config):
     command_str = command_str1 + command_str2
     
     # Create slurm job
-    job = create_script(tool, threads, memory, time, output, email, command_str)
+    job = create_script(tool, threads, "", memory, time, output, email, command_str)
 
     done = []
     with open(output + "/steps_done.txt", "r") as f:
