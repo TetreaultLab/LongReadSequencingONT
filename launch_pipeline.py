@@ -339,7 +339,7 @@ def qc(toml_config):
     command_str = command_str1 + command_str2
     
     # Create slurm job
-    job = create_script(tool, threads, "", memory, time, output, email, command_str)
+    job = create_script(tool, threads, memory, time, output, email, command_str)
 
     done = []
     with open(output + "/steps_done.txt", "r") as f:
