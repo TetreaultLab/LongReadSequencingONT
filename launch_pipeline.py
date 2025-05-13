@@ -151,6 +151,10 @@ def create_config_final(filename):
     # Move pod5 to reads directory
     if not os.path.exists(new_path + "/reads/pod5"):
         os.rename(os.path.join(new_path, "pod5"), os.path.join(new_path, "reads", "pod5"))
+    if os.path.exists(new_path + "/pod5_skip"):
+        for file in os.listdir(os.path.join(new_path + "/pod5_skip")):
+            os.rename(os.path.join(new_path, "pod5_skip", file), os.path.join(new_path, "reads", "pod5", file))
+            
 
     # Add Dorado options
     ## general options
