@@ -254,7 +254,7 @@ def create_script(tool, cores, memory, time, output, email, command):
 
         slurm_filled += "\n#\n### Calling " + tool + "\n#\n"
         slurm_filled += command
-        slurm_filled += "\n"
+        slurm_filled += "\n\n"
         slurm_filled += 'echo "' + tool + '" >> ' + output + '/scripts/steps_done.txt'
 
         with open(job, "w") as o:
@@ -398,7 +398,7 @@ def clair3(toml_config):
     with open(output + "/scripts/steps_done.txt", "r") as f:
         for line in f:
             done.append(line.strip())
-    ##### TO-DO: find other way to check if dorado is done
+
     if "dorado" not in done:
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("sbatch --dependency=afterok:$dorado " + job + "\n")
