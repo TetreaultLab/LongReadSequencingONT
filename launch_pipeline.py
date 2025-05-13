@@ -45,11 +45,11 @@ def main():
         toml_config = toml_config_initial
     
     # Get steps done
-    f = open(output + "/steps_done.txt", "a")
+    f = open(output + "/scripts/steps_done.txt", "a")
     f.close()
     
     done = []
-    with open(output + "/steps_done.txt", "r") as f:
+    with open(output + "/scripts/steps_done.txt", "r") as f:
         for line in f:
             done.append(line.strip())
     
@@ -255,7 +255,7 @@ def create_script(tool, cores, memory, time, output, email, command):
         slurm_filled += "\n#\n### Calling " + tool + "\n#\n"
         slurm_filled += command
         slurm_filled += "\n"
-        slurm_filled += 'echo "' + tool + '" >> ' + output + '/steps_done.txt'
+        slurm_filled += 'echo "' + tool + '" >> ' + output + '/scripts/steps_done.txt'
 
         with open(job, "w") as o:
             o.write(slurm_filled)
@@ -346,7 +346,7 @@ def qc(toml_config):
     job = create_script(tool, threads, memory, time, output, email, command_str)
 
     done = []
-    with open(output + "/steps_done.txt", "r") as f:
+    with open(output + "/scripts/steps_done.txt", "r") as f:
         for line in f:
             done.append(line.strip())
     
@@ -395,7 +395,7 @@ def clair3(toml_config):
 
     # Add slurm job to main.sh
     done = []
-    with open(output + "/steps_done.txt", "r") as f:
+    with open(output + "/scripts/steps_done.txt", "r") as f:
         for line in f:
             done.append(line.strip())
     ##### TO-DO: find other way to check if dorado is done
