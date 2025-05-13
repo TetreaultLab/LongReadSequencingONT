@@ -186,7 +186,7 @@ def create_config_final(filename):
 
 
     # Save new config file
-    with open(toml_config["general"]["project_path"] + '/config_final.toml', 'w') as f:
+    with open(toml_config["general"]["project_path"] + '/scripts/config_final.toml', 'w') as f:
         toml.dump(toml_config, f)
 
     return toml_config
@@ -216,7 +216,7 @@ def create_sample_sheet(toml_config):
     df = pd.DataFrame(data=d)
     df["barcode"] = "barcode" + df["barcode"].astype(int).astype(str).str.zfill(2)
 
-    df.to_csv(path+"/samples.csv", sep=",", index=False)
+    df.to_csv(path+"/scripts/samples.csv", sep=",", index=False)
 
 
 def get_reference(ref, tool):
@@ -270,14 +270,14 @@ def dorado(toml_config):
     genome = get_reference(toml_config["general"]["reference"], tool)["fasta"]
 
     bam_dorado = output + "/alignments/" + project_name + ".bam"
-    cores = "8"   
-    memory = "64"
+    cores = "16"   
+    memory = "128"
     if toml_config["general"]["seq_type"] == "WGS":
         time = "04-23:59"
     else:
         time = "00-15:59"
 
-    command = ["dorado", "basecaller", "--verbose", "--device", "cuda:auto", "--emit-moves", "--min-qscore", str(toml_config["dorado"]["min_q_score"]), "--reference", genome, "--sample-sheet", output + "/" + toml_config["dorado"]["sample_sheet"], "--trim", toml_config["dorado"]["trim"], "--kit-name", toml_config["general"]["kit"], "--mm2-opts", toml_config["dorado"]["mm2_opts"]]
+    command = ["dorado", "basecaller", "--verbose", "--device", "cuda:auto", "--emit-moves", "--min-qscore", str(toml_config["dorado"]["min_q_score"]), "--reference", genome, "--sample-sheet", output + "/scripts/" + toml_config["dorado"]["sample_sheet"], "--no-trim", "--kit-name", toml_config["general"]["kit"], "--mm2-opts", toml_config["dorado"]["mm2_opts"]]
     
     if toml_config["dorado"]["barcode_both_ends"] in ["true", "True", "yes", "Yes"]:
         command.extend(["--barcode-both-ends"])
@@ -292,8 +292,8 @@ def dorado(toml_config):
     command.extend([model, reads])
     command.extend(["> " + final + project_name + ".bam", "\n\n"])
 
-    command2 = ["dorado", "demux", "--no-trim", "--sort-bam", "--output-dir", final, "--no-classify", bam_dorado, "\n\n"]
-
+    command2 = ["dorado", "demux", "--sort-bam", "--output-dir", final, "--no-classify", bam_dorado, "\n\n"]
+    
     command3 = ["python", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/LongReadSequencingONT/rename_bam.py", output]
     
     command_str1 = " ".join(command)
@@ -314,7 +314,7 @@ def qc(toml_config):
     tool = "qc"
     output = toml_config["general"]["project_path"]
     project_name = get_project_name(output)
-    df = pd.read_csv(output + "/samples.csv", header=0)
+    df = pd.read_csv(output + "/scripts/samples.csv", header=0)
     df["name"] = df["alias"] + "_" + df["barcode"]
     fasta = get_reference(toml_config["general"]["reference"], tool)["fasta"]
     
