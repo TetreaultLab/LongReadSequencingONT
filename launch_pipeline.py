@@ -161,7 +161,7 @@ def create_config_final(filename):
     toml_config["dorado"] = {}
     toml_config['dorado']['min_q_score'] = 10
     toml_config['dorado']['sample_sheet'] = "samples.csv"
-    toml_config['dorado']['barcode_both_ends'] = True
+    toml_config['dorado']['barcode_both_ends'] = "True"
     toml_config['dorado']['trim'] = "all"
     toml_config['dorado']['model'] = "dna_r10.4.1_e8.2_400bps_sup@v5.0.0"
 
