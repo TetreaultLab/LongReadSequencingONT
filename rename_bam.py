@@ -8,7 +8,7 @@ parser.add_argument("directory", type=str, help="Path to the directory containin
 args = parser.parse_args()
 
 # Load the CSV file
-df = pd.read_csv(args.directory + "/samples.csv", header=0)
+df = pd.read_csv(args.directory + "/scripts/samples.csv", header=0)
 
 # Create a mapping from barcode -> alias
 barcode_to_alias = dict(zip(df["barcode"], df["alias"]))
