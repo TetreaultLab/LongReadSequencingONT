@@ -60,7 +60,7 @@ def main():
     if "dorado" not in done:
         function_queue.append(dorado)
 
-    if "qc" not in done:
+    #if "qc" not in done:
         #function_queue.append(qc)
     
     # SNP calling
