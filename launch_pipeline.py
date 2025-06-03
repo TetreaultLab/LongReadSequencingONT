@@ -295,7 +295,7 @@ def dorado(toml_config):
     command.extend([model, reads])
     command.extend(["> " + final + project_name + ".bam", "\n\n"])
     
-    command_str1 = " ".join(command)
+    command_str = " ".join(command)
 
     job = create_script(tool, cores, memory, time, output, email, command_str)
     
