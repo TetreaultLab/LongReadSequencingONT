@@ -223,7 +223,7 @@ def create_sample_sheet(toml_config):
     df.to_csv(path+"/scripts/samples.csv", sep=",", index=False)
 
 
-def get_reference(ref, tool):
+def get_reference(ref):
     path = "/lustre03/project/6019267/shared/tools/database_files/hg38/"
     reference: {}  # type: ignore
     match ref:
@@ -267,7 +267,7 @@ def dorado(toml_config):
     reads = output + "/reads/pod5"
     final = output + "/alignments/"
     email = toml_config["general"]["email"]
-    genome = get_reference(toml_config["general"]["reference"], tool)["fasta"]
+    genome = get_reference(toml_config["general"]["reference"])["fasta"]
 
     bam_dorado = output + "/alignments/" + project_name + ".bam"
 
@@ -334,7 +334,7 @@ def qc(toml_config):
     project_name = get_project_name(output)
     df = pd.read_csv(output + "/scripts/samples.csv", header=0)
     df["name"] = df["alias"] + "_" + df["barcode"]
-    fasta = get_reference(toml_config["general"]["reference"], tool)["fasta"]
+    fasta = get_reference(toml_config["general"]["reference"])["fasta"]
     
     threads = "8"
     memory = "200"
@@ -377,7 +377,7 @@ def clair3(toml_config):
 
     output = toml_config["general"]["project_path"]
     project_name = get_project_name(output)
-    ref = get_reference(toml_config["general"]["reference"], tool)["fasta"] # same ref for RNA + DNA ?
+    ref = get_reference(toml_config["general"]["reference"])["fasta"] # same ref for RNA + DNA ?
     bam = output + "/alignments/" + project_name + "_sorted.bam"
     model = "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/Clair3/models/r1041_e82_400bps_sup_v420" # https://www.bio8.cs.hku.hk/clair3/clair3_models/
     platform_rna = "ont_dorado_drna004" # Possible options: {ont_dorado_drna004, ont_guppy_drna002, ont_guppy_cdna, hifi_sequel2_pbmm2, hifi_sequel2_minimap2, hifi_mas_pbmm2, hifi_sequel2_minimap2}.
@@ -430,7 +430,7 @@ def whatshap(toml_config):
     input_vcf = output + "/results/" + project_name + ".vcf.gz"
     bam = output + "/alignments/" + project_name + "_sorted.bam"
     
-    ref = get_reference(toml_config["general"]["reference"], tool)["fasta"]
+    ref = get_reference(toml_config["general"]["reference"])["fasta"]
 
     threads = "8"
     memory = "32"
@@ -456,7 +456,7 @@ def sniffles2(toml_config):
     output = toml_config["general"]["project_path"]
     bam = "/home/shared/data/2024-10-16_Lapiana_n17/no_sample_id/20241016_1653_X2_FAV26227_d404da0e/alignment/minimap2_sup/B1540_sorted.bam"
     vcf = output + "/sniffles2_SV.vcf"
-    ref = get_reference(toml_config["general"]["reference"], tool)["fasta"]
+    ref = get_reference(toml_config["general"]["reference"])["fasta"]
 
     threads = "8"
     memory = "32"
