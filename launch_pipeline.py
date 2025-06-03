@@ -61,7 +61,7 @@ def main():
         function_queue.append(dorado)
 
     if "qc" not in done:
-        function_queue.append(qc)
+        #function_queue.append(qc)
     
     # SNP calling
     if "SNP" in toml_config["general"]["analysis"]:
@@ -163,7 +163,7 @@ def create_config_final(filename):
     toml_config['dorado']['sample_sheet'] = "samples.csv"
     toml_config['dorado']['barcode_both_ends'] = "True"
     toml_config['dorado']['trim'] = "all"
-    toml_config['dorado']['model'] = "dna_r10.4.1_e8.2_400bps_sup@v5.0.0"
+    toml_config['dorado']['model'] = "dna_r10.4.1_e8.2_400bps_sup@v5.2.0"
 
     ## parameters depending on sequencing type
     if seq_type == "WGS":
@@ -243,10 +243,8 @@ def create_script(tool, cores, memory, time, output, email, command):
 
     with open("/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/LongReadSequencingONT/sbatch_template.txt", "r") as f:
         slurm = f.read()
-        if tool == "dorado":
+        if tool == "dorado basecaller":
             slurm_filled = slurm.format(cores, "#SBATCH --gpus-per-node=4", memory, time, tool, project_name, "def", email)
-            slurm_filled += "module load StdEnv/2023 dorado/0.9.5 samtools\n"
-            slurm_filled += "source /lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/bin/activate"
             
         else: 
             slurm_filled = slurm.format(cores, "", memory, time, tool, project_name, "rrg", email)
@@ -264,8 +262,6 @@ def create_script(tool, cores, memory, time, output, email, command):
 
 
 def dorado(toml_config):
-    tool = "dorado"
-    
     output = toml_config["general"]["project_path"]
     project_name = get_project_name(output)
     reads = output + "/reads/pod5"
@@ -274,14 +270,17 @@ def dorado(toml_config):
     genome = get_reference(toml_config["general"]["reference"], tool)["fasta"]
 
     bam_dorado = output + "/alignments/" + project_name + ".bam"
-    cores = "16"   
-    memory = "128"
-    if toml_config["general"]["seq_type"] == "WGS":
-        time = "04-23:59"
-    else:
-        time = "00-15:59"
 
-    command = ["dorado", "basecaller", "--verbose", "--device", "cuda:all", "--emit-moves", "--min-qscore", str(toml_config["dorado"]["min_q_score"]), "--reference", genome, "--sample-sheet", output + "/scripts/" + toml_config["dorado"]["sample_sheet"], "--no-trim", "--kit-name", toml_config["general"]["kit"], "--mm2-opts", toml_config["dorado"]["mm2_opts"]]
+    # BASECALLER
+    tool = "dorado basecaller"
+    cores = "6"
+    memory = "64"
+    if toml_config["general"]["seq_type"] == "WGS":
+        time = "00-23:59"
+    else:
+        time = "00-01:59"
+
+    command = ["/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/dorado-1.0.0-linux-x64/bin/dorado", "basecaller", "--verbose", "--device", "cuda:all", "--emit-moves", "--min-qscore", str(toml_config["dorado"]["min_q_score"]), "--reference", genome, "--sample-sheet", output + "/scripts/" + toml_config["dorado"]["sample_sheet"], "--no-trim", "--kit-name", toml_config["general"]["kit"], "--mm2-opts", toml_config["dorado"]["mm2_opts"]]
     
     if toml_config["dorado"]["barcode_both_ends"] in ["true", "True", "yes", "Yes"]:
         command.extend(["--barcode-both-ends"])
@@ -295,13 +294,40 @@ def dorado(toml_config):
     model = "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/dorado_models/" + toml_config['dorado']['model']
     command.extend([model, reads])
     command.extend(["> " + final + project_name + ".bam", "\n\n"])
-
-    command2 = ["dorado", "demux", "--sort-bam", "--output-dir", final, "--no-classify", bam_dorado, "\n\n"]
-    
-    command3 = ["python", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/LongReadSequencingONT/rename_bam.py", output]
     
     command_str1 = " ".join(command)
+
+    job = create_script(tool, cores, memory, time, output, email, command_str)
+    
+    # Add slurm job to main.sh
+    with open(output + "/scripts/main.sh", "a") as f:
+        f.write("dorado=$(sbatch --parsable " + job + ")\n")
+
+    # DEMUX
+    tool2 = "dorado demux"
+
+    cores = "1"   
+    memory = "8"
+    if toml_config["general"]["seq_type"] == "WGS":
+        time = "00-23:59"
+    else:
+        time = "00-01:59"
+        
+    command2 = ["/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/dorado-1.0.0-linux-x64/bin/dorado", "demux", "--verbose", "--sort-bam", "--output-dir", final, "--no-classify", bam_dorado, "\n\n"]
     command_str2 = " ".join(command2)
+
+    # Create slurm job
+    job = create_script(tool2, cores, memory, time, output, email, command_str)
+    
+    # Add slurm job to main.sh
+    with open(output + "/scripts/main.sh", "a") as f:
+        f.write("dorado=$(sbatch --parsable " + job + ")\n")
+
+    
+    #command3 = ["python", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/LongReadSequencingONT/rename_bam.py", output]
+    
+    
+    
     command_str3 = " ".join(command3)
 
     command_str = command_str1 + command_str2 + command_str3
@@ -311,7 +337,7 @@ def dorado(toml_config):
     
     # Add slurm job to main.sh
     with open(output + "/scripts/main.sh", "a") as f:
-        f.write("dorado=$(sbatch --parsable " + job + ")\n")
+        f.write("dorado=$(sbatch --dependency=afterok:$dorado " + job + ")\n")
 
 
 def qc(toml_config):
@@ -350,7 +376,7 @@ def qc(toml_config):
         for line in f:
             done.append(line.strip())
     
-    if "dorado" not in done:
+    if "dorado demux" not in done:
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("sbatch --dependency=afterok:$dorado " + job + "\n")
     else:
