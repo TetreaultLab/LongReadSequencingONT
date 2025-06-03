@@ -321,7 +321,7 @@ def dorado(toml_config):
     
     # Add slurm job to main.sh
     with open(output + "/scripts/main.sh", "a") as f:
-        f.write("sbatch --dependency=afterok:$dorado " + job2 + ")\n")
+        f.write("sbatch --dependency=afterok:$dorado " + job2 + "\n")
 
     
     #command3 = ["python", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/LongReadSequencingONT/rename_bam.py", output]
