@@ -177,7 +177,7 @@ def create_config_final(filename):
             raise Exception("Error: Wrong Kit for Whole Transcriptome. Options are SQK-PCB114-24")
 
     if methylation_status:
-        toml_config['dorado']['modified_bases'] = "5mCG_5hmCG"
+        toml_config['dorado']['modified_bases'] = "5mC_5hmC"
         toml_config['dorado']['modified_bases_threshold'] = 0.05
 
     if seq_type == "Targeted":
