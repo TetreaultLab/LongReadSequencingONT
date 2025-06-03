@@ -243,7 +243,7 @@ def create_script(tool, cores, memory, time, output, email, command):
 
     with open("/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/LongReadSequencingONT/sbatch_template.txt", "r") as f:
         slurm = f.read()
-        if tool == "dorado basecaller":
+        if tool == "dorado_basecaller":
             slurm_filled = slurm.format(cores, "#SBATCH --gpus-per-node=4", memory, time, tool, project_name, "def", email)
             
         else: 
