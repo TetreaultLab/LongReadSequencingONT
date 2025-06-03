@@ -177,7 +177,7 @@ def create_config_final(filename):
             raise Exception("Error: Wrong Kit for Whole Transcriptome. Options are SQK-PCB114-24")
 
     if methylation_status:
-        toml_config['dorado']['modified_bases'] = "5mC_5hmC"
+        toml_config['dorado']['modified_bases'] = "dna_r10.4.1_e8.2_400bps_sup@v5.2.0_5mC_5hmC@v1"
         toml_config['dorado']['modified_bases_threshold'] = 0.05
 
     if seq_type == "Targeted":
@@ -286,7 +286,7 @@ def dorado(toml_config):
         command.extend(["--barcode-both-ends"])
 
     if "methylation" in toml_config["general"]["analysis"]:
-        command.extend(["--modified-bases", toml_config["dorado"]["modified_bases"], "--modified-bases-threshold", str(toml_config["dorado"]["modified_bases_threshold"])])
+        command.extend(["--modified-bases-models", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/dorado_models/" + toml_config["dorado"]["modified_bases"], "--modified-bases-threshold", str(toml_config["dorado"]["modified_bases_threshold"])])
 
     if "polya" in toml_config["general"]["analysis"]:
         command.extend(["--estimate-poly-a"])
