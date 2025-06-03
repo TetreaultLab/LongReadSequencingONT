@@ -272,7 +272,7 @@ def dorado(toml_config):
     bam_dorado = output + "/alignments/" + project_name + ".bam"
 
     # BASECALLER
-    tool = "dorado basecaller"
+    tool = "dorado_basecaller"
     cores = "6"
     memory = "64"
     if toml_config["general"]["seq_type"] == "WGS":
@@ -304,40 +304,28 @@ def dorado(toml_config):
         f.write("dorado=$(sbatch --parsable " + job + ")\n")
 
     # DEMUX
-    tool2 = "dorado demux"
+    tool2 = "dorado_demux"
 
-    cores = "1"   
-    memory = "8"
+    cores2 = "1"   
+    memory2 = "8"
     if toml_config["general"]["seq_type"] == "WGS":
-        time = "00-23:59"
+        time2 = "02-23:00"
     else:
-        time = "00-01:59"
+        time2 = "00-01:59"
         
     command2 = ["/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/dorado-1.0.0-linux-x64/bin/dorado", "demux", "--verbose", "--sort-bam", "--output-dir", final, "--no-classify", bam_dorado, "\n\n"]
     command_str2 = " ".join(command2)
 
     # Create slurm job
-    job = create_script(tool2, cores, memory, time, output, email, command_str)
+    job2 = create_script(tool2, cores2, memory2, time2, output, email, command_str2)
     
     # Add slurm job to main.sh
     with open(output + "/scripts/main.sh", "a") as f:
-        f.write("dorado=$(sbatch --parsable " + job + ")\n")
+        f.write("sbatch --dependency=afterok:$dorado " + job2 + ")\n")
 
     
     #command3 = ["python", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/LongReadSequencingONT/rename_bam.py", output]
-    
-    
-    
-    command_str3 = " ".join(command3)
-
-    command_str = command_str1 + command_str2 + command_str3
-    
-    # Create slurm job
-    job = create_script(tool, cores, memory, time, output, email, command_str)
-    
-    # Add slurm job to main.sh
-    with open(output + "/scripts/main.sh", "a") as f:
-        f.write("dorado=$(sbatch --dependency=afterok:$dorado " + job + ")\n")
+    #command_str3 = " ".join(command3)
 
 
 def qc(toml_config):
@@ -376,7 +364,7 @@ def qc(toml_config):
         for line in f:
             done.append(line.strip())
     
-    if "dorado demux" not in done:
+    if "dorado_demux" not in done:
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("sbatch --dependency=afterok:$dorado " + job + "\n")
     else:
