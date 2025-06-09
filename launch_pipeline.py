@@ -309,7 +309,7 @@ def dorado(toml_config):
     cores2 = "1"   
     memory2 = "8"
     if toml_config["general"]["seq_type"] == "WGS":
-        time2 = "02-23:00"
+        time2 = "00-23:00"
     else:
         time2 = "00-01:59"
         
