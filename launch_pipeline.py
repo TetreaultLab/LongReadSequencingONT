@@ -276,9 +276,9 @@ def dorado(toml_config):
     cores = "6"
     memory = "64"
     if toml_config["general"]["seq_type"] == "WGS":
-        time = "00-23:59"
+        time = "01-23:00"
     else:
-        time = "00-01:59"
+        time = "00-02:59"
 
     command = ["/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/dorado-1.0.0-linux-x64/bin/dorado", "basecaller", "--verbose", "--device", "cuda:all", "--emit-moves", "--min-qscore", str(toml_config["dorado"]["min_q_score"]), "--reference", genome, "--sample-sheet", output + "/scripts/" + toml_config["dorado"]["sample_sheet"], "--no-trim", "--kit-name", toml_config["general"]["kit"], "--mm2-opts", toml_config["dorado"]["mm2_opts"]]
     
@@ -309,9 +309,9 @@ def dorado(toml_config):
     cores2 = "1"   
     memory2 = "8"
     if toml_config["general"]["seq_type"] == "WGS":
-        time2 = "00-23:00"
+        time2 = "01-23:00"
     else:
-        time2 = "00-01:59"
+        time2 = "00-02:59"
         
     command2 = ["/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/dorado-1.0.0-linux-x64/bin/dorado", "demux", "--verbose", "--sort-bam", "--output-dir", final, "--no-classify", bam_dorado, "\n\n"]
     command_str2 = " ".join(command2)
