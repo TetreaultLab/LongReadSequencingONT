@@ -273,14 +273,14 @@ def dorado(toml_config):
 
     # BASECALLER
     tool = "dorado_basecaller"
-    cores = "6"
-    memory = "64"
+    cores = "10"
+    memory = "100"
     if toml_config["general"]["seq_type"] == "WGS":
-        time = "01-23:00"
+        time = "03-23:00"
     else:
         time = "00-02:59"
 
-    command = ["/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/dorado-1.0.0-linux-x64/bin/dorado", "basecaller", "--verbose", "--device", "cuda:all", "--emit-moves", "--min-qscore", str(toml_config["dorado"]["min_q_score"]), "--reference", genome, "--sample-sheet", output + "/scripts/" + toml_config["dorado"]["sample_sheet"], "--no-trim", "--kit-name", toml_config["general"]["kit"], "--mm2-opts", toml_config["dorado"]["mm2_opts"]]
+    command = ["/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/dorado-1.0.0-linux-x64/bin/dorado", "basecaller", "--verbose", "--device", "cuda:all", "--emit-moves", "--emit-summary", "--min-qscore", str(toml_config["dorado"]["min_q_score"]), "--reference", genome, "--sample-sheet", output + "/scripts/" + toml_config["dorado"]["sample_sheet"], "--no-trim", "--kit-name", toml_config["general"]["kit"], "--mm2-opts", toml_config["dorado"]["mm2_opts"]]
     
     if toml_config["dorado"]["barcode_both_ends"] in ["true", "True", "yes", "Yes"]:
         command.extend(["--barcode-both-ends"])
@@ -309,11 +309,11 @@ def dorado(toml_config):
     cores2 = "1"   
     memory2 = "8"
     if toml_config["general"]["seq_type"] == "WGS":
-        time2 = "01-23:00"
+        time2 = "05-23:00"
     else:
         time2 = "00-02:59"
         
-    command2 = ["/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/dorado-1.0.0-linux-x64/bin/dorado", "demux", "--verbose", "--sort-bam", "--output-dir", final, "--no-classify", bam_dorado, "\n\n"]
+    command2 = ["/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/dorado-1.0.0-linux-x64/bin/dorado", "demux", "--verbose", "--sort-bam", "--no-trim" "--output-dir", final, "--no-classify", bam_dorado, "\n\n"]
     command_str2 = " ".join(command2)
 
     # Create slurm job
