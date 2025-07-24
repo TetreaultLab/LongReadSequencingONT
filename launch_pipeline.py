@@ -201,7 +201,8 @@ def create_config_final(filename):
 
 def create_sample_sheet(toml_config):
     path = toml_config["general"]["project_path"]
-    rm_prefix = path.replace('/lustre09/project/6019267/shared/projects/Nanopore_Dock/', '')
+    #rm_prefix = path.replace('/lustre09/project/6019267/shared/projects/Nanopore_Dock/', ''0)
+    rm_prefix = path.replace('/lustre09/project/6019267/shared/tools/main_pipelines/long-read/', '')
     path_list = rm_prefix.split("/")
     print(path_list)
     project_name_date = path_list[0].split("_", 1)
