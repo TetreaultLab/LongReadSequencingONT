@@ -138,7 +138,7 @@ def create_config_final(filename):
 
     # Making directory structure in flowcells subdirectories
     directories = ["main_reports", "reads"]
-    for flow in fc_dir_names
+    for flow in fc_dir_names:
         for d in directories:
             if not os.path.exists(new_path + "/" + flow + "/" + d):
                 os.makedirs(new_path + "/" + d)
