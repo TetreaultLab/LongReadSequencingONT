@@ -64,17 +64,17 @@ def main():
         #function_queue.append(qc)
     
     # SNP calling
-    if "SNP" in toml_config["general"]["analysis"]:
-        if "clair3" not in done:
-            function_queue.append(clair3)
+    # if "SNP" in toml_config["general"]["analysis"]:
+    #     if "clair3" not in done:
+    #         function_queue.append(clair3)
 
-        if "whatshap" not in done: # phasing
-            function_queue.append(whatshap)
+    #     if "whatshap" not in done: # phasing
+    #         function_queue.append(whatshap)
 
-    # SV calling
-    if "SV" in toml_config["general"]["analysis"]:
-        if "sniffles2" not in done:
-            function_queue.append(sniffles2)
+    # # SV calling
+    # if "SV" in toml_config["general"]["analysis"]:
+    #     if "sniffles2" not in done:
+    #         function_queue.append(sniffles2)
 
     # Other tools ...
 
@@ -92,7 +92,7 @@ def main():
 
 
 def get_project_name(output):
-    rm_prefix = output.replace('/lustre03/project/6019267/shared/projects/Nanopore_Dock/', '')
+    rm_prefix = output.replace('/lustre09/project/6019267/shared/projects/Nanopore_Dock/', '')
     path_list = rm_prefix.split("/")
     
     if path_list[0].startswith("2"):
@@ -109,11 +109,6 @@ def create_config_final(filename):
     with open(filename, "r") as f:
         toml_config = toml.load(f)
 
-    ## Which analysis are possible for each seq-type. Make a if to fill the analysis field and check if some error are made in analysis was not empty
-    # if analysis list is empty, add all available analysis
-    if toml_config["general"]["analysis"] == []:
-        toml_config["general"]["analysis"] = ["methylation", "splicing", "polya", "SNP", "SV", "repeats"]
-
     # set kit to variable
     kit = toml_config['general']['kit']
 
@@ -124,6 +119,9 @@ def create_config_final(filename):
     else:
         methylation_status = False
 
+    # get all flowcell directory names
+    fc_dir_names = toml_config['general']['fc_dir_names']
+
     # if path has a "/" at the end, remove it 
     path = toml_config["general"]["project_path"]
     if path.endswith('/'):
@@ -132,35 +130,41 @@ def create_config_final(filename):
     else:
         new_path = path
 
-    # Making directory structure
-    directories = ["main_reports", "reads", "scripts", "alignments", "results", "qc"]
+    # Making directory structure in project
+    directories = ["scripts", "alignments", "results", "qc"]
     for d in directories:
         if not os.path.exists(new_path + "/" + d):
             os.makedirs(new_path + "/" + d)
 
-    # Move main reports files to corresponding directory
-    reports = ["barcode_alignment", "final_summary", "pore_activity", "report", "sample_sheet", "sequencing_summary", "throughput"]
-    for r in reports:
-        f = glob(os.path.join(new_path, r + "*"))
-        if f != []: # if the file exist in the main directory
-            for i in range(0, len(f)): # if one or more file starts with the report name
-                f2 = f[i]
-                name = f2.split("/")[-1]
-                os.rename(f2, os.path.join(new_path, "main_reports", name)) # move to main_reports
+    # Making directory structure in flowcells subdirectories
+    directories = ["main_reports", "reads"]
+    for flow in fc_dir_names
+        for d in directories:
+            if not os.path.exists(new_path + "/" + flow + "/" + d):
+                os.makedirs(new_path + "/" + d)
 
-    # Move pod5 to reads directory
-    if not os.path.exists(new_path + "/reads/pod5"):
-        os.rename(os.path.join(new_path, "pod5"), os.path.join(new_path, "reads", "pod5"))
-    if os.path.exists(new_path + "/pod5_skip"):
-        for file in os.listdir(os.path.join(new_path + "/pod5_skip")):
-            os.rename(os.path.join(new_path, "pod5_skip", file), os.path.join(new_path, "reads", "pod5", file))
+        # Move main reports files to corresponding directory
+        reports = ["barcode_alignment", "final_summary", "pore_activity", "report", "sample_sheet", "sequencing_summary", "throughput"]
+        for r in reports:
+            f = glob(os.path.join(new_path + "/" + flow + "/", r + "*"))
+            if f != []: # if the file exist in the main directory
+                for i in range(0, len(f)): # if one or more file starts with the report name
+                    f2 = f[i]
+                    name = f2.split("/")[-1]
+                    os.rename(f2, os.path.join(new_path + "/" + flow + "/main_reports", name)) # move to main_reports
+
+        # Move pod5 to reads directory
+        if not os.path.exists(new_path + "/" + flow + "/reads/pod5"):
+            os.rename(os.path.join(new_path, flow, "pod5"), os.path.join(new_path, flow, "reads", "pod5"))
+        if os.path.exists(new_path + "/" + flow + "/pod5_skip"):
+            for file in os.listdir(os.path.join(new_path, flow, "pod5_skip")):
+                os.rename(os.path.join(new_path, flow, "pod5_skip", file), os.path.join(new_path, flow, "reads", "pod5", file))
             
 
     # Add Dorado options
     ## general options
     toml_config["dorado"] = {}
-    toml_config['dorado']['min_q_score'] = 10
-    toml_config['dorado']['sample_sheet'] = "samples.csv"
+    toml_config['dorado']['min_q_score'] = 5
     toml_config['dorado']['barcode_both_ends'] = "False"
     toml_config['dorado']['model'] = "dna_r10.4.1_e8.2_400bps_sup@v5.2.0"
 
@@ -197,62 +201,73 @@ def create_config_final(filename):
 
 def create_sample_sheet(toml_config):
     path = toml_config["general"]["project_path"]
-    rm_prefix = path.replace('/lustre03/project/6019267/shared/projects/Nanopore_Dock/', '')
+    rm_prefix = path.replace('/lustre09/project/6019267/shared/projects/Nanopore_Dock/', '')
     path_list = rm_prefix.split("/")
     project_name_date = path_list[0].split("_", 1)
     project_name = project_name_date[1]
-    flow_cell = path_list[2]
-    flow_cell_id_list = flow_cell.split("_")
-    flow_cell_id = flow_cell_id_list[3] + "_" + flow_cell_id_list[4]
     kit = toml_config["general"]["kit"]
     samples = toml_config["general"]["samples"]
     conditions = toml_config["general"]["conditions"]
-    barcode_initial = toml_config["general"]["barcode"]
 
-    d = {'flow_cell_id': flow_cell_id, 
-         'experiment_id': project_name, 
-         'kit': kit, 
-         'alias': samples, 
-         'type': conditions, 
-         'barcode': range(barcode_initial, barcode_initial + len(samples))}
+    flowcells = toml_config["general"]["fc_dir_names"]
+    barcode = toml_config["general"]["barcode"]
 
-    df = pd.DataFrame(data=d)
-    df["barcode"] = "barcode" + df["barcode"].astype(int).astype(str).str.zfill(2)
+    for flowcell in flowcells:
+        flow_cell_id_list = flowcell.split("_")
+        flow_cell_id = flow_cell_id_list[3] + "_" + flow_cell_id_list[4]
 
-    df.to_csv(path+"/scripts/samples.csv", sep=",", index=False)
+        if type(barcode) is list:
+            d = {'flow_cell_id': flow_cell_id, 
+                'experiment_id': project_name, 
+                'kit': kit, 
+                'alias': samples, 
+                'type': conditions, 
+                'barcode': barcode}
+        else :
+            d = {'flow_cell_id': flow_cell_id, 
+                'experiment_id': project_name, 
+                'kit': kit, 
+                'alias': samples, 
+                'type': conditions, 
+                'barcode': range(barcode_initial, barcode_initial + len(samples))}
+
+        df = pd.DataFrame(data=d)
+        df["barcode"] = "barcode" + df["barcode"].astype(int).astype(str).str.zfill(2)
+
+        df.to_csv(path+"/scripts/" + flowcell + ".csv", sep=",", index=False)
 
 
 def get_reference(ref):
-    path = "/lustre03/project/6019267/shared/tools/database_files/hg38/"
+    path = "/lustre09/project/6019267/shared/tools/references/gencode/"
     reference: {}  # type: ignore
     match ref:
         case "grch38":
             reference = {
-                "fasta": path + "gencode.v38.p13.genome.fa",
-                "gtf": path + "gencode.v38.annotation.gtf",
-                "chrom_size": path + "gencode.v38.p13.chrom_sizes.txt"
+                "fasta": path + "GRCh38_p14/GRCh38.primary_assembly.genome.fa",
+                "gtf": path + "GRCh38_p14/gencode.v48.primary_assembly.annotation.gtf",
+                "chrom_size": path + "GRCh38_p14/GRCh38.primary_assembly.genome.chromSizes.txt"
             }
 
     return reference
 
 
-def create_script(tool, cores, memory, time, output, email, command):
+def create_script(tool, cores, memory, time, output, email, command, flowcell):
     project_name = get_project_name(output)
-    job = output + "/scripts/" + tool + "_" + project_name + ".slurm"
+    job = output + "/scripts/" + flowcell + ".slurm"
 
-    with open("/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/LongReadSequencingONT/sbatch_template.txt", "r") as f:
+    with open("/lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/sbatch_template.txt", "r") as f:
         slurm = f.read()
         if tool == "dorado_basecaller":
-            slurm_filled = slurm.format(cores, "#SBATCH --gpus-per-node=4", memory, time, tool, project_name, "def", email)
+            slurm_filled = slurm.format(cores, "#SBATCH --gpus-per-node=h100:4", memory, time, tool, project_name, "def", email)
             
         else: 
             slurm_filled = slurm.format(cores, "", memory, time, tool, project_name, "rrg", email)
             slurm_filled += "module load StdEnv/2023 apptainer samtools"
 
-        slurm_filled += "\n#\n### Calling " + tool + "\n#\n"
+        slurm_filled += "\n#\n### Calling " + tool + " - " + flowcell + "\n#\n"
         slurm_filled += command
         slurm_filled += "\n\n"
-        slurm_filled += 'echo "' + tool + '" >> ' + output + '/scripts/steps_done.txt'
+        # slurm_filled += 'echo "' + tool + '" >> ' + output + '/scripts/steps_done.txt'
 
         with open(job, "w") as o:
             o.write(slurm_filled)
@@ -263,64 +278,64 @@ def create_script(tool, cores, memory, time, output, email, command):
 def dorado(toml_config):
     output = toml_config["general"]["project_path"]
     project_name = get_project_name(output)
-    reads = output + "/reads/pod5"
     final = output + "/alignments/"
     email = toml_config["general"]["email"]
     genome = get_reference(toml_config["general"]["reference"])["fasta"]
 
-    bam_dorado = output + "/alignments/" + project_name + ".bam"
+    flowcells = toml_config["general"]["fc_dir_names"]
+    for flowcell in flowcells:
+        reads = output + "/" + flowcell + "/reads/pod5"
 
-    # BASECALLER
-    tool = "dorado_basecaller"
-    cores = "10"
-    memory = "100"
-    if toml_config["general"]["seq_type"] == "WGS":
-        time = "03-23:00"
-    else:
-        time = "00-02:59"
+        # BASECALLER
+        tool = "dorado_basecaller"
+        cores = "10"
+        memory = "100"
+        if toml_config["general"]["seq_type"] == "WGS":
+            time = "06-23:00"
+        else:
+            time = "00-02:59"
 
-    command = ["/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/dorado-1.0.0-linux-x64/bin/dorado", "basecaller", "--verbose", "--device", "cuda:all", "--emit-moves", "--emit-summary", "--min-qscore", str(toml_config["dorado"]["min_q_score"]), "--reference", genome, "--sample-sheet", output + "/scripts/" + toml_config["dorado"]["sample_sheet"], "--no-trim", "--kit-name", toml_config["general"]["kit"], "--mm2-opts", toml_config["dorado"]["mm2_opts"]]
-    
-    if toml_config["dorado"]["barcode_both_ends"] in ["true", "True", "yes", "Yes"]:
-        command.extend(["--barcode-both-ends"])
-
-    if "methylation" in toml_config["general"]["analysis"]:
-        command.extend(["--modified-bases-models", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/dorado_models/" + toml_config["dorado"]["modified_bases"], "--modified-bases-threshold", str(toml_config["dorado"]["modified_bases_threshold"])])
-
-    if "polya" in toml_config["general"]["analysis"]:
-        command.extend(["--estimate-poly-a"])
-
-    model = "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/dorado_models/" + toml_config['dorado']['model']
-    command.extend([model, reads])
-    command.extend(["> " + final + project_name + ".bam", "\n\n"])
-    
-    command_str = " ".join(command)
-
-    job = create_script(tool, cores, memory, time, output, email, command_str)
-    
-    # Add slurm job to main.sh
-    with open(output + "/scripts/main.sh", "a") as f:
-        f.write("dorado=$(sbatch --parsable " + job + ")\n")
-
-    # DEMUX
-    tool2 = "dorado_demux"
-
-    cores2 = "1"   
-    memory2 = "8"
-    if toml_config["general"]["seq_type"] == "WGS":
-        time2 = "05-23:00"
-    else:
-        time2 = "00-02:59"
+        command = ["/lustre09/project/6019267/shared/tools/main_pipelines/long-read/dorado-1.0.0-linux-x64/bin/dorado", "basecaller", "--verbose", "--device", "cuda:all", "--emit-moves", "--output-dir", final, "--min-qscore", str(toml_config["dorado"]["min_q_score"]), "--reference", genome, "--sample-sheet", output + "/scripts/" + flowcell + ".csv", "--no-trim", "--kit-name", toml_config["general"]["kit"], "--mm2-opts", toml_config["dorado"]["mm2_opts"]]
         
-    command2 = ["/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/dorado-1.0.0-linux-x64/bin/dorado", "demux", "--verbose", "--sort-bam", "--no-trim" "--output-dir", final, "--no-classify", bam_dorado, "\n\n"]
-    command_str2 = " ".join(command2)
+        if toml_config["dorado"]["barcode_both_ends"] in ["true", "True", "yes", "Yes"]:
+            command.extend(["--barcode-both-ends"])
 
-    # Create slurm job
-    job2 = create_script(tool2, cores2, memory2, time2, output, email, command_str2)
+        if "methylation" in toml_config["general"]["analysis"]:
+            command.extend(["--modified-bases-models", "/lustre09/project/6019267/shared/tools/main_pipelines/long-read/dorado_models/" + toml_config["dorado"]["modified_bases"], "--modified-bases-threshold", str(toml_config["dorado"]["modified_bases_threshold"])])
+
+        if "polya" in toml_config["general"]["analysis"]:
+            command.extend(["--estimate-poly-a"])
+
+        model = "/lustre09/project/6019267/shared/tools/main_pipelines/long-read/dorado_models/" + toml_config['dorado']['model']
+        command.extend([model, reads])
+        
+        command_str = " ".join(command)
+
+        job = create_script(tool, cores, memory, time, output, email, command_str, flowcell)
     
-    # Add slurm job to main.sh
-    with open(output + "/scripts/main.sh", "a") as f:
-        f.write("sbatch --dependency=afterok:$dorado " + job2 + "\n")
+        # Add slurm job to main.sh
+        with open(output + "/scripts/main.sh", "a") as f:
+            f.write("dorado=$(sbatch --parsable " + job + ")\n")
+
+    # # DEMUX
+    # tool2 = "dorado_demux"
+
+    # cores2 = "1"   
+    # memory2 = "8"
+    # if toml_config["general"]["seq_type"] == "WGS":
+    #     time2 = "05-23:00"
+    # else:
+    #     time2 = "00-02:59"
+        
+    # command2 = ["/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/dorado-1.0.0-linux-x64/bin/dorado", "demux", "--verbose", "--sort-bam", "--no-trim" "--output-dir", final, "--no-classify", bam_dorado, "\n\n"]
+    # command_str2 = " ".join(command2)
+
+    # # Create slurm job
+    # job2 = create_script(tool2, cores2, memory2, time2, output, email, command_str2)
+    
+    # # Add slurm job to main.sh
+    # with open(output + "/scripts/main.sh", "a") as f:
+    #     f.write("sbatch --dependency=afterok:$dorado " + job2 + "\n")
 
     
     #command3 = ["python", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/LongReadSequencingONT/rename_bam.py", output]

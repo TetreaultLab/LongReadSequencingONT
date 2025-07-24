@@ -5,7 +5,7 @@
     conditions = [] # matching conditions to samples, ex : ["Ctrl", "Disease"]
     seq_type = "" # WGS, RNA, Meth, Targeted
     kit = "" # Option : WGS: ["SQK-RBK114-24", "SQK-NBD114.24", "SQK-LSK114"], RNA: ["SQK-PCB114-24"], Meth: [], Targeted: ["SQK-NBD114-24"]
-    fc_dir_name = [] # flowcell directory names from the project path.
+    fc_dir_names = [] # flowcell directory names from the project path.
     email = "" # Your e-mail address to receive notification
     analysis = [] # select which downstream analysis is needed. If empty, run only dorado and qc. Ex: analysis = ["none", "splicing", "methylation", "SNP", "SV", "polya", "repeats"]
     file_type = "pod5" # only available option for now
