@@ -141,7 +141,7 @@ def create_config_final(filename):
     for flow in fc_dir_names:
         for d in directories:
             if not os.path.exists(new_path + "/" + flow + "/" + d):
-                os.makedirs(new_path + "/" + d)
+                os.makedirs(new_path + "/" + flow + "/" + d)
 
         # Move main reports files to corresponding directory
         reports = ["barcode_alignment", "final_summary", "pore_activity", "report", "sample_sheet", "sequencing_summary", "throughput"]
