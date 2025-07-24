@@ -203,6 +203,7 @@ def create_sample_sheet(toml_config):
     path = toml_config["general"]["project_path"]
     rm_prefix = path.replace('/lustre09/project/6019267/shared/projects/Nanopore_Dock/', '')
     path_list = rm_prefix.split("/")
+    print(path_list)
     project_name_date = path_list[0].split("_", 1)
     project_name = project_name_date[1]
     kit = toml_config["general"]["kit"]
