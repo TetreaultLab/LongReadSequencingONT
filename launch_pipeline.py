@@ -157,8 +157,8 @@ def create_config_final(filename):
     ## parameters depending on sequencing type
     if seq_type == "WGS":
         toml_config['dorado']['mm2_opts'] = '"-x lr:hq"'
-        if kit not in ["SQK-RBK114-24", "SQK-NBD114.24", "SQK-LSK114"]:
-            raise Exception("Error: Wrong Kit for WGS. Options are SQK-RBK114-24, SQK-NBD114.24, SQK-LSK114")
+        if kit not in ["SQK-RBK114-24", "SQK-NBD114-24", "SQK-LSK114"]:
+            raise Exception("Error: Wrong Kit for WGS. Options are SQK-RBK114-24, SQK-NBD114-24, SQK-LSK114")
 
     if seq_type == "RNA":
         toml_config['dorado']['mm2_opts'] = '"-x splice:hq"'
