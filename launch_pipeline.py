@@ -230,7 +230,7 @@ def create_sample_sheet(toml_config):
                 'kit': kit, 
                 'alias': samples, 
                 'type': conditions, 
-                'barcode': range(barcode_initial, barcode_initial + len(samples))}
+                'barcode': range(barcode, barcode + len(samples))}
 
         df = pd.DataFrame(data=d)
         df["barcode"] = "barcode" + df["barcode"].astype(int).astype(str).str.zfill(2)
@@ -253,7 +253,9 @@ def get_reference(ref):
 
 
 def create_script(tool, cores, memory, time, output, email, command, flowcell):
+    print(output)
     project_name = get_project_name(output)
+    print(project_name)
     job = output + "/scripts/" + flowcell + ".slurm"
 
     with open("/lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/sbatch_template.txt", "r") as f:
