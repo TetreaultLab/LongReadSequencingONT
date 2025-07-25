@@ -28,7 +28,6 @@ def main():
         toml_config_initial = toml.load(f)
 
     output = toml_config_initial["general"]["project_path"]
-    project_name = get_project_name(output)
 
     ## config and sample sheet
     if args.config != "config_final.toml":
@@ -89,19 +88,6 @@ def main():
 
     # Call main.sh
     subprocess.run(["bash", output + "/scripts/main.sh"])
-
-
-def get_project_name(output):
-    rm_prefix = output.replace('/lustre09/project/6019267/shared/projects/Nanopore_Dock/', '')
-    path_list = rm_prefix.split("/")
-    
-    if path_list[0].startswith("2"):
-        project_name_date = path_list[0].split("_", 1)
-        project_name = project_name_date[1]
-    else:
-        project_name = path_list[0]
-    
-    return project_name
 
 
 def create_config_final(filename):
@@ -253,18 +239,15 @@ def get_reference(ref):
 
 
 def create_script(tool, cores, memory, time, output, email, command, flowcell):
-    print(output)
-    project_name = get_project_name(output)
-    print(project_name)
     job = output + "/scripts/" + flowcell + ".slurm"
 
     with open("/lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/sbatch_template.txt", "r") as f:
         slurm = f.read()
         if tool == "dorado_basecaller":
-            slurm_filled = slurm.format(cores, "#SBATCH --gpus-per-node=h100:4", memory, time, tool, project_name, "def", email)
+            slurm_filled = slurm.format(cores, "#SBATCH --gpus-per-node=h100:4", memory, time, tool, flowcell, "def", email)
             
         else: 
-            slurm_filled = slurm.format(cores, "", memory, time, tool, project_name, "rrg", email)
+            slurm_filled = slurm.format(cores, "", memory, time, tool, flowcell, "rrg", email)
             slurm_filled += "module load StdEnv/2023 apptainer samtools"
 
         slurm_filled += "\n#\n### Calling " + tool + " - " + flowcell + "\n#\n"
@@ -280,7 +263,6 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
 
 def dorado(toml_config):
     output = toml_config["general"]["project_path"]
-    project_name = get_project_name(output)
     final = output + "/alignments/"
     email = toml_config["general"]["email"]
     genome = get_reference(toml_config["general"]["reference"])["fasta"]
@@ -348,7 +330,6 @@ def dorado(toml_config):
 def qc(toml_config):
     tool = "qc"
     output = toml_config["general"]["project_path"]
-    project_name = get_project_name(output)
     df = pd.read_csv(output + "/scripts/samples.csv", header=0)
     df["name"] = df["alias"] + "_" + df["barcode"]
     fasta = get_reference(toml_config["general"]["reference"])["fasta"]
@@ -358,7 +339,7 @@ def qc(toml_config):
     time = "00-11:59"
     email = toml_config["general"]["email"]
 
-    command_pod5 = ["apptainer", "run", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_longreadsum.sif", "pod5", "--threads", threads, "--log", output + "/qc/longreadsum_pod5.log", "-Q", '"' + project_name + '"', "-P", '"' + output + "/reads/pod5/*.pod5\"", "-o", output + "/qc", "--basecalls", output + "/alignments/" + project_name + ".bam", "\n\n"]
+    command_pod5 = ["apptainer", "run", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_longreadsum.sif", "pod5", "--threads", threads, "--log", output + "/qc/longreadsum_pod5.log", "-Q", '"' + flowcell + '"', "-P", '"' + output + "/reads/pod5/*.pod5\"", "-o", output + "/qc", "--basecalls", output + "/alignments/" + flowcell + ".bam", "\n\n"]
     command_str1 = " ".join(command_pod5)
     
     command_str2 = ""
@@ -393,9 +374,8 @@ def clair3(toml_config):
     tool = "clair3"
 
     output = toml_config["general"]["project_path"]
-    project_name = get_project_name(output)
     ref = get_reference(toml_config["general"]["reference"])["fasta"] # same ref for RNA + DNA ?
-    bam = output + "/alignments/" + project_name + "_sorted.bam"
+    bam = output + "/alignments/" + flowcell + "_sorted.bam"
     model = "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/Clair3/models/r1041_e82_400bps_sup_v420" # https://www.bio8.cs.hku.hk/clair3/clair3_models/
     platform_rna = "ont_dorado_drna004" # Possible options: {ont_dorado_drna004, ont_guppy_drna002, ont_guppy_cdna, hifi_sequel2_pbmm2, hifi_sequel2_minimap2, hifi_mas_pbmm2, hifi_sequel2_minimap2}.
     platform_dna = "ont"
@@ -411,8 +391,8 @@ def clair3(toml_config):
     else:
         command = ["apptainer", "run", "-C", "-W", "${SLURM_TMPDIR}", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_" + tool + ".sif ", "run_clair3.sh", "-b", bam, "-f", ref, "-m", model, "-t", threads, "-p", platform_dna, "-o", output + "/results/", "\n\n"]
 
-    command2 = ["mv", output + "/results/output.vcf.gz", output + "/results/" + project_name + ".vcf.gz", "\n\n"]
-    command3 = ["mv", output + "/results/output.vcf.gz.tbi", output + "/results/" + project_name + ".vcf.gz.tbi"]
+    command2 = ["mv", output + "/results/output.vcf.gz", output + "/results/" + flowcell + ".vcf.gz", "\n\n"]
+    command3 = ["mv", output + "/results/output.vcf.gz.tbi", output + "/results/" + flowcell + ".vcf.gz.tbi"]
     
     command_str1 = " ".join(command)
     command_str2 = " ".join(command2)
@@ -442,10 +422,9 @@ def whatshap(toml_config):
     tool = "whatshap"
 
     output = toml_config["general"]["project_path"]
-    project_name = get_project_name(output)
-    output_vcf = output + "/results/" + project_name + "phased.vcf"
-    input_vcf = output + "/results/" + project_name + ".vcf.gz"
-    bam = output + "/alignments/" + project_name + "_sorted.bam"
+    output_vcf = output + "/results/" + flowcell + "phased.vcf"
+    input_vcf = output + "/results/" + flowcell + ".vcf.gz"
+    bam = output + "/alignments/" + flowcell + "_sorted.bam"
     
     ref = get_reference(toml_config["general"]["reference"])["fasta"]
 
