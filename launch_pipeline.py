@@ -91,7 +91,6 @@ def main():
 
 
 def create_config_final(filename):
-    print("create_config_final")
     # Read initial config file
     with open(filename, "r") as f:
         toml_config = toml.load(f)
@@ -187,7 +186,6 @@ def create_config_final(filename):
 
 
 def create_sample_sheet(toml_config):
-    print("create_sample_sheet")
     path = toml_config["general"]["project_path"]
     #rm_prefix = path.replace('/lustre09/project/6019267/shared/projects/Nanopore_Dock/', ''0)
     rm_prefix = path.replace('/lustre09/project/6019267/shared/tools/main_pipelines/long-read/', '')
@@ -236,12 +234,10 @@ def get_reference(ref):
                 "gtf": path + "GRCh38_p14/gencode.v48.primary_assembly.annotation.gtf",
                 "chrom_size": path + "GRCh38_p14/GRCh38.primary_assembly.genome.chromSizes.txt"
             }
-    print(reference)
     return reference
 
 
 def create_script(tool, cores, memory, time, output, email, command, flowcell):
-    print("create_script")
     job = output + "/scripts/" + flowcell + ".slurm"
 
     with open("/lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/sbatch_template.txt", "r") as f:
@@ -265,7 +261,6 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
 
 
 def dorado(toml_config):
-    print("dorado")
     output = toml_config["general"]["project_path"]
     final = output + "/alignments/"
     email = toml_config["general"]["email"]
