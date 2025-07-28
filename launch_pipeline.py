@@ -238,7 +238,7 @@ def get_reference(ref):
 
 
 def create_script(tool, cores, memory, time, output, email, command, flowcell):
-    job = output + "/scripts/" + flowcell + ".slurm"
+    job = output + "/scripts/" + tool + "_" + flowcell + ".slurm"
 
     with open("/lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/sbatch_template.txt", "r") as f:
         slurm = f.read()
