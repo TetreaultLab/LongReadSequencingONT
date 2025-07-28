@@ -317,7 +317,7 @@ def dorado(toml_config):
         command_str2 = " ".join(command2)
 
         # Create slurm job
-        job2 = create_script(tool2, cores2, memory2, time2, output, email, command_str2)
+        job2 = create_script(tool2, cores2, memory2, time2, output, email, command_str2, flowcell)
         
         # Add slurm job to main.sh
         with open(output + "/scripts/main.sh", "a") as f:
