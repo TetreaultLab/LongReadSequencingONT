@@ -274,7 +274,7 @@ def dorado(toml_config):
         # BASECALLER
         tool = "dorado_basecaller"
         cores = "8"
-        memory = "100"
+        memory = "96"
         if toml_config["general"]["seq_type"] == "WGS":
             time = "00-11:00"
         else:
@@ -308,7 +308,7 @@ def dorado(toml_config):
         cores2 = "32"   
         memory2 = "128"
         if toml_config["general"]["seq_type"] == "WGS":
-            time2 = "02-23:00"
+            time2 = "00-23:00"
         else:
             time2 = "00-02:59"
             
