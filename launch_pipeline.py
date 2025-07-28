@@ -38,7 +38,7 @@ def main():
         create_sample_sheet(toml_config)
 
         print("\n\n\n!!! WARNING !!!\nIf you to change the parameters: Press CTRL+C now!\nModify config_final.toml and launch_pipeline with that config file.\n\nOtherwise it will run with default parameters.\n\n")
-        time.sleep(20)
+        time.sleep(10)
 
     else:
         toml_config = toml_config_initial
