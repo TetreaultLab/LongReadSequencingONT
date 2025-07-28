@@ -274,7 +274,7 @@ def dorado(toml_config):
         # BASECALLER
         tool = "dorado_basecaller"
         cores = "8"
-        memory = "100"
+        memory = "100.0"
         if toml_config["general"]["seq_type"] == "WGS":
             time = "00-11:00"
         else:
@@ -292,8 +292,8 @@ def dorado(toml_config):
             command.extend(["--estimate-poly-a"])
 
         model = "/lustre09/project/6019267/shared/tools/main_pipelines/long-read/dorado_models/" + toml_config['dorado']['model']
-        command.extend([model, reads])
-        command.extend([">", bam_dorado])
+        command.extend([model, reads, ">", bam_dorado])
+        print(command)
         
         command_str = " ".join(command)
 
@@ -307,7 +307,7 @@ def dorado(toml_config):
         tool2 = "dorado_demux"
 
         cores2 = "32"   
-        memory2 = "128"
+        memory2 = "128.0"
         if toml_config["general"]["seq_type"] == "WGS":
             time2 = "02-23:00"
         else:
