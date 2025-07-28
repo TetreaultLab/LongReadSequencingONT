@@ -269,17 +269,18 @@ def dorado(toml_config):
     flowcells = toml_config["general"]["fc_dir_names"]
     for flowcell in flowcells:
         reads = output + "/" + flowcell + "/reads/pod5"
+        bam_dorado = final + flowcell + ".bam"
 
         # BASECALLER
         tool = "dorado_basecaller"
         cores = "8"
-        memory = "64"
+        memory = "100"
         if toml_config["general"]["seq_type"] == "WGS":
-            time = "01-23:00"
+            time = "00-11:00"
         else:
             time = "00-02:59"
 
-        command = ["/lustre09/project/6019267/shared/tools/main_pipelines/long-read/dorado-1.0.0-linux-x64/bin/dorado", "basecaller", "--verbose", "--device", "cuda:all", "--emit-moves", "--output-dir", final, "--min-qscore", str(toml_config["dorado"]["min_q_score"]), "--reference", genome, "--sample-sheet", output + "/scripts/" + flowcell + ".csv", "--no-trim", "--kit-name", toml_config["general"]["kit"], "--mm2-opts", toml_config["dorado"]["mm2_opts"]]
+        command = ["/lustre09/project/6019267/shared/tools/main_pipelines/long-read/dorado-1.0.0-linux-x64/bin/dorado", "basecaller", "-vv", "--device", "cuda:all", "--emit-moves", "--min-qscore", str(toml_config["dorado"]["min_q_score"]), "--reference", genome, "--sample-sheet", output + "/scripts/" + flowcell + ".csv", "--no-trim", "--kit-name", toml_config["general"]["kit"], "--mm2-opts", toml_config["dorado"]["mm2_opts"]]
         
         if toml_config["dorado"]["barcode_both_ends"] in ["true", "True", "yes", "Yes"]:
             command.extend(["--barcode-both-ends"])
@@ -292,6 +293,7 @@ def dorado(toml_config):
 
         model = "/lustre09/project/6019267/shared/tools/main_pipelines/long-read/dorado_models/" + toml_config['dorado']['model']
         command.extend([model, reads])
+        command.extend([">", bam_dorado])
         
         command_str = " ".join(command)
 
@@ -299,31 +301,31 @@ def dorado(toml_config):
     
         # Add slurm job to main.sh
         with open(output + "/scripts/main.sh", "a") as f:
-            f.write("dorado=$(sbatch --parsable " + job + ")\n")
+            f.write("dorado_" + flowcell + "=$(sbatch --parsable " + job + ")\n")
 
-    # # DEMUX
-    # tool2 = "dorado_demux"
+        # DEMUX
+        tool2 = "dorado_demux"
 
-    # cores2 = "1"   
-    # memory2 = "8"
-    # if toml_config["general"]["seq_type"] == "WGS":
-    #     time2 = "05-23:00"
-    # else:
-    #     time2 = "00-02:59"
+        cores2 = "32"   
+        memory2 = "128"
+        if toml_config["general"]["seq_type"] == "WGS":
+            time2 = "02-23:00"
+        else:
+            time2 = "00-02:59"
+            
+        command2 = ["/lustre09/project/6019267/shared/tools/main_pipelines/long-read/dorado-1.0.0-linux-x64/bin/dorado", "demux", "-vv", "--threads", cores2, "--sort-bam", "--no-trim" "--output-dir", final, "--no-classify", bam_dorado, "\n\n"]
+        command_str2 = " ".join(command2)
+
+        # Create slurm job
+        job2 = create_script(tool2, cores2, memory2, time2, output, email, command_str2)
         
-    # command2 = ["/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/dorado-1.0.0-linux-x64/bin/dorado", "demux", "--verbose", "--sort-bam", "--no-trim" "--output-dir", final, "--no-classify", bam_dorado, "\n\n"]
-    # command_str2 = " ".join(command2)
-
-    # # Create slurm job
-    # job2 = create_script(tool2, cores2, memory2, time2, output, email, command_str2)
-    
-    # # Add slurm job to main.sh
-    # with open(output + "/scripts/main.sh", "a") as f:
-    #     f.write("sbatch --dependency=afterok:$dorado " + job2 + "\n")
+        # Add slurm job to main.sh
+        with open(output + "/scripts/main.sh", "a") as f:
+            f.write("sbatch --dependency=afterok:$dorado_" + flowcell + " " + job2 + "\n")
 
     
-    #command3 = ["python", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/LongReadSequencingONT/rename_bam.py", output]
-    #command_str3 = " ".join(command3)
+    # command3 = ["python", "/lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/rename_bam.py", output]
+    # command_str3 = " ".join(command3)
 
 
 def qc(toml_config):
