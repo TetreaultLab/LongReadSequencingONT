@@ -300,7 +300,7 @@ def dorado(toml_config):
     
         # Add slurm job to main.sh
         with open(output + "/scripts/main.sh", "a") as f:
-            f.write("dorado_" + flowcell + "=$(sbatch --parsable " + job + ")\n")
+            f.write("dorado=$(sbatch --parsable " + job + ")\n")
 
         # DEMUX
         tool2 = "dorado_demux"
@@ -320,7 +320,7 @@ def dorado(toml_config):
         
         # Add slurm job to main.sh
         with open(output + "/scripts/main.sh", "a") as f:
-            f.write("sbatch --dependency=afterok:$dorado_" + flowcell + " " + job2 + "\n")
+            f.write("sbatch --dependency=afterok:$dorado " + job2 + "\n")
 
     
     # command3 = ["python", "/lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/rename_bam.py", output]
