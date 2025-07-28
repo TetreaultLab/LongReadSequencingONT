@@ -274,7 +274,7 @@ def dorado(toml_config):
         # BASECALLER
         tool = "dorado_basecaller"
         cores = "8"
-        memory = "100.0"
+        memory = "100"
         if toml_config["general"]["seq_type"] == "WGS":
             time = "00-11:00"
         else:
@@ -300,13 +300,13 @@ def dorado(toml_config):
     
         # Add slurm job to main.sh
         with open(output + "/scripts/main.sh", "a") as f:
-            f.write("dorado=$(sbatch --parsable " + job + ")\n")
+            f.write("dorado_" + flowcell + "=$(sbatch --parsable " + job + ")\n")
 
         # DEMUX
         tool2 = "dorado_demux"
 
         cores2 = "32"   
-        memory2 = "128.0"
+        memory2 = "128"
         if toml_config["general"]["seq_type"] == "WGS":
             time2 = "02-23:00"
         else:
@@ -320,7 +320,7 @@ def dorado(toml_config):
         
         # Add slurm job to main.sh
         with open(output + "/scripts/main.sh", "a") as f:
-            f.write("sbatch --dependency=afterok:$dorado " + job2 + "\n")
+            f.write("sbatch --dependency=afterok:$dorado_" + flowcell + " " + job2 + "\n")
 
     
     # command3 = ["python", "/lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/rename_bam.py", output]
