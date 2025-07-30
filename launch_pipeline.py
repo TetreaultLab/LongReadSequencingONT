@@ -243,7 +243,7 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
     with open("/lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/sbatch_template.txt", "r") as f:
         slurm = f.read()
         if tool == "dorado_basecaller":
-            slurm_filled = slurm.format(cores, "#SBATCH --gpus-per-node=h100:4", memory, time, tool, flowcell, "def", email)
+            slurm_filled = slurm.format(cores, "#SBATCH --gpus=nvidia_h100_80gb_hbm3_3g.40gb:1", memory, time, tool, flowcell, "def", email)
             
         else: 
             slurm_filled = slurm.format(cores, "", memory, time, tool, flowcell, "rrg", email)
@@ -273,8 +273,8 @@ def dorado(toml_config):
 
         # BASECALLER
         tool = "dorado_basecaller"
-        cores = "16"
-        memory = "124"
+        cores = "8"
+        memory = "64"
         if toml_config["general"]["seq_type"] == "WGS":
             time = "00-23:00"
         else:
