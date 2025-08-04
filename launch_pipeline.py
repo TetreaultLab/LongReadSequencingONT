@@ -313,7 +313,7 @@ def dorado(toml_config):
         else:
             time2 = "00-02:59"
             
-        command2 = ["/lustre09/project/6019267/shared/tools/main_pipelines/long-read/dorado-1.0.0-linux-x64/bin/dorado", "demux", "-vv", "--threads", cores2, "--sort-bam", "--no-trim", "--output-dir", final, "--no-classify", bam_dorado, "\n\n"]
+        command2 = ["/lustre09/project/6019267/shared/tools/main_pipelines/long-read/dorado-1.1.0-linux-x64/bin/dorado", "demux", "-vv", "--threads", cores2, "--sort-bam", "--no-trim", "--output-dir", final, "--no-classify", bam_dorado, "\n\n"]
         command_str2 = " ".join(command2)
 
         # Create slurm job
