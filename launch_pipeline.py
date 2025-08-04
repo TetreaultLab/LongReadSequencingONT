@@ -105,9 +105,6 @@ def create_config_final(filename):
     else:
         methylation_status = False
 
-    # get all flowcell directory names
-    fc_dir_names = toml_config['general']['fc_dir_names']
-
     # if path has a "/" at the end, remove it 
     path = toml_config["general"]["project_path"]
     if path.endswith('/'):
@@ -115,6 +112,17 @@ def create_config_final(filename):
         toml_config["general"]["project_path"] = new_path
     else:
         new_path = path
+
+    
+    # get all flowcell directory names
+    fc_dir_names = []
+    for entry in os.listdir(new_path):
+        full_path = os.path.join(new_path, entry)
+        if os.path.isdir(full_path):
+            directories.append(entry)
+    toml_config['general']['fc_dir_names'] = fc_dir_names
+    print(fc_dir_names)
+
 
     # Making directory structure in project
     directories = ["scripts", "alignments", "results", "qc"]
