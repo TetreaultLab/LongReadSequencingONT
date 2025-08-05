@@ -284,7 +284,7 @@ def dorado(toml_config):
         cores = "8"
         memory = "64"
         if toml_config["general"]["seq_type"] == "WGS":
-            time = "03-23:00"
+            time = "01-23:00"
         else:
             time = "00-02:59"
 
@@ -314,10 +314,10 @@ def dorado(toml_config):
         # DEMUX
         tool2 = "dorado_demux"
 
-        cores2 = "32"   
-        memory2 = "128"
+        cores2 = "16"   
+        memory2 = "40"
         if toml_config["general"]["seq_type"] == "WGS":
-            time2 = "06-23:00"
+            time2 = "01-23:00"
         else:
             time2 = "00-02:59"
             
