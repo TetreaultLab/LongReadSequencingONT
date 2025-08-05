@@ -121,7 +121,6 @@ def create_config_final(filename):
         if os.path.isdir(full_path) and entry.startswith("2"):
             fc_dir_names.append(entry)
     toml_config['general']['fc_dir_names'] = fc_dir_names
-    print(fc_dir_names)
 
 
     # Making directory structure in project
