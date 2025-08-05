@@ -118,7 +118,7 @@ def create_config_final(filename):
     fc_dir_names = []
     for entry in os.listdir(new_path):
         full_path = os.path.join(new_path, entry)
-        if os.path.isdir(full_path):
+        if os.path.isdir(full_path) and entry.startswith("2"):
             fc_dir_names.append(entry)
     toml_config['general']['fc_dir_names'] = fc_dir_names
     print(fc_dir_names)
