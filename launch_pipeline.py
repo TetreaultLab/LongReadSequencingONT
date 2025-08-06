@@ -278,6 +278,12 @@ def dorado(toml_config):
         reads = output + "/" + flowcell + "/reads/pod5"
         bam_dorado = final + flowcell + ".bam"
 
+        # Get reads size 
+        cmd = ["du", "-sh", "--apparent-size", "--block-size", "G", reads]
+        result = subprocess.run(cmd, stdout=subprocess.PIPE)
+        print(result.stdout.decode('utf-8'))
+        print(cmd)
+
         # BASECALLER
         tool = "dorado_basecaller"
         cores = "8"
