@@ -283,7 +283,7 @@ def dorado(toml_config):
         result = subprocess.run(cmd, capture_output=True, text=True)
 
         size_str = result.stdout.split()[0].rstrip('G')
-        time_in_hr = size_str * 0.02
+        time_in_hr = size_str.astype(int) * 0.02
         print(size_str, " ", time_in_hr)
 
         # BASECALLER
