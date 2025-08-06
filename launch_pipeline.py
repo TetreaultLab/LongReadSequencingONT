@@ -279,10 +279,11 @@ def dorado(toml_config):
         bam_dorado = final + flowcell + ".bam"
 
         # Get reads size 
-        cmd = ["du", "-sh", "--apparent-size", "--block-size", "G", reads, "|", "cut", "-f1", "|", "tr", "-d", "'G'"]
-        result = subprocess.run(cmd, stdout=subprocess.PIPE)
-        print(result.stdout.decode('utf-8'))
-        print(cmd)
+        cmd = ["du", "-sh", "--apparent-size", "--block-size", "G", reads]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+
+        size_str = result.stdout.split()[0].rstrip('G')
+        print(size_str)
 
         # BASECALLER
         tool = "dorado_basecaller"
