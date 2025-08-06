@@ -283,8 +283,16 @@ def dorado(toml_config):
         result = subprocess.run(cmd, capture_output=True, text=True)
 
         size_str = result.stdout.split()[0].rstrip('G')
-        time_in_hr = int(size_str) * 0.02
-        print(size_str, " ", time_in_hr)
+        hours = int(size_str) * 0.02
+
+        days = int(hours // 24)
+        remaining_hours = int(hours % 24)
+        minutes = int((hours % 1) * 60)
+
+        # Format as DD-HH:MM
+        formatted_time = f"{days:02d}-{remaining_hours:02d}:{minutes:02d}"
+
+        print(size_str, " ", hours, " ", formatted_time)
 
         # BASECALLER
         tool = "dorado_basecaller"
