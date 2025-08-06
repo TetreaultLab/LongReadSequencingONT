@@ -87,7 +87,7 @@ def main():
         func(toml_config)
 
     # Call main.sh
-    #subprocess.run(["bash", output + "/scripts/main.sh"])
+    subprocess.run(["bash", output + "/scripts/main.sh"])
 
 
 def create_config_final(filename):
@@ -278,6 +278,11 @@ def dorado(toml_config):
         reads = output + "/" + flowcell + "/reads/pod5"
         bam_dorado = final + flowcell + ".bam"
 
+        # BASECALLER
+        tool = "dorado_basecaller"
+        cores = "8"
+        memory = "64"
+
         # Get reads size 
         cmd = ["du", "-sh", "--apparent-size", "--block-size", "G", reads]
         result = subprocess.run(cmd, capture_output=True, text=True)
@@ -291,17 +296,6 @@ def dorado(toml_config):
 
         # Format as DD-HH:MM
         formatted_time = f"{days:02d}-{remaining_hours:02d}:{minutes:02d}"
-
-        print(size_str, " ", hours, " ", formatted_time)
-
-        # BASECALLER
-        tool = "dorado_basecaller"
-        cores = "8"
-        memory = "64"
-        if toml_config["general"]["seq_type"] == "WGS":
-            time = "01-23:00"
-        else:
-            time = "00-02:59"
 
         command = ["/lustre09/project/6019267/shared/tools/main_pipelines/long-read/dorado-1.0.0-linux-x64/bin/dorado", "basecaller", "-v", "--device", "cuda:all", "--emit-moves", "--min-qscore", str(toml_config["dorado"]["min_q_score"]), "--reference", genome, "--sample-sheet", output + "/scripts/" + flowcell + ".csv", "--no-trim", "--kit-name", toml_config["general"]["kit"], "--mm2-opts", toml_config["dorado"]["mm2_opts"]]
         
@@ -319,7 +313,7 @@ def dorado(toml_config):
         
         command_str = " ".join(command)
 
-        job = create_script(tool, cores, memory, time, output, email, command_str, flowcell)
+        job = create_script(tool, cores, memory, formatted_time, output, email, command_str, flowcell)
     
         # Add slurm job to main.sh
         with open(output + "/scripts/main.sh", "a") as f:
@@ -331,6 +325,8 @@ def dorado(toml_config):
 
         cores2 = "16"   
         memory2 = "40"
+
+        ######## TO-DO formatted time for demux
         if toml_config["general"]["seq_type"] == "WGS":
             time2 = "01-23:00"
         else:
