@@ -340,6 +340,7 @@ def dorado(toml_config):
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("# Flowcell : " + flowcell + "\n")
             f.write(f'{var_name_bc}=$(sbatch --parsable ' + job + ")\n\n")
+            f.write("echo $" + var_name_bc)
 
         # DEMUX
         tool2 = "dorado_demux"
@@ -376,7 +377,6 @@ def dorado(toml_config):
     with open(output + "/scripts/main.sh", "a") as f:
         f.write("# Merge, sort and index bams")
         f.write(f"\nsbatch --dependency=afterok:{dependencies} {job3}\n")
-        f.write("echo $" + dependencies)
 
 
 def qc(toml_config):
