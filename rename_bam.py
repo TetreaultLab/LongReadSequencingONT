@@ -52,7 +52,7 @@ for fc in fcs :
 
 # Merge bams
 # Load samtools
-subprocess.run(["ml", "samtools"], check=True)
+subprocess.run(["module", "load", "samtools"], check=True)
 
 samples = toml_config_initial["general"]["samples"]
 
