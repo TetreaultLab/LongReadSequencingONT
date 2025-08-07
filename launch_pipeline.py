@@ -371,7 +371,6 @@ def dorado(toml_config):
 
     # Samtools
     dependencies = ":".join([f"$demux_{code}" for code in codes])
-    print(dependencies)
     command3 = ["python", "/lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/rename_bam.py", toml_config["general"]["project_path"] + '/scripts/config_final.toml']
     command_str3 = " ".join(command3)
     time3 = "00-23:00"
