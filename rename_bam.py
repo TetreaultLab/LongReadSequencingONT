@@ -26,16 +26,13 @@ fcs = toml_config_initial["general"]["fc_dir_names"]
 # Loop over flowcells to rename
 for fc in fcs :
     code = fc.split('_')[-1]
-    print(code)
 
     # Load the CSV file
     df = pd.read_csv(toml_config_initial["general"]["project_path"] + "/scripts/" + fc + ".csv", header=0)
     df["code"] = df["flow_cell_id"].str.split('_').str[-1]
-    print(df)
 
     # Create a mapping from barcode -> alias
     barcode_to_alias = dict(zip(zip(df["barcode"], df["alias"]), df["code"]))
-    print(barcode_to_alias)
 
     # Process each file in the directory
     for file in output.iterdir():
@@ -57,10 +54,10 @@ for fc in fcs :
 samples = toml_config_initial["general"]["samples"]
 
 for s in samples:
-    bam_files = list(output.glob(s + "*.bam"))
-    output_file = output / s + ".bam"
+    bam_files = list(bam_dir.glob(f"{s}*.bam"))
+    output_file = bam_dir / f"{s}.bam"
     cmd = ["samtools", "merge", "-f", str(output_file)] + [str(f) for f in bam_files]
-    print(" ".join(cmd))
+    print("Running:", " ".join(cmd))
     # subprocess.run(cmd, check=True)
 
 # Remove all .bam.bai
