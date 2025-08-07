@@ -46,33 +46,31 @@ for fc in fcs :
                         continue
                         
                     new_path = output / new_name
-                    #file.rename(new_path) # uncomment to actually change the names
+                    file.rename(new_path)
                     print(f"Renamed {file.name} -> {new_name}")
 
 
 # Merge bams
 samples = toml_config_initial["general"]["samples"]
 samtools = "/cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v4/Compiler/gcccore/samtools/1.22.1/bin/samtools"
+
 # Loop over samples
 for s in samples:
-    print(s)
+    print("Running: samtools merge, sort and index for sample ", s)
     bam_files = list(output.glob(f"{s}*.bam"))
     output_file = output / f"{s}.bam"
 
     # merge
     cmd = [samtools, "merge", "-o", str(output_file)] + [str(f) for f in bam_files]
-    print("Running:", " ".join(cmd))
-    # subprocess.run(cmd, check=True)
+    subprocess.run(cmd, check=True)
 
     # sort
     cmd2 = [samtools, "sort", "-o", s + "_sorted.bam", s + ".bam"]
-    print("Running:", " ".join(cmd2))
-    # subprocess.run(cmd2, check=True)
+    subprocess.run(cmd2, check=True)
     
     # index
     cmd3 = [samtools, "index", "-o", s + "_sorted.bam.bai", s + "_sorted.bam"]
-    print("Running:", " ".join(cmd3))
-    # subprocess.run(cmd3, check=True)
+    subprocess.run(cmd3, check=True)
 
-# Remove all .bam.bai
+# Clean-up : TO-DO
 
