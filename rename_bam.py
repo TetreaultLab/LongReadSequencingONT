@@ -50,21 +50,31 @@ for fc in fcs :
 
 
 # Merge bams
-# TO-DO
-#samples = toml_config_initial["general"]["samples"]
-samples = ["e7024aba", "7bbaf330"]
-print(samples)
+# Load samtools
+subprocess.run(["ml", "samtools"], check=True)
 
+samples = toml_config_initial["general"]["samples"]
+
+# Loop over samples
 for s in samples:
-    print(list(output.iterdir()))
+    print(s)
     bam_files = list(output.glob(f"{s}*.bam"))
-    print(bam_files)
     output_file = output / f"{s}.bam"
+
+    # merge
     cmd = ["samtools", "merge", "-o", str(output_file)] + [str(f) for f in bam_files]
     print("Running:", " ".join(cmd))
     # subprocess.run(cmd, check=True)
 
+    # sort
+    cmd2 = ["samtools", "sort", "-o", s + "_sorted.bam", s + ".bam"]
+    print("Running:", " ".join(cmd2))
+    # subprocess.run(cmd2, check=True)
+    
+    # index
+    cmd3 = ["samtools", "index", "-o", s + "_sorted.bam.bai", s + "_sorted.bam"]
+    print("Running:", " ".join(cmd3))
+    # subprocess.run(cmd3, check=True)
+
 # Remove all .bam.bai
 
-# Sort and index bams
-# TO-DO
