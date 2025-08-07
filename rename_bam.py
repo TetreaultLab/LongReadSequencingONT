@@ -43,7 +43,7 @@ for fc in fcs :
                 if barcode in file.name:
                     if file.name.endswith(".bam.bai"):
                         new_name = f"{alias}_{barcode}_{code}.bam.bai"
-                    else:
+                    elif file.name.endswith(".bam"):
                         new_name = f"{alias}_{barcode}_{code}.bam"
                         
                     new_path = output / new_name
