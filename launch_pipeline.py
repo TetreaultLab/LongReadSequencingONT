@@ -364,7 +364,7 @@ def dorado(toml_config):
         # Add slurm job to main.sh
         with open(output + "/scripts/main.sh", "a") as f:
             f.write(f'{var_name}=$(sbatch --parsable --dependency=afterok:${var_name_bc} ' + job2 + ')\n\n')
-
+            f.write("echo $" + var_name)
 
     # Samtools
     dependencies = ":".join([f"$demux_{fc}" for fc in flowcells])
@@ -376,6 +376,7 @@ def dorado(toml_config):
     with open(output + "/scripts/main.sh", "a") as f:
         f.write("# Merge, sort and index bams")
         f.write(f"\nsbatch --dependency=afterok:{dependencies} {job3}\n")
+        f.write("echo $" + dependencies)
 
 
 def qc(toml_config):
