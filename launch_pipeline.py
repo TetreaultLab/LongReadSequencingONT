@@ -292,7 +292,6 @@ def dorado(toml_config):
     email = toml_config["general"]["email"]
     genome = get_reference(toml_config["general"]["reference"])["fasta"]
 
-    jobs_demux = ""
     flowcells = toml_config["general"]["fc_dir_names"]
     for flowcell in flowcells:
         reads = output + "/" + flowcell + "/reads/pod5"

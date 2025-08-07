@@ -61,15 +61,15 @@ for s in samples:
     output_file = output / f"{s}.bam"
 
     # merge
-    cmd = ["samtools", "merge", "-o", str(output_file)] + [str(f) for f in bam_files]
+    cmd = ["samtools", "merge", "-@", "8", "-o", str(output_file)] + [str(f) for f in bam_files]
     subprocess.run(cmd, check=True)
 
     # sort
-    cmd2 = ["samtools", "sort", "-o", s + "_sorted.bam", s + ".bam"]
+    cmd2 = ["samtools", "sort", "-@", "8", "-o", s + "_sorted.bam", s + ".bam"]
     subprocess.run(cmd2, check=True)
     
     # index
-    cmd3 = ["samtools", "index", "-o", s + "_sorted.bam.bai", s + "_sorted.bam"]
+    cmd3 = ["samtools", "index", "-@", "8", "-o", s + "_sorted.bam.bai", s + "_sorted.bam"]
     subprocess.run(cmd3, check=True)
 
 # Clean-up : TO-DO
