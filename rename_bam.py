@@ -32,7 +32,8 @@ for fc in fcs :
     print(df)
 
     # Create a mapping from barcode -> alias
-    barcode_to_alias = dict(zip(df["barcode"], df["alias"], df["code"]))
+    barcode_to_alias = dict(zip(zip(df["barcode"], df["alias"]), df["code"]))
+    print(barcode_to_alias)
 
     # Process each file in the directory
     for file in output.iterdir():
