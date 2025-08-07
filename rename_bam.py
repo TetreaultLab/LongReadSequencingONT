@@ -7,7 +7,7 @@ import subprocess
 
 parser = argparse.ArgumentParser(
         prog="Rename Bam files after dorado demultiplexing",
-        description="Change long names for bam and .bam.bai files to a easier format",
+        description="Change long names for bam files to a easier format",
     )
 
 parser.add_argument(
