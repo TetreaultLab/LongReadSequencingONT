@@ -54,8 +54,8 @@ for fc in fcs :
 samples = toml_config_initial["general"]["samples"]
 
 for s in samples:
-    bam_files = list(bam_dir.glob(f"{s}*.bam"))
-    output_file = bam_dir / f"{s}.bam"
+    bam_files = list(output.glob(f"{s}*.bam"))
+    output_file = output / f"{s}.bam"
     cmd = ["samtools", "merge", "-f", str(output_file)] + [str(f) for f in bam_files]
     print("Running:", " ".join(cmd))
     # subprocess.run(cmd, check=True)
