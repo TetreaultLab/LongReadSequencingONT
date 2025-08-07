@@ -39,7 +39,7 @@ for fc in fcs :
     # Process each file in the directory
     for file in output.iterdir():
         if file.is_file() and file.name.startswith(code):
-            for barcode, alias, code in barcode_to_alias.items():
+            for (barcode, alias), code in barcode_to_alias.items():
                 if barcode in file.name:
                     if file.name.endswith(".bam.bai"):
                         new_name = f"{alias}_{barcode}_{code}.bam.bai"
