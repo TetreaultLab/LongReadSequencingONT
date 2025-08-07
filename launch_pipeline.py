@@ -363,7 +363,7 @@ def dorado(toml_config):
         
         # Add slurm job to main.sh
         with open(output + "/scripts/main.sh", "a") as f:
-            f.write(f'{var_name}=$(sbatch --parsable --dependency=afterok:{var_name_bc} ' + job2 + ')\n\n')
+            f.write(f'{var_name}=$(sbatch --parsable --dependency=afterok:${var_name_bc} ' + job2 + ')\n\n')
 
 
     # Samtools
