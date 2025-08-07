@@ -58,7 +58,7 @@ samples = toml_config_initial["general"]["samples"]
 
 for s in samples:
     bam_files = list(output.glob(s + "*.bam"))
-    output_file = output / + s + ".bam"
+    output_file = output / s + ".bam"
     cmd = ["samtools", "merge", "-f", str(output_file)] + [str(f) for f in bam_files]
     print(" ".join(cmd))
     # subprocess.run(cmd, check=True)
