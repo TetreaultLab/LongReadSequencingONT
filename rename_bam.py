@@ -52,7 +52,6 @@ for fc in fcs :
 
 # Merge bams
 samples = toml_config_initial["general"]["samples"]
-samtools = "/cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v4/Compiler/gcccore/samtools/1.22.1/bin/samtools"
 
 # Loop over samples
 for s in samples:
@@ -61,15 +60,15 @@ for s in samples:
     output_file = output / f"{s}.bam"
 
     # merge
-    cmd = [samtools, "merge", "-o", str(output_file)] + [str(f) for f in bam_files]
+    cmd = ["samtools", "merge", "-o", str(output_file)] + [str(f) for f in bam_files]
     subprocess.run(cmd, check=True)
 
     # sort
-    cmd2 = [samtools, "sort", "-o", s + "_sorted.bam", s + ".bam"]
+    cmd2 = ["samtools", "sort", "-o", s + "_sorted.bam", s + ".bam"]
     subprocess.run(cmd2, check=True)
     
     # index
-    cmd3 = [samtools, "index", "-o", s + "_sorted.bam.bai", s + "_sorted.bam"]
+    cmd3 = ["samtools", "index", "-o", s + "_sorted.bam.bai", s + "_sorted.bam"]
     subprocess.run(cmd3, check=True)
 
 # Clean-up : TO-DO

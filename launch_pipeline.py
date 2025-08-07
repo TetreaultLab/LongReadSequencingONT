@@ -87,7 +87,7 @@ def main():
         func(toml_config)
 
     # Call main.sh
-    subprocess.run(["bash", output + "/scripts/main.sh"])
+    # subprocess.run(["bash", output + "/scripts/main.sh"])
 
 
 def create_config_final(filename):
@@ -194,7 +194,7 @@ def create_config_final(filename):
 
 def create_sample_sheet(toml_config):
     path = toml_config["general"]["project_path"]
-    #rm_prefix = path.replace('/lustre09/project/6019267/shared/projects/Nanopore_Dock/', ''0)
+    #rm_prefix = path.replace('/lustre09/project/6019267/shared/projects/Nanopore_Dock/', '')
     rm_prefix = path.replace('/lustre09/project/6019267/shared/tools/main_pipelines/long-read/', '')
     path_list = rm_prefix.split("/")
     project_name_date = path_list[0].split("_", 1)
@@ -245,26 +245,45 @@ def get_reference(ref):
 
 
 def create_script(tool, cores, memory, time, output, email, command, flowcell):
-    job = output + "/scripts/" + tool + "_" + flowcell + ".slurm"
+    if flowcell != "":
+        job = output + "/scripts/" + tool + "_" + flowcell + ".slurm"
 
-    with open("/lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/sbatch_template.txt", "r") as f:
-        slurm = f.read()
-        if tool == "dorado_basecaller":
-            slurm_filled = slurm.format(cores, "#SBATCH --gpus=h100:1", memory, time, tool, flowcell, "def", email)
+        with open("/lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/sbatch_template.txt", "r") as f:
+            slurm = f.read()
+            if tool == "dorado_basecaller":
+                slurm_filled = slurm.format(cores, "#SBATCH --gpus=h100:1", memory, time, tool, flowcell, "def", email)
+                
+            else: 
+                slurm_filled = slurm.format(cores, "", memory, time, tool, flowcell, "rrg", email)
+                slurm_filled += "module load StdEnv/2023 apptainer samtools"
+
+            slurm_filled += "\n#\n### Calling " + tool + " - " + flowcell + "\n#\n"
+            slurm_filled += command
+            slurm_filled += "\n\n"
+            # slurm_filled += 'echo "' + tool + '" >> ' + output + '/scripts/steps_done.txt'
+
+            with open(job, "w") as o:
+                o.write(slurm_filled)
             
-        else: 
-            slurm_filled = slurm.format(cores, "", memory, time, tool, flowcell, "rrg", email)
-            slurm_filled += "module load StdEnv/2023 apptainer samtools"
+                return job
+    else :
+        job = output + "/scripts/" + tool + ".slurm"
 
-        slurm_filled += "\n#\n### Calling " + tool + " - " + flowcell + "\n#\n"
-        slurm_filled += command
-        slurm_filled += "\n\n"
-        # slurm_filled += 'echo "' + tool + '" >> ' + output + '/scripts/steps_done.txt'
+        with open("/lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/sbatch_template.txt", "r") as f:
+            slurm = f.read()
+            slurm_filled = slurm.format(cores, "", memory, time, tool, "run", "rrg", email)
+            slurm_filled += "module load StdEnv/2023 samtools"
 
-        with open(job, "w") as o:
-            o.write(slurm_filled)
-        
-            return job
+            slurm_filled += "\n#\n### Calling " + tool + "\n#\n"
+            slurm_filled += command
+            slurm_filled += "\n\n"
+            # slurm_filled += 'echo "' + tool + '" >> ' + output + '/scripts/steps_done.txt'
+
+            with open(job, "w") as o:
+                o.write(slurm_filled)
+            
+                return job
+
 
 
 def dorado(toml_config):
@@ -273,6 +292,7 @@ def dorado(toml_config):
     email = toml_config["general"]["email"]
     genome = get_reference(toml_config["general"]["reference"])["fasta"]
 
+    jobs_demux = ""
     flowcells = toml_config["general"]["fc_dir_names"]
     for flowcell in flowcells:
         reads = output + "/" + flowcell + "/reads/pod5"
@@ -317,7 +337,7 @@ def dorado(toml_config):
     
         # Add slurm job to main.sh
         with open(output + "/scripts/main.sh", "a") as f:
-            f.write("\n\n# Flowcell : " + flowcell + "\n\n")
+            f.write("# Flowcell : " + flowcell + "\n")
             f.write("dorado=$(sbatch --parsable " + job + ")\n\n")
 
         # DEMUX
@@ -338,13 +358,23 @@ def dorado(toml_config):
         # Create slurm job
         job2 = create_script(tool2, cores2, memory2, time2, output, email, command_str2, flowcell)
         
+        var_name = f"demux_{fc}"
+        
         # Add slurm job to main.sh
         with open(output + "/scripts/main.sh", "a") as f:
-            f.write("sbatch --dependency=afterok:$dorado " + job2 + "\n\n")
+            f.write(f'{var_name}=$(sbatch --parsable ' + job2 + ')\n\n')
 
-    
-    # command3 = ["python", "/lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/rename_bam.py", output]
-    # command_str3 = " ".join(command3)
+
+    # Samtools
+    dependencies = ":".join([f"$demux_{fc}" for fc in flowcells])
+    command3 = ["python", "/lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/rename_bam.py", toml_config["general"]["project_path"] + '/scripts/config_final.toml']
+    command_str3 = " ".join(command3)
+    time3 = "00-11:00"
+    job3 = create_script("samtools", "8", "32", time3, output, email, command_str3, "")
+
+    with open(output + "/scripts/main.sh", "a") as f:
+        f.write("# Merge, sort and index bams\n")
+        f.write(f"\nsbatch --dependency=afterok:{dependencies} {job3}\n")
 
 
 def qc(toml_config):
