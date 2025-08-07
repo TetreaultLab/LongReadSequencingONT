@@ -333,11 +333,13 @@ def dorado(toml_config):
         command_str = " ".join(command)
 
         job = create_script(tool, cores, memory, formatted_time, output, email, command_str, flowcell)
-    
+
+        var_name_bc = f"basecall_{flowcell}"
+
         # Add slurm job to main.sh
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("# Flowcell : " + flowcell + "\n")
-            f.write("dorado=$(sbatch --parsable " + job + ")\n\n")
+            f.write(f'{var_name_bc}=$(sbatch --parsable ' + job + ")\n\n")
 
         # DEMUX
         tool2 = "dorado_demux"
@@ -361,7 +363,7 @@ def dorado(toml_config):
         
         # Add slurm job to main.sh
         with open(output + "/scripts/main.sh", "a") as f:
-            f.write(f'{var_name}=$(sbatch --parsable ' + job2 + ')\n\n')
+            f.write(f'{var_name}=$(sbatch --parsable --dependency=afterok:{var_name_bc} ' + job2 + ')\n\n')
 
 
     # Samtools
