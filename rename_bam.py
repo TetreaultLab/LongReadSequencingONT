@@ -51,9 +51,12 @@ for fc in fcs :
 
 # Merge bams
 # TO-DO
-samples = toml_config_initial["general"]["samples"]
+#samples = toml_config_initial["general"]["samples"]
+samples = ["e7024aba", "7bbaf330"]
+print(samples)
 
 for s in samples:
+    print(list(output.iterdir()))
     bam_files = list(output.glob(f"{s}*.bam"))
     print(bam_files)
     output_file = output / f"{s}.bam"
