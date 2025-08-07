@@ -41,9 +41,7 @@ for fc in fcs :
         if file.is_file() and file.name.startswith(code):
             for (barcode, alias), code in barcode_to_alias.items():
                 if barcode in file.name:
-                    if file.name.endswith(".bam.bai"):
-                        new_name = f"{alias}_{barcode}_{code}.bam.bai"
-                    elif file.name.endswith(".bam"):
+                    if file.name.endswith(".bam"):
                         new_name = f"{alias}_{barcode}_{code}.bam"
                     else:
                         continue
@@ -53,4 +51,7 @@ for fc in fcs :
                     print(f"Renamed {file.name} -> {new_name}")
 
 # Merge bams
+# TO-DO
+
+# Sort and index bams
 # TO-DO
