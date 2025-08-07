@@ -19,6 +19,7 @@ with open(args.config, "r") as f:
     toml_config_initial = toml.load(f)
 
 output = toml_config_initial["general"]["project_path"] + "/alignments"
+output = Path(output)
 fcs = toml_config_initial["general"]["fc_dir_names"]
 
 # Loop over flowcells to rename
@@ -35,7 +36,6 @@ for fc in fcs :
     barcode_to_alias = dict(zip(zip(df["barcode"], df["alias"]), df["code"]))
     print(barcode_to_alias)
 
-    output = Path(output)
     # Process each file in the directory
     for file in output.iterdir():
         if file.is_file() and file.name.startswith(code):
@@ -50,8 +50,18 @@ for fc in fcs :
                     #file.rename(new_path) # uncomment to actually change the names
                     print(f"Renamed {file.name} -> {new_name}")
 
+
 # Merge bams
 # TO-DO
+samples = toml_config_initial["general"]["samples"]
+bam_groups = defaultdict(list)
+print(bam_groups)
+for prefix, bam_files in bam_groups.items():
+    output_bam = bam_dir / f"{prefix}.bam"
+    cmd = ["samtools", "merge", "-f", str(output_bam)] + bam_files
+    print(" ".join(cmd))
+    # subprocess.run(cmd, check=True)
+# Remove all .bam.bai
 
 # Sort and index bams
 # TO-DO
