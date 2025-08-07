@@ -293,9 +293,13 @@ def dorado(toml_config):
     genome = get_reference(toml_config["general"]["reference"])["fasta"]
 
     flowcells = toml_config["general"]["fc_dir_names"]
+    codes = []
     for flowcell in flowcells:
         reads = output + "/" + flowcell + "/reads/pod5"
         bam_dorado = final + flowcell + ".bam"
+        
+        code = flowcell.split('_')[-1]
+        codes.append(code)
 
         # BASECALLER
         tool = "dorado_basecaller"
@@ -334,7 +338,7 @@ def dorado(toml_config):
 
         job = create_script(tool, cores, memory, formatted_time, output, email, command_str, flowcell)
 
-        var_name_bc = f"basecall_{flowcell}"
+        var_name_bc = f"basecall_{code}"
 
         # Add slurm job to main.sh
         with open(output + "/scripts/main.sh", "a") as f:
@@ -360,7 +364,7 @@ def dorado(toml_config):
         # Create slurm job
         job2 = create_script(tool2, cores2, memory2, time2, output, email, command_str2, flowcell)
         
-        var_name = f"demux_{flowcell}"
+        var_name = f"demux_{code}"
         
         # Add slurm job to main.sh
         with open(output + "/scripts/main.sh", "a") as f:
@@ -368,7 +372,7 @@ def dorado(toml_config):
             f.write("echo $" + var_name)
 
     # Samtools
-    dependencies = ":".join([f"$demux_{fc}" for fc in flowcells])
+    dependencies = ":".join([f"$demux_{code}" for code in codes])
     command3 = ["python", "/lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/rename_bam.py", toml_config["general"]["project_path"] + '/scripts/config_final.toml']
     command_str3 = " ".join(command3)
     time3 = "00-23:00"
