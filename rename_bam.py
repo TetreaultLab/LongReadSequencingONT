@@ -45,6 +45,8 @@ for fc in fcs :
                         new_name = f"{alias}_{barcode}_{code}.bam.bai"
                     elif file.name.endswith(".bam"):
                         new_name = f"{alias}_{barcode}_{code}.bam"
+                    else:
+                        continue
                         
                     new_path = output / new_name
                     #file.rename(new_path) # uncomment to actually change the names
