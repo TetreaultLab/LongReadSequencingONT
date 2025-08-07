@@ -1,31 +1,40 @@
 import pandas as pd
 from pathlib import Path
-import argparse
+import toml
 
-parser = argparse.ArgumentParser(description="Rename BAM and BAI files based on barcode->alias mapping.")
-parser.add_argument("directory", type=str, help="Path to the directory containing the BAM/BAI files.")
+# Loading TOML config
+with open(args.config, "r") as f:
+    toml_config_initial = toml.load(f)
 
-args = parser.parse_args()
+output = toml_config_initial["general"]["project_path"] + "/alignments"
+fcs = toml_config_initial["general"]["fc_dir_names"]
 
-# Load the CSV file
-df = pd.read_csv(args.directory + "/scripts/samples.csv", header=0)
+# Loop over flowcells to rename
+for fc in fcs :
+    code = fc.split('_')[-1]
+    print(code)
 
-# Create a mapping from barcode -> alias
-barcode_to_alias = dict(zip(df["barcode"], df["alias"]))
+    # Load the CSV file
+    df = pd.read_csv(toml_config_initial["general"]["project_path"] + "/scripts/" + fc + ".csv", header=0)
+    df["code"] = df["flow_cell_id"].str.split('_').str[-1]
+    print(df)
 
-# Directory containing the files
-data_dir = Path(args.directory + "/alignments")
+    # Create a mapping from barcode -> alias
+    barcode_to_alias = dict(zip(df["barcode"], df["alias"], df["code"]))
 
-# Process each file in the directory
-for file in data_dir.iterdir():
-    if file.is_file():
-        for barcode, alias in barcode_to_alias.items():
-            if barcode in file.name:
-                if file.name.endswith(".bam.bai"):
-                    new_name = f"{alias}_{barcode}.bam.bai"
-                else:
-                    new_name = f"{alias}_{barcode}.bam"
-                    
-                new_path = data_dir / new_name
-                file.rename(new_path)
-                print(f"Renamed {file.name} -> {new_name}")
+    # Process each file in the directory
+    for file in output.iterdir():
+        if file.is_file() and file.name.startswith(code):
+            for barcode, alias, code in barcode_to_alias.items():
+                if barcode in file.name:
+                    if file.name.endswith(".bam.bai"):
+                        new_name = f"{alias}_{barcode}_{code}.bam.bai"
+                    else:
+                        new_name = f"{alias}_{barcode}_{code}.bam"
+                        
+                    new_path = output / new_name
+                    #file.rename(new_path) # uncomment to actually change the names
+                    print(f"Renamed {file.name} -> {new_name}")
+
+# Merge bams
+# TO-DO
