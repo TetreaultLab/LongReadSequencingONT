@@ -3,6 +3,7 @@ from pathlib import Path
 from collections import defaultdict
 import argparse
 import toml
+import subprocess
 
 parser = argparse.ArgumentParser(
         prog="Rename Bam files after dorado demultiplexing",
