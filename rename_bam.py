@@ -35,6 +35,7 @@ for fc in fcs :
     barcode_to_alias = dict(zip(zip(df["barcode"], df["alias"]), df["code"]))
     print(barcode_to_alias)
 
+    output = Path(output)
     # Process each file in the directory
     for file in output.iterdir():
         if file.is_file() and file.name.startswith(code):
