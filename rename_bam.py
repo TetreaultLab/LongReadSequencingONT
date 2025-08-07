@@ -1,6 +1,18 @@
 import pandas as pd
 from pathlib import Path
+import argparse
 import toml
+
+parser = argparse.ArgumentParser(
+        prog="Rename Bam files after dorado demultiplexing",
+        description="Change long names for bam and .bam.bai files to a easier format",
+    )
+
+parser.add_argument(
+    "config", type=str, help="Project config file, including path."
+    )
+
+args = parser.parse_args()
 
 # Loading TOML config
 with open(args.config, "r") as f:
