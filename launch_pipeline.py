@@ -87,7 +87,7 @@ def main():
         func(toml_config)
 
     # Call main.sh
-    # subprocess.run(["bash", output + "/scripts/main.sh"])
+    subprocess.run(["bash", output + "/scripts/main.sh"])
 
 
 def create_config_final(filename):
@@ -369,11 +369,11 @@ def dorado(toml_config):
     dependencies = ":".join([f"$demux_{fc}" for fc in flowcells])
     command3 = ["python", "/lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/rename_bam.py", toml_config["general"]["project_path"] + '/scripts/config_final.toml']
     command_str3 = " ".join(command3)
-    time3 = "00-11:00"
+    time3 = "00-23:00"
     job3 = create_script("samtools", "8", "32", time3, output, email, command_str3, "")
 
     with open(output + "/scripts/main.sh", "a") as f:
-        f.write("# Merge, sort and index bams\n")
+        f.write("# Merge, sort and index bams")
         f.write(f"\nsbatch --dependency=afterok:{dependencies} {job3}\n")
 
 
