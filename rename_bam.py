@@ -55,13 +55,14 @@ for fc in fcs :
 # Merge bams
 # TO-DO
 samples = toml_config_initial["general"]["samples"]
-bam_groups = defaultdict(list)
-print(bam_groups)
-for prefix, bam_files in bam_groups.items():
-    output_bam = bam_dir / f"{prefix}.bam"
-    cmd = ["samtools", "merge", "-f", str(output_bam)] + bam_files
+
+for s in samples:
+    bam_files = list(output.glob(s + "*.bam"))
+    output_file = bam_dir / "S1.merged.bam"
+    cmd = ["samtools", "merge", "-f", str(output_file)] + [str(f) for f in bam_files]
     print(" ".join(cmd))
     # subprocess.run(cmd, check=True)
+
 # Remove all .bam.bai
 
 # Sort and index bams
