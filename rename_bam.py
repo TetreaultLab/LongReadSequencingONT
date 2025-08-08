@@ -26,7 +26,7 @@ fcs = toml_config_initial["general"]["fc_dir_names"]
 
 # Loop over flowcells to rename
 for fc in fcs :
-    print("Running: rename for sample ", s)
+    print("Running: rename for flowcell ", fc)
     code = fc.split('_')[-1]
 
     # Load the CSV file
