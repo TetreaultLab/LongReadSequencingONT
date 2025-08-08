@@ -355,7 +355,7 @@ def dorado(toml_config):
         cores2 = "4"   
         memory2 = "24"
 
-        hours2 = int(size_str) * 0.035
+        hours2 = int(size_str) * 0.04
         formatted_time2 = format_time(hours2)
             
         command2 = ["/lustre09/project/6019267/shared/tools/main_pipelines/long-read/dorado-1.1.0-linux-x64/bin/dorado", "demux", "-vv", "--threads", cores2, "--no-trim", "--output-dir", final, "--no-classify", bam_dorado, "\n\n"]
