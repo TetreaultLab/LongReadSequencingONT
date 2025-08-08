@@ -347,7 +347,7 @@ def dorado(toml_config):
         # Add slurm job to main.sh
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("# Flowcell : " + flowcell + "\n")
-            f.write(f'{var_name_bc}=$(sbatch --parsable ' + job + ")\n\n")
+            f.write(f'{var_name_bc}=$(sbatch --parsable ' + job + ")\n")
 
         # DEMUX
         tool2 = "dorado_demux"
@@ -378,7 +378,7 @@ def dorado(toml_config):
     job3 = create_script("samtools", "8", "32", time3, output, email, command_str3, "")
 
     with open(output + "/scripts/main.sh", "a") as f:
-        f.write("# Merge, sort and index bams")
+        f.write("# Rename, merge, sort and index bams")
         f.write(f"\nsbatch --dependency=afterok:{dependencies} {job3}\n")
 
 
