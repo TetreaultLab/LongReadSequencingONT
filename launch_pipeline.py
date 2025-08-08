@@ -318,11 +318,10 @@ def dorado(toml_config):
         # Get reads size 
         cmd = ["du", "-sh", "--apparent-size", "--block-size", "G", reads]
         result = subprocess.run(cmd, capture_output=True, text=True)
-
+        
         size_str = result.stdout.split()[0].rstrip('G')
-        hours = int(size_str) * 0.02
 
-        # Format as DD-HH:MM
+        hours = int(size_str) * 0.02
         formatted_time = format_time(hours)
 
         command = ["/lustre09/project/6019267/shared/tools/main_pipelines/long-read/dorado-1.0.0-linux-x64/bin/dorado", "basecaller", "-v", "--device", "cuda:all", "--emit-moves", "--min-qscore", str(toml_config["dorado"]["min_q_score"]), "--reference", genome, "--sample-sheet", output + "/scripts/" + flowcell + ".csv", "--no-trim", "--kit-name", toml_config["general"]["kit"], "--mm2-opts", toml_config["dorado"]["mm2_opts"]]
@@ -353,15 +352,10 @@ def dorado(toml_config):
         # DEMUX
         tool2 = "dorado_demux"
 
-        cores2 = "16"   
-        memory2 = "40"
+        cores2 = "4"   
+        memory2 = "24"
 
-        cmd2 = ["du", "-sh", "--apparent-size", "--block-size", "G", bam_dorado]
-        result2 = subprocess.run(cmd2, capture_output=True, text=True)
-
-        size_str2 = result2.stdout.split()[0].rstrip('G')
-        hours2 = int(size_str2) * 0.3
-
+        hours2 = int(size_str) * 0.035
         formatted_time2 = format_time(hours2)
             
         command2 = ["/lustre09/project/6019267/shared/tools/main_pipelines/long-read/dorado-1.1.0-linux-x64/bin/dorado", "demux", "-vv", "--threads", cores2, "--no-trim", "--output-dir", final, "--no-classify", bam_dorado, "\n\n"]
