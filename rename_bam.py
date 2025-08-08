@@ -57,7 +57,7 @@ samples = toml_config_initial["general"]["samples"]
 # Loop over samples
 for s in samples:
     print("Running: Samtools for sample ", s)
-    bam_files = list(output.glob(f"{s}*.bam"))
+    bam_files = list(output.glob(f"{s}_*.bam"))
     output_file = output / f"{s}.bam"
 
     # merge
