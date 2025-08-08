@@ -321,7 +321,7 @@ def dorado(toml_config):
         
         size_str = result.stdout.split()[0].rstrip('G')
 
-        hours = int(size_str) * 0.05
+        hours = int(size_str) * 0.02
         formatted_time = format_time(hours)
 
         command = ["/lustre09/project/6019267/shared/tools/main_pipelines/long-read/dorado-1.0.0-linux-x64/bin/dorado", "basecaller", "-v", "--device", "cuda:all", "--emit-moves", "--min-qscore", str(toml_config["dorado"]["min_q_score"]), "--reference", genome, "--sample-sheet", output + "/scripts/" + flowcell + ".csv", "--no-trim", "--kit-name", toml_config["general"]["kit"], "--mm2-opts", toml_config["dorado"]["mm2_opts"]]
