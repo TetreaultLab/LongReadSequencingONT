@@ -20,14 +20,18 @@ args = parser.parse_args()
 with open(args.config, "r") as f:
     toml_config_initial = toml.load(f)
 
-output = toml_config_initial["general"]["project_path"] + "/alignments"
-output = Path(output)
 fcs = toml_config_initial["general"]["fc_dir_names"]
 
 # Loop over flowcells to rename
 for fc in fcs :
     print("\nRunning: rename for flowcell ", fc)
     code = fc.split('_')[-1]
+
+    inputs = toml_config_initial["general"]["project_path"] + "/" + fc + "/alignments"
+    inputs = Path(inputs)
+
+    output = toml_config_initial["general"]["project_path"] + "/alignments"
+    output_path = Path(output)
 
     # Load the CSV file
     df = pd.read_csv(toml_config_initial["general"]["project_path"] + "/scripts/" + fc + ".csv", header=0)
@@ -37,7 +41,7 @@ for fc in fcs :
     barcode_to_alias = dict(zip(zip(df["barcode"], df["alias"]), df["code"]))
 
     # Process each file in the directory
-    for file in output.iterdir():
+    for file in inputs.iterdir():
         if file.is_file() and file.name.startswith(code):
             for (barcode, alias), code in barcode_to_alias.items():
                 if barcode in file.name:
@@ -46,7 +50,7 @@ for fc in fcs :
                     else:
                         continue
                         
-                    new_path = output / new_name
+                    new_path = inputs / new_name
                     file.rename(new_path)
                     print(f"Renamed {file.name} -> {new_name}")
 
@@ -57,8 +61,8 @@ samples = toml_config_initial["general"]["samples"]
 # Loop over samples
 for s in samples:
     print("\nRunning: Samtools for sample ", s)
-    bam_files = list(output.glob(f"{s}_*.bam"))
-    output_file = output / f"{s}.bam"
+    bam_files = list(inputs.glob(f"{s}_*.bam"))
+    output_file = output_path / f"{s}.bam"
 
     # merge
     print("--> Merge")
@@ -67,12 +71,12 @@ for s in samples:
 
     # sort
     print("--> Sort")
-    cmd2 = ["samtools", "sort", "-@", "8", "-o", s + "_sorted.bam", s + ".bam"]
+    cmd2 = ["samtools", "sort", "-@", "8", "-o", output + "/" + s + "_sorted.bam", s + ".bam"]
     subprocess.run(cmd2, check=True)
     
     # index
     print("--> Index")
-    cmd3 = ["samtools", "index", "-@", "8", "-o", s + "_sorted.bam.bai", s + "_sorted.bam"]
+    cmd3 = ["samtools", "index", "-@", "8", "-o", output + "/" + s + "_sorted.bam.bai", output + "/" + s + "_sorted.bam"]
     subprocess.run(cmd3, check=True)
 
 path = toml_config["general"]["project_path"]

@@ -130,7 +130,7 @@ def create_config_final(filename):
             os.makedirs(new_path + "/" + d)
 
     # Making directory structure in flowcells subdirectories
-    directories = ["main_reports", "reads"]
+    directories = ["main_reports", "reads", "alignments"]
     for flow in fc_dir_names:
         for d in directories:
             if not os.path.exists(new_path + "/" + flow + "/" + d):
@@ -297,7 +297,6 @@ def format_time(hours):
 
 def dorado(toml_config):
     output = toml_config["general"]["project_path"]
-    final = output + "/alignments/"
     email = toml_config["general"]["email"]
     genome = get_reference(toml_config["general"]["reference"])["fasta"]
 
@@ -305,6 +304,7 @@ def dorado(toml_config):
     codes = []
     for flowcell in flowcells:
         reads = output + "/" + flowcell + "/reads/pod5"
+        final = output + "/" + flowcell + "/alignments/"
         bam_dorado = final + flowcell + ".bam"
         
         code = flowcell.split('_')[-1]
@@ -321,7 +321,7 @@ def dorado(toml_config):
         
         size_str = result.stdout.split()[0].rstrip('G')
 
-        hours = int(size_str) * 0.02
+        hours = int(size_str) * 0.05
         formatted_time = format_time(hours)
 
         command = ["/lustre09/project/6019267/shared/tools/main_pipelines/long-read/dorado-1.0.0-linux-x64/bin/dorado", "basecaller", "-v", "--device", "cuda:all", "--emit-moves", "--min-qscore", str(toml_config["dorado"]["min_q_score"]), "--reference", genome, "--sample-sheet", output + "/scripts/" + flowcell + ".csv", "--no-trim", "--kit-name", toml_config["general"]["kit"], "--mm2-opts", toml_config["dorado"]["mm2_opts"]]
@@ -355,7 +355,7 @@ def dorado(toml_config):
         cores2 = "4"   
         memory2 = "24"
 
-        hours2 = int(size_str) * 0.04
+        hours2 = int(size_str) * 0.05
         formatted_time2 = format_time(hours2)
             
         command2 = ["/lustre09/project/6019267/shared/tools/main_pipelines/long-read/dorado-1.1.0-linux-x64/bin/dorado", "demux", "-vv", "--threads", cores2, "--no-trim", "--output-dir", final, "--no-classify", bam_dorado, "\n\n"]
