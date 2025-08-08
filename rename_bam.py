@@ -80,8 +80,8 @@ for s in samples:
     subprocess.run(cmd3, check=True)
 
 path = toml_config["general"]["project_path"]
+rm_prefix = path.replace('/lustre09/project/6019267/shared/projects/Nanopore_Dock/', '')
 #rm_prefix = path.replace('/lustre09/project/6019267/shared/tools/main_pipelines/long-read/', '')
-rm_prefix = path.replace('/lustre09/project/6019267/shared/tools/main_pipelines/long-read/', '')
 path_list = rm_prefix.split("/")
 project_name_date = path_list[0].split("_", 1)
 project_name = project_name_date[1]
