@@ -273,6 +273,7 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
             slurm = f.read()
             slurm_filled = slurm.format(cores, "", memory, time, tool, "run", "rrg", email)
             slurm_filled += "module load StdEnv/2023 samtools"
+            slurm_filled += "source /lustre09/project/6019267/shared/tools/main_pipelines/long-read/launch_pipeline_env/bin/activate"
 
             slurm_filled += "\n#\n### Calling " + tool + "\n#\n"
             slurm_filled += command
@@ -284,6 +285,14 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
             
                 return job
 
+def format_time(hours):
+    days = int(hours // 24)
+    remaining_hours = int(hours % 24)
+    minutes = int((hours % 1) * 60)
+
+    # Format as DD-HH:MM
+    formatted_time = f"{days:02d}-{remaining_hours:02d}:{minutes:02d}"
+    return(formatted_time)
 
 
 def dorado(toml_config):
@@ -313,12 +322,8 @@ def dorado(toml_config):
         size_str = result.stdout.split()[0].rstrip('G')
         hours = int(size_str) * 0.02
 
-        days = int(hours // 24)
-        remaining_hours = int(hours % 24)
-        minutes = int((hours % 1) * 60)
-
         # Format as DD-HH:MM
-        formatted_time = f"{days:02d}-{remaining_hours:02d}:{minutes:02d}"
+        formatted_time = format_time(hours)
 
         command = ["/lustre09/project/6019267/shared/tools/main_pipelines/long-read/dorado-1.0.0-linux-x64/bin/dorado", "basecaller", "-v", "--device", "cuda:all", "--emit-moves", "--min-qscore", str(toml_config["dorado"]["min_q_score"]), "--reference", genome, "--sample-sheet", output + "/scripts/" + flowcell + ".csv", "--no-trim", "--kit-name", toml_config["general"]["kit"], "--mm2-opts", toml_config["dorado"]["mm2_opts"]]
         
@@ -351,17 +356,19 @@ def dorado(toml_config):
         cores2 = "16"   
         memory2 = "40"
 
-        ######## TO-DO formatted time for demux
-        if toml_config["general"]["seq_type"] == "WGS":
-            time2 = "01-23:00"
-        else:
-            time2 = "00-02:59"
+        cmd2 = ["du", "-sh", "--apparent-size", "--block-size", "G", bam_dorado]
+        result2 = subprocess.run(cmd2, capture_output=True, text=True)
+
+        size_str2 = result2.stdout.split()[0].rstrip('G')
+        hours2 = int(size_str2) * 0.3
+
+        formatted_time2 = format_time(hours2)
             
         command2 = ["/lustre09/project/6019267/shared/tools/main_pipelines/long-read/dorado-1.1.0-linux-x64/bin/dorado", "demux", "-vv", "--threads", cores2, "--no-trim", "--output-dir", final, "--no-classify", bam_dorado, "\n\n"]
         command_str2 = " ".join(command2)
 
         # Create slurm job
-        job2 = create_script(tool2, cores2, memory2, time2, output, email, command_str2, flowcell)
+        job2 = create_script(tool2, cores2, memory2, formatted_time2, output, email, command_str2, flowcell)
         
         var_name = f"demux_{code}"
         
