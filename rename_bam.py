@@ -67,12 +67,12 @@ for s in samples:
 
     # sort
     print("--> Sort")
-    cmd2 = ["samtools", "sort", "-f", "-@", "8", "-o", s + "_sorted.bam", s + ".bam"]
+    cmd2 = ["samtools", "sort", "-@", "8", "-o", s + "_sorted.bam", s + ".bam"]
     subprocess.run(cmd2, check=True)
     
     # index
     print("--> Index")
-    cmd3 = ["samtools", "index", "-f", "-@", "8", "-o", s + "_sorted.bam.bai", s + "_sorted.bam"]
+    cmd3 = ["samtools", "index", "-@", "8", "-o", s + "_sorted.bam.bai", s + "_sorted.bam"]
     subprocess.run(cmd3, check=True)
 
 path = toml_config["general"]["project_path"]
