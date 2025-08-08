@@ -71,7 +71,7 @@ for s in samples:
 
     # sort
     print("--> Sort")
-    cmd2 = ["samtools", "sort", "-@", "8", "-o", output + "/" + s + "_sorted.bam", s + ".bam"]
+    cmd2 = ["samtools", "sort", "-@", "8", "-o", output + "/" + s + "_sorted.bam", output + "/" + s + ".bam"]
     subprocess.run(cmd2, check=True)
     
     # index
