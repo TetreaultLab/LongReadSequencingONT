@@ -62,17 +62,17 @@ for s in samples:
 
     # merge
     print("--> Merge")
-    cmd = ["samtools", "merge", "-@", "8", "-o", str(output_file)] + [str(f) for f in bam_files]
+    cmd = ["samtools", "merge", "-f", "-@", "8", "-o", str(output_file)] + [str(f) for f in bam_files]
     subprocess.run(cmd, check=True)
 
     # sort
     print("--> Sort")
-    cmd2 = ["samtools", "sort", "-@", "8", "-o", s + "_sorted.bam", s + ".bam"]
+    cmd2 = ["samtools", "sort", "-f", "-@", "8", "-o", s + "_sorted.bam", s + ".bam"]
     subprocess.run(cmd2, check=True)
     
     # index
     print("--> Index")
-    cmd3 = ["samtools", "index", "-@", "8", "-o", s + "_sorted.bam.bai", s + "_sorted.bam"]
+    cmd3 = ["samtools", "index", "-f", "-@", "8", "-o", s + "_sorted.bam.bai", s + "_sorted.bam"]
     subprocess.run(cmd3, check=True)
 
 path = toml_config["general"]["project_path"]
