@@ -26,7 +26,7 @@ fcs = toml_config_initial["general"]["fc_dir_names"]
 
 # Loop over flowcells to rename
 for fc in fcs :
-    print("Running: rename for flowcell ", fc)
+    print("\nRunning: rename for flowcell ", fc)
     code = fc.split('_')[-1]
 
     # Load the CSV file
@@ -56,21 +56,31 @@ samples = toml_config_initial["general"]["samples"]
 
 # Loop over samples
 for s in samples:
-    print("Running: samtools merge, sort and index for sample ", s)
+    print("Running: Samtools for sample ", s)
     bam_files = list(output.glob(f"{s}*.bam"))
     output_file = output / f"{s}.bam"
 
     # merge
+    print("--> Merge")
     cmd = ["samtools", "merge", "-@", "8", "-o", str(output_file)] + [str(f) for f in bam_files]
     subprocess.run(cmd, check=True)
 
     # sort
+    print("--> Sort")
     cmd2 = ["samtools", "sort", "-@", "8", "-o", s + "_sorted.bam", s + ".bam"]
     subprocess.run(cmd2, check=True)
     
     # index
+    print("--> Index")
     cmd3 = ["samtools", "index", "-@", "8", "-o", s + "_sorted.bam.bai", s + "_sorted.bam"]
     subprocess.run(cmd3, check=True)
+
+path = toml_config["general"]["project_path"]
+rm_prefix = path.replace('/lustre09/project/6019267/shared/tools/main_pipelines/long-read/', '')
+path_list = rm_prefix.split("/")
+project_name_date = path_list[0].split("_", 1)
+project_name = project_name_date[1]
+print("Done ", project_name, " !")
 
 # Clean-up : TO-DO
 
