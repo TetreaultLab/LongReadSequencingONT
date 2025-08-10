@@ -355,7 +355,7 @@ def dorado(toml_config):
         cores2 = "4"   
         memory2 = "24"
 
-        hours2 = int(size_str) * 0.05
+        hours2 = int(size_str) * 0.01
         formatted_time2 = format_time(hours2)
             
         command2 = ["/lustre09/project/6019267/shared/tools/main_pipelines/long-read/dorado-1.1.0-linux-x64/bin/dorado", "demux", "-vv", "--threads", cores2, "--no-trim", "--output-dir", final, "--no-classify", bam_dorado, "\n\n"]
@@ -374,12 +374,13 @@ def dorado(toml_config):
     dependencies = ":".join([f"$demux_{code}" for code in codes])
     command3 = ["python", "-u", "/lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/rename_bam.py", toml_config["general"]["project_path"] + '/scripts/config_final.toml']
     command_str3 = " ".join(command3)
-    time3 = "00-23:00"
+    time3 = "00-11:00"
     job3 = create_script("samtools", "8", "32", time3, output, email, command_str3, "")
 
     with open(output + "/scripts/main.sh", "a") as f:
         f.write("# Rename, merge, sort and index bams")
         f.write(f"\nsbatch --dependency=afterok:{dependencies} {job3}\n")
+
 
 
 def qc(toml_config):
@@ -498,7 +499,6 @@ def whatshap(toml_config):
     
     # Launch slurm job
     subprocess.run(["bash", job], check=True) # put sbatch instead of bash when on beluga
-
 
 
 def sniffles2(toml_config):

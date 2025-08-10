@@ -18,23 +18,23 @@ args = parser.parse_args()
 
 # Loading TOML config
 with open(args.config, "r") as f:
-    toml_config_initial = toml.load(f)
+    toml_config = toml.load(f)
 
-fcs = toml_config_initial["general"]["fc_dir_names"]
+fcs = toml_config["general"]["fc_dir_names"]
 
 # Loop over flowcells to rename
 for fc in fcs :
     print("\nRunning: rename for flowcell ", fc)
     code = fc.split('_')[-1]
 
-    inputs = toml_config_initial["general"]["project_path"] + "/" + fc + "/alignments"
+    inputs = toml_config["general"]["project_path"] + "/" + fc + "/alignments"
     inputs = Path(inputs)
 
-    output = toml_config_initial["general"]["project_path"] + "/alignments"
+    output = toml_config["general"]["project_path"] + "/alignments"
     output_path = Path(output)
 
     # Load the CSV file
-    df = pd.read_csv(toml_config_initial["general"]["project_path"] + "/scripts/" + fc + ".csv", header=0)
+    df = pd.read_csv(toml_config["general"]["project_path"] + "/scripts/" + fc + ".csv", header=0)
     df["code"] = df["flow_cell_id"].str.split('_').str[-1]
 
     # Create a mapping from barcode -> alias
@@ -56,7 +56,7 @@ for fc in fcs :
 
 
 # Merge bams
-samples = toml_config_initial["general"]["samples"]
+samples = toml_config["general"]["samples"]
 
 # Loop over samples
 for s in samples:
