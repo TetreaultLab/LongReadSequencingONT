@@ -255,7 +255,7 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
                 
             else: 
                 slurm_filled = slurm.format(cores, "", memory, time, tool, flowcell, "rrg", email)
-                slurm_filled += "module load StdEnv/2023 apptainer samtools"
+                slurm_filled += "module load StdEnv/2023 apptainer samtools\n"
 
             slurm_filled += "\n#\n### Calling " + tool + " - " + flowcell + "\n#\n"
             slurm_filled += command
@@ -272,7 +272,7 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
         with open("/lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/sbatch_template.txt", "r") as f:
             slurm = f.read()
             slurm_filled = slurm.format(cores, "", memory, time, tool, "run", "rrg", email)
-            slurm_filled += "module load StdEnv/2023 samtools"
+            slurm_filled += "module load StdEnv/2023 samtools\n"
             slurm_filled += "source /lustre09/project/6019267/shared/tools/main_pipelines/long-read/launch_pipeline_env/bin/activate"
 
             slurm_filled += "\n#\n### Calling " + tool + "\n#\n"
