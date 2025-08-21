@@ -384,7 +384,7 @@ def main_pipeline(toml_config):
 
     with open(output + "/scripts/main.sh", "a") as f:
         f.write("# Rename, merge, sort and index bams")
-        f.write(f"\nsamtools=$(sbatch --dependency=afterok:{dependencies} {job3})\n")
+        f.write(f"\nsamtools=$(sbatch --parsable --dependency=afterok:{dependencies} {job3})\n")
 
 
     # QC
@@ -405,7 +405,7 @@ def main_pipeline(toml_config):
 
     with open(output + "/scripts/main.sh", "a") as f:
             f.write("# QC\n")
-            f.write(f'\nsbatch --parsable --dependency=afterok:$samtools {job4})\n')
+            f.write(f'\nsbatch --dependency=afterok:$samtools {job4})\n')
 
 
 
