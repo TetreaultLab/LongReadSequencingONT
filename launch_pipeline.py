@@ -272,10 +272,10 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
         with open("/lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/sbatch_template.txt", "r") as f:
             slurm = f.read()
             if tool = "dorado_demux":
-                slurm_filled = slurm.format(cores, "", memory, time, tool, flowcell, "out", "log", "rrg", email)
+                slurm_filled = slurm.format(cores, "", memory, time, tool, "run", "out", "log", "rrg", email)
 
             else :
-                slurm_filled = slurm.format(cores, "", memory, time, tool, "run", "rrg", email)
+                slurm_filled = slurm.format(cores, "", memory, time, tool, "run", "log", "log", "rrg", email)
 
             slurm_filled += "module load StdEnv/2023 samtools\n"
             slurm_filled += "source /lustre09/project/6019267/shared/tools/main_pipelines/long-read/launch_pipeline_env/bin/activate"
@@ -384,7 +384,16 @@ def dorado(toml_config):
 
     with open(output + "/scripts/main.sh", "a") as f:
         f.write("# Rename, merge, sort and index bams")
-        f.write(f"\nsbatch --dependency=afterok:{dependencies} {job3}\n")
+        f.write(f"\nsamtools=$(sbatch --dependency=afterok:{dependencies} {job3})\n")
+
+
+    # QC
+    command4 = []
+
+    
+    with open(output + "/scripts/main.sh", "a") as f:
+            f.write("# QC\n")
+            f.write(f'\nsbatch --parsable --dependency=afterok:$samtools {job4})\n')
 
 
 
