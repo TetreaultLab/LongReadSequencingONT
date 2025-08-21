@@ -388,10 +388,10 @@ def main_pipeline(toml_config):
 
 
     # QC
-    fasta = get_reference(toml_config["general"]["reference"])["fasta"]
-
+    print("QC")
+    command_str4 = ""
     for name in toml_config["general"]["samples"]:
-        command4 = ["apptainer", "run", "/lustre09/project/6019267/shared/tools/main_pipelines/long-read/image_longreadsum.sif", "bam", "--threads", "8", "--log", output + "/qc/longreadsum_" + name + ".log", "--ref", fasta, "-Q", '"' + name + '_"', "-i", output + "/alignments/" + name + "_sorted.bam", "-o", output + "/qc"]
+        command4 = ["apptainer", "run", "/lustre09/project/6019267/shared/tools/main_pipelines/long-read/image_longreadsum.sif", "bam", "--threads", "8", "--log", output + "/qc/longreadsum_" + name + ".log", "--ref", genome, "-Q", '"' + name + '_"', "-i", output + "/alignments/" + name + "_sorted.bam", "-o", output + "/qc"]
 
         if "methylation" in toml_config["general"]["analysis"]:
             command4.extend(["--mod"])
@@ -401,7 +401,7 @@ def main_pipeline(toml_config):
 
     time4 = "00-11:00"
 
-    job4 = create_script("longReadSum", "8", "64", time4, output, email, command_str4, "")
+    job4 = create_script("LongReadSum", "8", "64", time4, output, email, command_str4, "")
 
     with open(output + "/scripts/main.sh", "a") as f:
             f.write("# QC\n")
