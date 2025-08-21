@@ -251,10 +251,10 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
         with open("/lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/sbatch_template.txt", "r") as f:
             slurm = f.read()
             if tool == "dorado_basecaller":
-                slurm_filled = slurm.format(cores, "#SBATCH --gpus=h100:1", memory, time, tool, flowcell, "def", email)
-                
-            else: 
-                slurm_filled = slurm.format(cores, "", memory, time, tool, flowcell, "rrg", email)
+                slurm_filled = slurm.format(cores, "#SBATCH --gpus=h100:1", memory, time, tool, flowcell, "log", "log", "def", email)
+            
+            else :
+                slurm_filled = slurm.format(cores, "", memory, time, tool, flowcell, "log", "log", "rrg", email)
                 slurm_filled += "module load StdEnv/2023 apptainer samtools\n"
 
             slurm_filled += "\n#\n### Calling " + tool + " - " + flowcell + "\n#\n"
@@ -271,7 +271,12 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
 
         with open("/lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/sbatch_template.txt", "r") as f:
             slurm = f.read()
-            slurm_filled = slurm.format(cores, "", memory, time, tool, "run", "rrg", email)
+            if tool = "dorado_demux":
+                slurm_filled = slurm.format(cores, "", memory, time, tool, flowcell, "out", "log", "rrg", email)
+
+            else :
+                slurm_filled = slurm.format(cores, "", memory, time, tool, "run", "rrg", email)
+
             slurm_filled += "module load StdEnv/2023 samtools\n"
             slurm_filled += "source /lustre09/project/6019267/shared/tools/main_pipelines/long-read/launch_pipeline_env/bin/activate"
 
