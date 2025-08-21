@@ -404,8 +404,8 @@ def main_pipeline(toml_config):
     job4 = create_script("LongReadSum", "8", "64", time4, output, email, command_str4, "")
 
     with open(output + "/scripts/main.sh", "a") as f:
-            f.write("# QC\n")
-            f.write(f'\nsbatch --dependency=afterok:$samtools {job4})\n')
+        f.write("# QC\n")
+        f.write(f'\nsbatch --dependency=afterok:$samtools {job4})\n')
 
 
 
