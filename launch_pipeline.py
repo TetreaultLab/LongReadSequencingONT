@@ -87,7 +87,7 @@ def main():
         func(toml_config)
 
     # Call main.sh
-    subprocess.run(["bash", output + "/scripts/main.sh"])
+    #subprocess.run(["bash", output + "/scripts/main.sh"])
 
 
 def create_config_final(filename):
