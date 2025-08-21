@@ -277,7 +277,7 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
             else :
                 slurm_filled = slurm.format(cores, "", memory, time, tool, "run", "log", "log", "rrg", email)
 
-            slurm_filled += "module load StdEnv/2023 samtools\n"
+            slurm_filled += "module load StdEnv/2023 apptainer samtools\n"
             slurm_filled += "source /lustre09/project/6019267/shared/tools/main_pipelines/long-read/launch_pipeline_env/bin/activate"
 
             slurm_filled += "\n#\n### Calling " + tool + "\n#\n"
@@ -318,7 +318,6 @@ def main_pipeline(toml_config):
 
         # BASECALLER
         tool = "dorado_basecaller"
-        print(tool)
         cores = "8"
         memory = "64"
 
@@ -358,7 +357,6 @@ def main_pipeline(toml_config):
 
         # DEMUX
         tool2 = "dorado_demux"
-        print(tool2)
 
         cores2 = "4"   
         memory2 = "24"
@@ -379,7 +377,6 @@ def main_pipeline(toml_config):
             f.write(f'{var_name}=$(sbatch --parsable --dependency=afterok:${var_name_bc} ' + job2 + ')\n\n')
 
     # Samtools
-    print("samtools")
     dependencies = ":".join([f"$demux_{code}" for code in codes])
     command3 = ["python", "-u", "/lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/rename_bam.py", toml_config["general"]["project_path"] + '/scripts/config_final.toml']
     command_str3 = " ".join(command3)
@@ -392,7 +389,6 @@ def main_pipeline(toml_config):
 
 
     # QC
-    print("QC")
     command_str4 = ""
     for name in toml_config["general"]["samples"]:
         command4 = ["apptainer", "run", "/lustre09/project/6019267/shared/tools/main_pipelines/long-read/image_longreadsum.sif", "bam", "--threads", "8", "--log", output + "/qc/longreadsum_" + name + ".log", "--ref", genome, "-Q", '"' + name + '_"', "-i", output + "/alignments/" + name + "_sorted.bam", "-o", output + "/qc"]
@@ -403,7 +399,7 @@ def main_pipeline(toml_config):
         command4.extend(["\n\n"])
         command_str4 += " ".join(command4)
 
-    time4 = "00-11:00"
+    time4 = "00-23:00"
 
     job4 = create_script("LongReadSum", "8", "64", time4, output, email, command_str4, "")
 
