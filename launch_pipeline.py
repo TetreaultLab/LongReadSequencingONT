@@ -309,7 +309,6 @@ def format_time(hours):
 
 
 def main_pipeline(toml_config):
-    print("main_pipeline")
     output = toml_config["general"]["project_path"]
     email = toml_config["general"]["email"]
     genome = get_reference(toml_config["general"]["reference"])["fasta"]
