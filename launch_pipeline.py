@@ -398,12 +398,15 @@ def main_pipeline(toml_config):
     # QC
     command_str4 = ""
     for name in toml_config["general"]["samples"]:
-        command4 = ["apptainer", "run", "/lustre09/project/6019267/shared/tools/main_pipelines/long-read/image_longreadsum.sif", "bam", "--threads", "8", "--log", output + "/qc/longreadsum_" + name + ".log", "--ref", genome, "-Q", '"' + name + '_"', "-i", output + "/alignments/" + name + "_sorted.bam", "-o", output + "/qc"]
+        command4 = ["apptainer", "run", "/lustre09/project/6019267/shared/tools/main_pipelines/long-read/image_longreadsum.sif", "bam", "--threads", "8", "--log", output + "/qc/longreadsum_" + name + ".log", "--log-level", "5", "--ref", genome, "-Q", '"' + name + '_"', "-i", output + "/alignments/" + name + "_sorted.bam", "-o", output + "/qc"]
 
         if "methylation" in toml_config["general"]["analysis"]:
             command4.extend(["--mod"])
 
         command4.extend(["\n\n"])
+        command4.extend(["mv", output + "/qc/bam_summary.txt", output + "/qc/", name, "_bam_summary.txt"])
+        command4.extend(["\n\n"])
+        
         command_str4 += " ".join(command4)
 
     time4 = "00-23:00"
