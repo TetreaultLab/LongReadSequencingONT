@@ -297,6 +297,8 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
                 return job
 
 def format_time(hours):
+    if hours < 1:
+        hours = 1.5
     days = int(hours // 24)
     remaining_hours = int(hours % 24)
     minutes = int((hours % 1) * 60)
