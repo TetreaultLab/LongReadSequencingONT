@@ -411,7 +411,7 @@ def main_pipeline(toml_config):
 
     time4 = "00-23:00"
 
-    job4 = create_script("LongReadSum", "8", "64", time4, output, email, command_str4, "")
+    job4 = create_script("LongReadSum", "8", "200", time4, output, email, command_str4, "")
 
     with open(output + "/scripts/main.sh", "a") as f:
         f.write("# QC\n")
