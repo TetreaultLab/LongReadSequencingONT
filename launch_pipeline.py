@@ -10,6 +10,9 @@ import traceback
 import os
 from glob import glob
 
+# Global variables
+TOOL_PATH = "/lustre09/project/6019267/shared/tools/"
+
 def main():
 
     parser = argparse.ArgumentParser(
@@ -29,7 +32,7 @@ def main():
 
     output = toml_config_initial["general"]["project_path"]
 
-    ## config and sample sheet
+    ## Create config and sample sheet
     if args.config != "config_final.toml":
         # Create final TOML config
         toml_config = create_config_final(args.config)
@@ -59,21 +62,27 @@ def main():
     if "main_pipeline" not in done:
         function_queue.append(main_pipeline)
 
+    # Quality Control
     #if "qc" not in done:
         #function_queue.append(qc)
 
+    # Cleanup
+    if "cleanup" not in done:
+        function_queue.append(cleanup)
+
     # SNP calling
-    # if "SNP" in toml_config["general"]["analysis"]:
-    #     if "clair3" not in done:
-    #         function_queue.append(clair3)
+    #if "SNP" in toml_config["general"]["analysis"]:
+    #    if "clair3" not in done:
+    #        function_queue.append(clair3)
 
-    #     if "whatshap" not in done: # phasing
-    #         function_queue.append(whatshap)
+    # Phasing
+    #if "whatshap" not in done:
+    #    function_queue.append(whatshap)
 
-    # # SV calling
-    # if "SV" in toml_config["general"]["analysis"]:
-    #     if "sniffles2" not in done:
-    #         function_queue.append(sniffles2)
+    # SV calling
+    #if "SV" in toml_config["general"]["analysis"]:
+    #    if "sniffles2" not in done:
+    #        function_queue.append(sniffles2)
 
     # Other tools ...
 
@@ -86,40 +95,42 @@ def main():
     for func in function_queue:
         func(toml_config)
 
-    # Call main.sh
+    # Call main.sh (Launch the pipeline)
     subprocess.run(["bash", output + "/scripts/main.sh"])
 
 
 def create_config_final(filename):
+    
     # Read initial config file
     with open(filename, "r") as f:
         toml_config = toml.load(f)
 
-    # set kit to variable
+    # Set kit to variable
     kit = toml_config['general']['kit']
 
-    # check seq_type
+    # Check seq_type
     seq_type = toml_config["general"]["seq_type"]
     if (toml_config["general"]["seq_type"] == "Meth") or ("methylation" in toml_config["general"]["analysis"]):
         methylation_status = True
     else:
         methylation_status = False
 
-    # if path has a "/" at the end, remove it
+    # Make sure path variable is correctly formatted (remove "/" at the end)
     path = toml_config["general"]["project_path"].rstrip("/")
     toml_config["general"]["project_path"] = path
 
-    # get all flowcell directory names
+    # Get all flowcell directory names
     fc_dir_names = []
     for entry in os.listdir(path):
         full_path = os.path.join(path, entry)
+        # This assumes MinKNOW will not change flowcell naming convention
         if os.path.isdir(full_path) and entry.startswith("2"):
             fc_dir_names.append(entry)
     toml_config['general']['fc_dir_names'] = fc_dir_names
 
 
-    # Making directory structure in project
-    directories = ["scripts", "alignments", "results", "qc"]
+    # Making directory structure in project (Within each sample library)
+    directories = ["scripts/logs", "alignments", "results", "qc"]
     for d in directories:
         if not os.path.exists(path + "/" + d):
             os.makedirs(path + "/" + d)
@@ -187,13 +198,14 @@ def create_config_final(filename):
     return toml_config
 
 def create_sample_sheet(toml_config):
-    path = toml_config["general"]["project_path"].rstrip("/")  # Normalize
+
+    path = toml_config["general"]["project_path"].rstrip("/")
     parts = path.split(os.sep)
 
     if len(parts) < 2:
         raise ValueError(f"Project path '{path}' is too short to parse project/date info")
 
-    # Take the *second-to-last* directory as project folder (date + name)
+    # Take the *second-to-last* directory as project folder 
     project_folder = parts[-2]
 
     # Split date and project name
@@ -205,13 +217,14 @@ def create_sample_sheet(toml_config):
             "to split date/project name"
         )
 
+    # Extract necessary information from the user-defined configuration
     kit = toml_config["general"]["kit"]
     samples = toml_config["general"]["samples"]
     conditions = toml_config["general"]["conditions"]
-
     flowcells = toml_config["general"]["fc_dir_names"]
     barcode = toml_config["general"]["barcode"]
 
+    # Iterate through each flowcell
     for flowcell in flowcells:
         flow_cell_id_list = flowcell.split("_")
         flow_cell_id = flow_cell_id_list[3] + "_" + flow_cell_id_list[4]
@@ -231,6 +244,7 @@ def create_sample_sheet(toml_config):
                 'type': conditions,
                 'barcode': range(barcode, barcode + len(samples))}
 
+        # Create the sample sheet and save to .csv
         df = pd.DataFrame(data=d)
         df["barcode"] = "barcode" + df["barcode"].astype(int).astype(str).str.zfill(2)
 
@@ -238,7 +252,9 @@ def create_sample_sheet(toml_config):
 
 
 def get_reference(ref):
-    path = "/lustre09/project/6019267/shared/tools/references/gencode/"
+
+    # Reference files location
+    path = TOOL_PATH + "references/gencode/"
     reference: {}  # type: ignore
     match ref:
         case "grch38":
@@ -246,19 +262,24 @@ def get_reference(ref):
                 "fasta": path + "GRCh38_p14/GRCh38.primary_assembly.genome.fa",
                 "gtf": path + "GRCh38_p14/gencode.v48.primary_assembly.annotation.gtf",
                 "chrom_size": path + "GRCh38_p14/GRCh38.primary_assembly.genome.chromSizes.txt"
+        # Other genomes can be added later
             }
     return reference
 
 
 def create_script(tool, cores, memory, time, output, email, command, flowcell):
+
+    # Enables creating a script per flowcell, or a single script if "" is added as the argument
     if flowcell != "":
         job = output + "/scripts/" + tool + "_" + flowcell + ".slurm"
 
-        with open("/lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/sbatch_template.txt", "r") as f:
+        # Uses a slurm template for each job script
+        with open(TOOL_PATH + "main_pipelines/long-read/LongReadSequencingONT/sbatch_template.txt", "r") as f:
             slurm = f.read()
+            # Because dorado utilizes a GPU, it needs different options
             if tool == "dorado_basecaller":
                 slurm_filled = slurm.format(cores, "#SBATCH --gpus=h100:1", memory, time, tool, flowcell, "log", "log", "def", email)
-
+            # Most tools will be CPU-dependent 
             else :
                 slurm_filled = slurm.format(cores, "", memory, time, tool, flowcell, "log", "log", "rrg", email)
                 slurm_filled += "module load StdEnv/2023 apptainer samtools\n"
@@ -266,29 +287,35 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
             slurm_filled += "\n#\n### Calling " + tool + " - " + flowcell + "\n#\n"
             slurm_filled += command
             slurm_filled += "\n\n"
-            # slurm_filled += 'echo "' + tool + '" >> ' + output + '/scripts/steps_done.txt'
+            # Pending completion to keep track of completed steps 
+            #slurm_filled += 'echo "' + tool + '" >> ' + output + '/scripts/steps_done.txt'
 
             with open(job, "w") as o:
                 o.write(slurm_filled)
 
                 return job
+            
+    # This is for tools running on all the data at once
     else :
         job = output + "/scripts/" + tool + ".slurm"
 
-        with open("/lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/sbatch_template.txt", "r") as f:
+        with open(TOOL_PATH + "main_pipelines/long-read/LongReadSequencingONT/sbatch_template.txt", "r") as f:
             slurm = f.read()
+            # Because dorado has a different log format? (Not sure if obsolete as demux is flowcell-specific)
             if tool == "dorado_demux":
                 slurm_filled = slurm.format(cores, "", memory, time, tool, "run", "out", "log", "rrg", email)
-
+            # For all other tools 
             else :
                 slurm_filled = slurm.format(cores, "", memory, time, tool, "run", "log", "log", "rrg", email)
 
+            # Add enviroment loading commands
             slurm_filled += "module load StdEnv/2023 apptainer samtools\n"
-            slurm_filled += "source /lustre09/project/6019267/shared/tools/main_pipelines/long-read/launch_pipeline_env/bin/activate"
+            slurm_filled += "source " + TOOL_PATH + "main_pipelines/long-read/launch_pipeline_env/bin/activate"
 
             slurm_filled += "\n#\n### Calling " + tool + "\n#\n"
             slurm_filled += command
             slurm_filled += "\n\n"
+            # Pending completion to keep track of completed steps
             # slurm_filled += 'echo "' + tool + '" >> ' + output + '/scripts/steps_done.txt'
 
             with open(job, "w") as o:
@@ -297,6 +324,8 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
                 return job
 
 def format_time(hours):
+
+    # Job time allocation formatting
     if hours < 1:
         hours = 1.5
     days = int(hours // 24)
@@ -309,96 +338,131 @@ def format_time(hours):
 
 
 def main_pipeline(toml_config):
+
+    # This function creates the core commands that will be added to main.sh (essential)
     output = toml_config["general"]["project_path"]
     email = toml_config["general"]["email"]
     genome = get_reference(toml_config["general"]["reference"])["fasta"]
-
     flowcells = toml_config["general"]["fc_dir_names"]
+    
+    # Iterate through each flowcell for basecalling and demultiplexing
     codes = []
     for flowcell in flowcells:
         reads = output + "/" + flowcell + "/reads/pod5"
         final = output + "/" + flowcell + "/alignments/"
         bam_dorado = final + flowcell + ".bam"
 
+        # Simplify flowcell name with a shorter string
         code = flowcell.split('_')[-1]
         codes.append(code)
 
-        # BASECALLER
+        # BASECALLER - TOOL 1 
         tool = "dorado_basecaller"
         cores = "8"
         memory = "64"
 
-        # Get reads size
+        # Get reads files size
         cmd = ["du", "-sh", "--apparent-size", "--block-size", "G", reads]
         result = subprocess.run(cmd, capture_output=True, text=True)
 
         size_str = result.stdout.split()[0].rstrip('G')
 
+        # Scale required job time based on amount of data 
         hours = int(size_str) * 0.02
         formatted_time = format_time(hours)
 
-        command = ["/lustre09/project/6019267/shared/tools/main_pipelines/long-read/dorado-1.0.0-linux-x64/bin/dorado", "basecaller", "-v", "--device", "cuda:0", "--emit-moves", "--min-qscore", str(toml_config["dorado"]["min_q_score"]), "--reference", genome, "--sample-sheet", output + "/scripts/" + flowcell + ".csv", "--no-trim", "--kit-name", toml_config["general"]["kit"], "--mm2-opts", toml_config["dorado"]["mm2_opts"]]
+        command = [TOOL_PATH + "main_pipelines/long-read/dorado-1.0.0-linux-x64/bin/dorado", 
+                   "basecaller", "-v", "--device", "cuda:0", 
+                   "--emit-moves", "--min-qscore", 
+                   str(toml_config["dorado"]["min_q_score"]), 
+                   "--reference", genome, 
+                   "--sample-sheet", output + "/scripts/" + flowcell + ".csv", 
+                   "--no-trim", "--kit-name", toml_config["general"]["kit"], 
+                   "--mm2-opts", toml_config["dorado"]["mm2_opts"]
+                   ]
 
+        # Increases stringency if user defines it
         if toml_config["dorado"]["barcode_both_ends"] in ["true", "True", "yes", "Yes"]:
             command.extend(["--barcode-both-ends"])
-
+        # Different model that includes base modification
         if "methylation" in toml_config["general"]["analysis"]:
-            command.extend(["--modified-bases-models", "/lustre09/project/6019267/shared/tools/main_pipelines/long-read/dorado_models/" + toml_config["dorado"]["modified_bases"], "--modified-bases-threshold", str(toml_config["dorado"]["modified_bases_threshold"])])
-
+            command.extend(["--modified-bases-models", TOOL_PATH + "main_pipelines/long-read/dorado_models/" + toml_config["dorado"]["modified_bases"], 
+                            "--modified-bases-threshold", str(toml_config["dorado"]["modified_bases_threshold"])])
+        # For transcriptomic data, when activated
         if "polya" in toml_config["general"]["analysis"]:
             command.extend(["--estimate-poly-a"])
 
-        model = "/lustre09/project/6019267/shared/tools/main_pipelines/long-read/dorado_models/" + toml_config['dorado']['model']
+        model = TOOL_PATH + "main_pipelines/long-read/dorado_models/" + toml_config['dorado']['model']
         command.extend([model, reads, ">", bam_dorado])
 
         command_str = " ".join(command)
 
         job = create_script(tool, cores, memory, formatted_time, output, email, command_str, flowcell)
 
+        # Creates a variable job name for each flowcell (used for dependencies)
         var_name_bc = f"basecall_{code}"
 
         # Add slurm job to main.sh
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("# Flowcell : " + flowcell + "\n")
-            f.write(f'{var_name_bc}=$(sbatch --parsable ' + job + ")\n")
+            f.write(f"{var_name_bc}=$(sbatch --parsable {job})\n")
 
-        # DEMUX
+        # DEMUX - TOOL 2
         tool2 = "dorado_demux"
-
         cores2 = "4"
         memory2 = "24"
 
+        # Scale required job time based on amount of data
         hours2 = int(size_str) * 0.01
         formatted_time2 = format_time(hours2)
 
-        command2 = ["/lustre09/project/6019267/shared/tools/main_pipelines/long-read/dorado-1.1.0-linux-x64/bin/dorado", "demux", "-vv", "--threads", cores2, "--no-trim", "--output-dir", final, "--no-classify", bam_dorado, "\n\n"]
+        command2 = [TOOL_PATH + "main_pipelines/long-read/dorado-1.1.0-linux-x64/bin/dorado", 
+                    "demux", "-vv", 
+                    "--threads", cores2, 
+                    "--no-trim", 
+                    "--output-dir", final, 
+                    "--no-classify", bam_dorado, "\n\n"
+                    ]
         command_str2 = " ".join(command2)
 
         # Create slurm job
         job2 = create_script(tool2, cores2, memory2, formatted_time2, output, email, command_str2, flowcell)
 
+        # Different variable name for next set of dependencies
         var_name = f"demux_{code}"
 
         # Add slurm job to main.sh
         with open(output + "/scripts/main.sh", "a") as f:
-            f.write(f'{var_name}=$(sbatch --parsable --dependency=afterok:${var_name_bc} ' + job2 + ')\n\n')
+            f.write(f"{var_name}=$(sbatch --parsable --dependency=afterok:${var_name_bc} {job2})\n\n")
 
-    # Samtools
+    # SAMTOOLS - TOOL 3 (Only 1 job for all flowcells)
     dependencies = ":".join([f"$demux_{code}" for code in codes])
-    command3 = ["python", "-u", "/lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/rename_bam.py", toml_config["general"]["project_path"] + '/scripts/config_final.toml']
+    command3 = ["python", "-u", 
+                TOOL_PATH + "main_pipelines/long-read/LongReadSequencingONT/rename_bam.py", 
+                toml_config["general"]["project_path"] + '/scripts/config_final.toml'
+                ]
     command_str3 = " ".join(command3)
     time3 = "00-11:00"
     job3 = create_script("samtools", "8", "32", time3, output, email, command_str3, "")
 
+    # Add slurm job to main.sh
     with open(output + "/scripts/main.sh", "a") as f:
         f.write("# Rename, merge, sort and index bams")
         f.write(f"\nsamtools=$(sbatch --parsable --dependency=afterok:{dependencies} {job3})\n")
 
 
-    # QC
+    # QC - TOOL 4 (LongReadSum - only 1 job for all flowcells)
     command_str4 = ""
     for name in toml_config["general"]["samples"]:
-        command4 = ["apptainer", "run", "/lustre09/project/6019267/shared/tools/main_pipelines/long-read/image_longreadsum.sif", "bam", "--threads", "8", "--ref", genome, "-Q", '"' + name + '_"', "-i", output + "/alignments/" + name + "_sorted.bam", "-o", output + "/qc"]
+        command4 = ["apptainer", "run", 
+                    TOOL_PATH + "main_pipelines/long-read/image_longreadsum.sif", 
+                    "bam", 
+                    "--threads", "8", 
+                    "--ref", genome, 
+                    "-Q", '"' + name + '_"', 
+                    "-i", output + "/alignments/" + name + "_sorted.bam", 
+                    "-o", output + "/qc"
+                    ]
 
         if "methylation" in toml_config["general"]["analysis"]:
             command4.extend(["--mod"])
@@ -410,33 +474,51 @@ def main_pipeline(toml_config):
         command_str4 += " ".join(command4)
 
     time4 = "00-23:00"
-
     job4 = create_script("LongReadSum", "8", "200", time4, output, email, command_str4, "")
 
+    # Add slurm job to main.sh
     with open(output + "/scripts/main.sh", "a") as f:
         f.write("# QC\n")
-        f.write(f'\nsbatch --dependency=afterok:$samtools {job4}\n')
+        f.write(f"\nlongreadsum=$(sbatch --parsable --dependency=afterok:$samtools {job4})\n")
 
 
 
 def qc(toml_config):
+
+    # Currently unused - This function would split the quality control step out of the main pipeline
     tool = "qc"
     output = toml_config["general"]["project_path"]
+    # This .csv is inexistent, will need to iterate through flowcells for command line list
     df = pd.read_csv(output + "/scripts/samples.csv", header=0)
     df["name"] = df["alias"] + "_" + df["barcode"]
     fasta = get_reference(toml_config["general"]["reference"])["fasta"]
-
+    # Should end up mirroring the main pipeline parameters
     threads = "8"
     memory = "200"
     time = "00-11:59"
     email = toml_config["general"]["email"]
 
-    command_pod5 = ["apptainer", "run", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_longreadsum.sif", "pod5", "--threads", threads, "--log", output + "/qc/longreadsum_pod5.log", "-Q", '"' + flowcell + '"', "-P", '"' + output + "/reads/pod5/*.pod5\"", "-o", output + "/qc", "--basecalls", output + "/alignments/" + flowcell + ".bam", "\n\n"]
+    # Few broken lines in there - pending
+    command_pod5 = ["apptainer", "run", 
+                    TOOL_PATH + "main_pipelines/long-read/image_longreadsum.sif", 
+                    "pod5", "--threads", threads, 
+                    "--log", output + "/qc/longreadsum_pod5.log", 
+                    "-Q", '"' + flowcell + '"', 
+                    "-P", '"' + output + "/reads/pod5/*.pod5\"", 
+                    "-o", output + "/qc", "--basecalls", output + "/alignments/" + flowcell + ".bam", "\n\n"
+                    ]
     command_str1 = " ".join(command_pod5)
 
     command_str2 = ""
     for name in df["name"]:
-        command = ["apptainer", "run", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_longreadsum.sif", "bam", "--threads", threads, "--log", output + "/qc/longreadsum_" + name + ".log", "--ref", fasta, "-Q", '"' + name + '_"', "-i", output + "/alignments/" + name + ".bam", "-o", output + "/qc"]
+        command = ["apptainer", "run", 
+                   TOOL_PATH + "main_pipelines/long-read/image_longreadsum.sif", 
+                   "bam", "--threads", threads, 
+                   "--log", output + "/qc/longreadsum_" + name + ".log", 
+                   "--ref", fasta, "-Q", '"' + name + '_"', 
+                   "-i", output + "/alignments/" + name + ".bam", 
+                   "-o", output + "/qc"
+                   ]
 
         if "methylation" in toml_config["general"]["analysis"]:
             command.extend(["--mod"])
@@ -447,13 +529,14 @@ def qc(toml_config):
     command_str = command_str1 + command_str2
 
     # Create slurm job
-    job = create_script(tool, threads, memory, time, output, email, command_str)
+    job = create_script(tool, threads, memory, time, output, email, command_str, "")
 
     done = []
     with open(output + "/scripts/steps_done.txt", "r") as f:
         for line in f:
             done.append(line.strip())
 
+    # Add slurm job to main.sh (broken - pending)
     if "dorado_demux" not in done:
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("sbatch --dependency=afterok:$dorado " + job + "\n")
@@ -461,14 +544,65 @@ def qc(toml_config):
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("sbatch " + job + "\n")
 
+def cleanup(toml_config):
+
+    # Simple function to remove redundant files and cleanup structure 
+    tool="cleanup"
+    output = toml_config["general"]["project_path"]
+    threads = "1"
+    memory = "1"
+    time = "00-00:30"
+    email = toml_config["general"]["email"]
+    flowcells = toml_config["general"]["fc_dir_names"]
+
+    # Build cleanup commands
+    commands = []
+
+    # Move all logs to scripts/logs
+    commands.append(f"mv {output}/*.log {output}/scripts/logs/")
+
+    # Move all files in the main directory to scripts
+    commands.append(f"mv -t {output}/scripts/ {output}/*.txt {output}/*.sh {output}/*.py")
+
+    # Remove temp directories/files for each flowcell (MinKNOW-related OR redundant from merge)
+    for flow in flowcells:
+        commands.append(f"rm -rf {output}/{flow}/fastq_*")
+        commands.append(f"rm -rf {output}/{flow}/bam_*")
+        commands.append(f"rm -rf {output}/{flow}/alignments/*.bam")
+        commands.append(f"rm -rf {output}/{flow}/alignments/*.bam.bai")
+        commands.append(f"rm -f {output}/{flow}/main_reports/sequencing_summary*.txt")
+
+    # Join all commands into a single string
+    command_str = "\n".join(commands)
+
+    # Create slurm job (Might be wasteful of server resources?)
+    job = create_script(tool, threads, memory, time, output, email, command_str, "")
+
+    done = []
+    # For future - check if step is already done
+    with open(output + "/scripts/steps_done.txt", "r") as f:
+        for line in f:
+            done.append(line.strip())
+
+    # If QC is running, wait for it to finish
+    if "qc" not in done:
+        with open(output + "/scripts/main.sh", "a") as f:
+            f.write("\n# Cleanup temporary files and logs\n")
+            f.write(f"cleanup=$(sbatch --parsable --dependency=afterok:$longreadsum {job})\n")
+    else:
+        with open(output + "/scripts/main.sh", "a") as f:
+            f.write("\n# Cleanup temporary files and logs\n")
+            f.write(f"sbatch {job} \n")
 
 def clair3(toml_config):
+
+    # Pending - Variant calling with Clair3
     tool = "clair3"
 
     output = toml_config["general"]["project_path"]
     ref = get_reference(toml_config["general"]["reference"])["fasta"] # same ref for RNA + DNA ?
     bam = output + "/alignments/" + flowcell + "_sorted.bam"
-    model = "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/Clair3/models/r1041_e82_400bps_sup_v420" # https://www.bio8.cs.hku.hk/clair3/clair3_models/
+    model = TOOL_PATH + "PIPELINES/LongReadSequencing/Clair3/models/r1041_e82_400bps_sup_v420" # https://www.bio8.cs.hku.hk/clair3/clair3_models/
     platform_rna = "ont_dorado_drna004" # Possible options: {ont_dorado_drna004, ont_guppy_drna002, ont_guppy_cdna, hifi_sequel2_pbmm2, hifi_sequel2_minimap2, hifi_mas_pbmm2, hifi_sequel2_minimap2}.
     platform_dna = "ont"
 
@@ -478,10 +612,10 @@ def clair3(toml_config):
     email = toml_config["general"]["email"]
 
     if toml_config["general"]["seq_type"] == "RNA":
-        command = ["apptainer", "run", "-C", "-W", "${SLURM_TMPDIR}", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_" + tool + ".sif ", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/Clair3-RNA/run_clair3_rna", "--bam_fn", bam, "--ref_fn", ref, "--threads", threads, "--platform", platform_rna, "--output_dir", output + "/results/", "\n\n"]
+        command = ["apptainer", "run", "-C", "-W", "${SLURM_TMPDIR}", TOOL_PATH + "PIPELINES/LongReadSequencing/image_" + tool + ".sif ", TOOL_PATH + "/PIPELINES/LongReadSequencing/Clair3-RNA/run_clair3_rna", "--bam_fn", bam, "--ref_fn", ref, "--threads", threads, "--platform", platform_rna, "--output_dir", output + "/results/", "\n\n"]
         # add --enable_phasing_model ?
     else:
-        command = ["apptainer", "run", "-C", "-W", "${SLURM_TMPDIR}", "/lustre03/project/6019267/shared/tools/PIPELINES/LongReadSequencing/image_" + tool + ".sif ", "run_clair3.sh", "-b", bam, "-f", ref, "-m", model, "-t", threads, "-p", platform_dna, "-o", output + "/results/", "\n\n"]
+        command = ["apptainer", "run", "-C", "-W", "${SLURM_TMPDIR}", TOOL_PATH + "PIPELINES/LongReadSequencing/image_" + tool + ".sif ", "run_clair3.sh", "-b", bam, "-f", ref, "-m", model, "-t", threads, "-p", platform_dna, "-o", output + "/results/", "\n\n"]
 
     command2 = ["mv", output + "/results/output.vcf.gz", output + "/results/" + flowcell + ".vcf.gz", "\n\n"]
     command3 = ["mv", output + "/results/output.vcf.gz.tbi", output + "/results/" + flowcell + ".vcf.gz.tbi"]
@@ -511,6 +645,8 @@ def clair3(toml_config):
 
 
 def whatshap(toml_config):
+
+    # Pending - Phasing of alleles
     tool = "whatshap"
 
     output = toml_config["general"]["project_path"]
@@ -538,6 +674,8 @@ def whatshap(toml_config):
 
 
 def sniffles2(toml_config):
+
+    # Pending - SNV calling with Sniffles2
     tool = "sniffles2"
 
     output = toml_config["general"]["project_path"]
@@ -561,6 +699,6 @@ def sniffles2(toml_config):
     # Launch slurm job
     subprocess.run(["bash", job], check=True) # put sbatch instead of bash when on beluga
 
-
+# Launches main function
 if __name__ == "__main__":
     main()
