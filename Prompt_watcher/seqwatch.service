@@ -1,0 +1,19 @@
+# This must be placed in the ~/.config/systemd/user/ & activated (sudo chmod +x)
+[Unit]
+Description=Watch for new sequencing runs and prompt user
+After=graphical.target
+
+[Service]
+ExecStart=/home/grub/watch_new_seq.sh
+Restart=always
+RestartSec=5s                # retry after 5 seconds if it fails
+StartLimitBurst=0             # unlimited restarts
+StartLimitIntervalSec=0
+
+# Ensure it has access to the desktop session
+Environment=DISPLAY=:1
+Environment=XAUTHORITY=/run/user/1000/gdm/Xauthority
+Environment=DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus
+
+[Install]
+WantedBy=default.target
