@@ -1,7 +1,8 @@
 #!/bin/bash
 # Interactive config generator for Nanopore pipeline
 
-CONFIG="config_initial.txt"
+TARGET_DIR="${1:-$(pwd)}"
+CONFIG="$TARGET_DIR/config_initial.txt"
 echo "[general]" > "$CONFIG"
 
 prompt() {
@@ -19,9 +20,9 @@ prompt() {
 
 # Project path
 echo
-echo ">>> Project folder location (This should be a full path AND it should include the Pool/Sample Name)"
+echo ">>> Project folder name (This includes the name you gave the sample; i.e. 2025-08-25_FXN-WGS-Batch1/FXN_N12)"
 project_path=$(prompt "project_path" "Project path" "")
-echo "    project_path = \"$project_path\"" >> "$CONFIG"
+echo "    project_path = \"/lustre09/project/6019267/shared/projects/Nanopore_Dock/$project_path\"" >> "$CONFIG"
 
 # Barcode
 barcode=$(prompt "barcode" "Barcode (first number or leave empty for none)" "")
