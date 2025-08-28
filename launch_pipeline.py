@@ -495,7 +495,7 @@ def longreadsum(toml_config):
         command = ["apptainer", "run", 
                     TOOL_PATH + "main_pipelines/long-read/image_longreadsum.sif", 
                     "bam", 
-                    "--threads", "8", 
+                    "--threads", cores, 
                     "--ref", genome, 
                     "-Q", '"' + name + '_"', 
                     "-i", output + "/alignments/" + name + "_sorted.bam", 
