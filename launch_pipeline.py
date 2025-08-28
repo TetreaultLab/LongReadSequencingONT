@@ -40,7 +40,7 @@ def main():
         # Create sample_sheet.csv
         create_sample_sheet(toml_config)
 
-        print("\n\n\n!!! WARNING !!!\nIf you to change the parameters: Press CTRL+C now!\nModify config_final.toml and launch_pipeline with that config file.\n\nOtherwise it will run with default parameters.\n\n")
+        print("\n\n\n!!! WARNING !!!\nIf you want to change the parameters: Press CTRL+C now!\nModify config_final.toml and launch_pipeline with that config file.\n\nOtherwise it will run with default parameters.\n\n")
         time.sleep(10)
 
     else:
@@ -511,7 +511,7 @@ def longreadsum(toml_config):
 
         command_str += " ".join(command)
 
-    job4 = create_script(tool, cores, memory, time, output, email, command_str, "")
+    job = create_script(tool, cores, memory, time, output, email, command_str, "")
 
     # Add slurm job to main.sh
     with open(output + "/scripts/main.sh", "a") as f:
