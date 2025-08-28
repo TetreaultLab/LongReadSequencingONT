@@ -58,33 +58,25 @@ def main():
 
     function_queue = []
     # Setting up list of steps
-    # Base calling
-    if "main_pipeline" not in done:
-        function_queue.append(main_pipeline)
+    # Dorado Basecalling
+    if "dorado_basecaller" not in done:
+        function_queue.append(dorado_basecaller)
 
-    # Quality Control
-    #if "qc" not in done:
-        #function_queue.append(qc)
+    # Dorado Basecalling
+    if "dorado_demux" not in done:
+        function_queue.append(dorado_demux)
+
+    # Renaming bams and running samtools merge, sort and index
+    if "samtools" not in done:
+        function_queue.append(samtools)
+    
+    # Quality Control - LongReadSum
+    if "longreadsum" not in done:
+        function_queue.append(longreadsum)
 
     # Cleanup
     if "cleanup" not in done:
         function_queue.append(cleanup)
-
-    # SNP calling
-    #if "SNP" in toml_config["general"]["analysis"]:
-    #    if "clair3" not in done:
-    #        function_queue.append(clair3)
-
-    # Phasing
-    #if "whatshap" not in done:
-    #    function_queue.append(whatshap)
-
-    # SV calling
-    #if "SV" in toml_config["general"]["analysis"]:
-    #    if "sniffles2" not in done:
-    #        function_queue.append(sniffles2)
-
-    # Other tools ...
 
 
     # Create main.sh
@@ -279,6 +271,10 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
             # Because dorado utilizes a GPU, it needs different options
             if tool == "dorado_basecaller":
                 slurm_filled = slurm.format(cores, "#SBATCH --gpus=h100:1", memory, time, tool, flowcell, "log", "log", "def", email)
+            
+            else if tool == "dorado_demux":
+                slurm_filled = slurm.format(cores, "", memory, time, tool, "run", "out", "log", "rrg", email)
+            
             # Most tools will be CPU-dependent 
             else :
                 slurm_filled = slurm.format(cores, "", memory, time, tool, flowcell, "log", "log", "rrg", email)
@@ -302,11 +298,8 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
         with open(TOOL_PATH + "main_pipelines/long-read/LongReadSequencingONT/sbatch_template.txt", "r") as f:
             slurm = f.read()
             # Because dorado has a different log format? (Not sure if obsolete as demux is flowcell-specific)
-            if tool == "dorado_demux":
-                slurm_filled = slurm.format(cores, "", memory, time, tool, "run", "out", "log", "rrg", email)
             # For all other tools 
-            else :
-                slurm_filled = slurm.format(cores, "", memory, time, tool, "run", "log", "log", "rrg", email)
+            slurm_filled = slurm.format(cores, "", memory, time, tool, "run", "log", "log", "rrg", email)
 
             # Add enviroment loading commands
             slurm_filled += "module load StdEnv/2023 apptainer samtools\n"
@@ -337,9 +330,9 @@ def format_time(hours):
     return(formatted_time)
 
 
-def main_pipeline(toml_config):
+def dorado_basecaller(toml_config):
 
-    # This function creates the core commands that will be added to main.sh (essential)
+    tool = "dorado_basecaller"
     output = toml_config["general"]["project_path"]
     email = toml_config["general"]["email"]
     genome = get_reference(toml_config["general"]["reference"])["fasta"]
@@ -356,8 +349,6 @@ def main_pipeline(toml_config):
         code = flowcell.split('_')[-1]
         codes.append(code)
 
-        # BASECALLER - TOOL 1 
-        tool = "dorado_basecaller"
         cores = "8"
         memory = "64"
 
@@ -407,54 +398,100 @@ def main_pipeline(toml_config):
             f.write("# Flowcell : " + flowcell + "\n")
             f.write(f"{var_name_bc}=$(sbatch --parsable {job})\n")
 
-        # DEMUX - TOOL 2
-        tool2 = "dorado_demux"
-        cores2 = "4"
-        memory2 = "24"
+def dorado_demux(toml_config):
+
+    tool = "dorado_demux"
+    output = toml_config["general"]["project_path"]
+    email = toml_config["general"]["email"]
+    genome = get_reference(toml_config["general"]["reference"])["fasta"]
+    flowcells = toml_config["general"]["fc_dir_names"]
+    
+    # Iterate through each flowcell for basecalling and demultiplexing
+    codes = []
+    for flowcell in flowcells:
+        reads = output + "/" + flowcell + "/reads/pod5"
+        final = output + "/" + flowcell + "/alignments/"
+        bam_dorado = final + flowcell + ".bam"
+
+        # Simplify flowcell name with a shorter string
+        code = flowcell.split('_')[-1]
+        codes.append(code)
+
+        # Get reads files size
+        cmd = ["du", "-sh", "--apparent-size", "--block-size", "G", reads]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+
+        size_str = result.stdout.split()[0].rstrip('G')
+
+        cores = "4"
+        memory = "24"
 
         # Scale required job time based on amount of data
-        hours2 = int(size_str) * 0.01
-        formatted_time2 = format_time(hours2)
+        hours = int(size_str) * 0.01
+        formatted_time = format_time(hours)
 
-        command2 = [TOOL_PATH + "main_pipelines/long-read/dorado-1.1.0-linux-x64/bin/dorado", 
+        command = [TOOL_PATH + "main_pipelines/long-read/dorado-1.1.0-linux-x64/bin/dorado", 
                     "demux", "-vv", 
-                    "--threads", cores2, 
+                    "--threads", cores, 
                     "--no-trim", 
                     "--output-dir", final, 
                     "--no-classify", bam_dorado, "\n\n"
                     ]
-        command_str2 = " ".join(command2)
+        command_str = " ".join(command)
 
         # Create slurm job
-        job2 = create_script(tool2, cores2, memory2, formatted_time2, output, email, command_str2, flowcell)
+        job = create_script(tool, cores, memory, formatted_time, output, email, command_str, flowcell)
 
         # Different variable name for next set of dependencies
         var_name = f"demux_{code}"
 
         # Add slurm job to main.sh
         with open(output + "/scripts/main.sh", "a") as f:
-            f.write(f"{var_name}=$(sbatch --parsable --dependency=afterok:${var_name_bc} {job2})\n\n")
+            f.write(f"{var_name}=$(sbatch --parsable --dependency=afterok:${var_name_bc} {job})\n\n")
 
-    # SAMTOOLS - TOOL 3 (Only 1 job for all flowcells)
+def samtools(toml_config):
+    tool="samtools"
+    cores="8"
+    memory="32"
+    time = "00-11:00"
+
+    output = toml_config["general"]["project_path"]
+    email = toml_config["general"]["email"]
+    genome = get_reference(toml_config["general"]["reference"])["fasta"]
+    flowcells = toml_config["general"]["fc_dir_names"]
+
+    codes = []
+    for flowcell in flowcells:
+        code = flowcell.split('_')[-1]
+        codes.append(code)
     dependencies = ":".join([f"$demux_{code}" for code in codes])
-    command3 = ["python", "-u", 
+    command = ["python", "-u", 
                 TOOL_PATH + "main_pipelines/long-read/LongReadSequencingONT/rename_bam.py", 
                 toml_config["general"]["project_path"] + '/scripts/config_final.toml'
                 ]
-    command_str3 = " ".join(command3)
-    time3 = "00-11:00"
-    job3 = create_script("samtools", "8", "32", time3, output, email, command_str3, "")
+    command_str = " ".join(command)
+    
+    job = create_script(tool, cores, memory, time, output, email, command_str, "")
 
     # Add slurm job to main.sh
     with open(output + "/scripts/main.sh", "a") as f:
         f.write("# Rename, merge, sort and index bams")
-        f.write(f"\nsamtools=$(sbatch --parsable --dependency=afterok:{dependencies} {job3})\n")
+        f.write(f"\nsamtools=$(sbatch --parsable --dependency=afterok:{dependencies} {job})\n")
 
 
-    # QC - TOOL 4 (LongReadSum - only 1 job for all flowcells)
-    command_str4 = ""
+def longreadsum(toml_config):
+    tool="longreadsum"
+    cores="4"
+    memory="16"
+    time = "00-23:00"
+
+    output = toml_config["general"]["project_path"]
+    email = toml_config["general"]["email"]
+    genome = get_reference(toml_config["general"]["reference"])["fasta"]
+
+    command_str = ""
     for name in toml_config["general"]["samples"]:
-        command4 = ["apptainer", "run", 
+        command = ["apptainer", "run", 
                     TOOL_PATH + "main_pipelines/long-read/image_longreadsum.sif", 
                     "bam", 
                     "--threads", "8", 
@@ -465,84 +502,21 @@ def main_pipeline(toml_config):
                     ]
 
         if "methylation" in toml_config["general"]["analysis"]:
-            command4.extend(["--mod"])
+            command.extend(["--mod"])
 
-        command4.extend(["\n"])
-        command4.extend(["mv", output + "/qc/bam_summary.txt", output + "/qc/" + name + "_bam_summary.txt"])
-        command4.extend(["\n\n"])
+        command.extend(["\n"])
+        command.extend(["mv", output + "/qc/bam_summary.txt", output + "/qc/" + name + "_bam_summary.txt"])
+        command.extend(["\n\n"])
 
-        command_str4 += " ".join(command4)
+        command_str += " ".join(command)
 
-    time4 = "00-23:00"
-    job4 = create_script("LongReadSum", "8", "200", time4, output, email, command_str4, "")
+    job4 = create_script(tool, cores, memory, time, output, email, command_str, "")
 
     # Add slurm job to main.sh
     with open(output + "/scripts/main.sh", "a") as f:
         f.write("# QC\n")
-        f.write(f"\nlongreadsum=$(sbatch --parsable --dependency=afterok:$samtools {job4})\n")
+        f.write(f"\nlongreadsum=$(sbatch --parsable --dependency=afterok:$samtools {job})\n")
 
-
-
-def qc(toml_config):
-
-    # Currently unused - This function would split the quality control step out of the main pipeline
-    tool = "qc"
-    output = toml_config["general"]["project_path"]
-    # This .csv is inexistent, will need to iterate through flowcells for command line list
-    df = pd.read_csv(output + "/scripts/samples.csv", header=0)
-    df["name"] = df["alias"] + "_" + df["barcode"]
-    fasta = get_reference(toml_config["general"]["reference"])["fasta"]
-    # Should end up mirroring the main pipeline parameters
-    threads = "8"
-    memory = "200"
-    time = "00-11:59"
-    email = toml_config["general"]["email"]
-
-    # Few broken lines in there - pending
-    command_pod5 = ["apptainer", "run", 
-                    TOOL_PATH + "main_pipelines/long-read/image_longreadsum.sif", 
-                    "pod5", "--threads", threads, 
-                    "--log", output + "/qc/longreadsum_pod5.log", 
-                    "-Q", '"' + flowcell + '"', 
-                    "-P", '"' + output + "/reads/pod5/*.pod5\"", 
-                    "-o", output + "/qc", "--basecalls", output + "/alignments/" + flowcell + ".bam", "\n\n"
-                    ]
-    command_str1 = " ".join(command_pod5)
-
-    command_str2 = ""
-    for name in df["name"]:
-        command = ["apptainer", "run", 
-                   TOOL_PATH + "main_pipelines/long-read/image_longreadsum.sif", 
-                   "bam", "--threads", threads, 
-                   "--log", output + "/qc/longreadsum_" + name + ".log", 
-                   "--ref", fasta, "-Q", '"' + name + '_"', 
-                   "-i", output + "/alignments/" + name + ".bam", 
-                   "-o", output + "/qc"
-                   ]
-
-        if "methylation" in toml_config["general"]["analysis"]:
-            command.extend(["--mod"])
-
-        command.extend(["\n\n"])
-        command_str2 += " ".join(command)
-
-    command_str = command_str1 + command_str2
-
-    # Create slurm job
-    job = create_script(tool, threads, memory, time, output, email, command_str, "")
-
-    done = []
-    with open(output + "/scripts/steps_done.txt", "r") as f:
-        for line in f:
-            done.append(line.strip())
-
-    # Add slurm job to main.sh (broken - pending)
-    if "dorado_demux" not in done:
-        with open(output + "/scripts/main.sh", "a") as f:
-            f.write("sbatch --dependency=afterok:$dorado " + job + "\n")
-    else:
-        with open(output + "/scripts/main.sh", "a") as f:
-            f.write("sbatch " + job + "\n")
 
 def cleanup(toml_config):
 
@@ -594,110 +568,6 @@ def cleanup(toml_config):
             f.write("\n# Cleanup temporary files and logs\n")
             f.write(f"sbatch {job} \n")
 
-def clair3(toml_config):
-
-    # Pending - Variant calling with Clair3
-    tool = "clair3"
-
-    output = toml_config["general"]["project_path"]
-    ref = get_reference(toml_config["general"]["reference"])["fasta"] # same ref for RNA + DNA ?
-    bam = output + "/alignments/" + flowcell + "_sorted.bam"
-    model = TOOL_PATH + "PIPELINES/LongReadSequencing/Clair3/models/r1041_e82_400bps_sup_v420" # https://www.bio8.cs.hku.hk/clair3/clair3_models/
-    platform_rna = "ont_dorado_drna004" # Possible options: {ont_dorado_drna004, ont_guppy_drna002, ont_guppy_cdna, hifi_sequel2_pbmm2, hifi_sequel2_minimap2, hifi_mas_pbmm2, hifi_sequel2_minimap2}.
-    platform_dna = "ont"
-
-    threads = "8"
-    memory = "32"
-    time = "00-23:59"
-    email = toml_config["general"]["email"]
-
-    if toml_config["general"]["seq_type"] == "RNA":
-        command = ["apptainer", "run", "-C", "-W", "${SLURM_TMPDIR}", TOOL_PATH + "PIPELINES/LongReadSequencing/image_" + tool + ".sif ", TOOL_PATH + "/PIPELINES/LongReadSequencing/Clair3-RNA/run_clair3_rna", "--bam_fn", bam, "--ref_fn", ref, "--threads", threads, "--platform", platform_rna, "--output_dir", output + "/results/", "\n\n"]
-        # add --enable_phasing_model ?
-    else:
-        command = ["apptainer", "run", "-C", "-W", "${SLURM_TMPDIR}", TOOL_PATH + "PIPELINES/LongReadSequencing/image_" + tool + ".sif ", "run_clair3.sh", "-b", bam, "-f", ref, "-m", model, "-t", threads, "-p", platform_dna, "-o", output + "/results/", "\n\n"]
-
-    command2 = ["mv", output + "/results/output.vcf.gz", output + "/results/" + flowcell + ".vcf.gz", "\n\n"]
-    command3 = ["mv", output + "/results/output.vcf.gz.tbi", output + "/results/" + flowcell + ".vcf.gz.tbi"]
-
-    command_str1 = " ".join(command)
-    command_str2 = " ".join(command2)
-    command_str3 = " ".join(command3)
-
-    command_str = command_str1 + command_str2 + command_str3
-
-    # Create slurm job
-    job = create_script(tool, threads, memory, time, output, email, command_str)
-
-
-    # Add slurm job to main.sh
-    done = []
-    with open(output + "/scripts/steps_done.txt", "r") as f:
-        for line in f:
-            done.append(line.strip())
-
-    if "dorado" not in done:
-        with open(output + "/scripts/main.sh", "a") as f:
-            f.write("sbatch --dependency=afterok:$dorado " + job + "\n")
-    else:
-        with open(output + "/scripts/main.sh", "a") as f:
-            f.write("sbatch " + job + "\n")
-
-
-def whatshap(toml_config):
-
-    # Pending - Phasing of alleles
-    tool = "whatshap"
-
-    output = toml_config["general"]["project_path"]
-    output_vcf = output + "/results/" + flowcell + "phased.vcf"
-    input_vcf = output + "/results/" + flowcell + ".vcf.gz"
-    bam = output + "/alignments/" + flowcell + "_sorted.bam"
-
-    ref = get_reference(toml_config["general"]["reference"])["fasta"]
-
-    threads = "8"
-    memory = "32"
-    time = "00-23:59"
-    email = toml_config["general"]["email"]
-
-    command = ["whatshap", "phase", "--ignore-read-groups", "-o", output_vcf, "--reference", ref, input_vcf, bam]
-
-    command_str = " ".join(command)
-    print(f">>> {command_str}\n")
-
-    # Create slurm job
-    job = create_script(tool, threads, memory, time, output, email, command_str)
-
-    # Launch slurm job
-    subprocess.run(["bash", job], check=True) # put sbatch instead of bash when on beluga
-
-
-def sniffles2(toml_config):
-
-    # Pending - SNV calling with Sniffles2
-    tool = "sniffles2"
-
-    output = toml_config["general"]["project_path"]
-    bam = "/home/shared/data/2024-10-16_Lapiana_n17/no_sample_id/20241016_1653_X2_FAV26227_d404da0e/alignment/minimap2_sup/B1540_sorted.bam"
-    vcf = output + "/sniffles2_SV.vcf"
-    ref = get_reference(toml_config["general"]["reference"])["fasta"]
-
-    threads = "8"
-    memory = "32"
-    time = "00-23:59"
-    email = toml_config["general"]["email"]
-
-    command = ["sniffles", "--threads", threads, "--reference", ref, "--input", bam, "--vcf", vcf]
-
-    command_str = " ".join(command)
-    print(f">>> {command_str}\n")
-
-    # Create slurm job
-    job = create_script(tool, threads, memory, time, output, email, command_str)
-
-    # Launch slurm job
-    subprocess.run(["bash", job], check=True) # put sbatch instead of bash when on beluga
 
 # Launches main function
 if __name__ == "__main__":
