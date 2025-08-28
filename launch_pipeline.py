@@ -333,9 +333,29 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
 
 def format_time(hours):
 
-    # Job time allocation formatting
-    if hours < 1:
-        hours = 1.5
+    # Optimization of time allocation (buffers within AllianceCan priority)
+    if hours < 2.5: # Rule 1: For hours < 2.5
+        if hours * 2 > 3: # Only weakness I would see is 2.0-2.5h (may timeout)
+            hours = 3.0
+        else:
+            hours = np.ceil(hours * 2)
+    elif 2.5 <= hours < 6: # Rule 2: For 2.5 ≤ hours < 10
+        hours = np.ceil(hours + 1)  # +1 hour buffer
+    elif 6 <= hours < 10:
+        hours = np.ceil(hours + 2)  # +2 hours buffer
+    elif 10 <= hours < 15: # Rule 3: For 10 ≤ hours < 20
+        hours = np.ceil(hours + 3)  # +3 hours buffer
+    elif 15 <= hours < 20:
+        hours = np.ceil(hours + 4)  # +4 hours buffer
+    elif 20 <= hours < 66: # Rule 4: For 20 ≤ hours < 66
+        hours = np.ceil(hours + 6)  # +6 hours buffer
+    elif 66 <= hours < 158: # Rule 5: For 66 ≤ hours < 158
+        hours = np.ceil(hours + 10)  # +10 hours buffer
+    elif hours >= 158: # Rule 6: For 158 ≤ hours
+        hours = 168  # Max SLURM time: 7 days
+        print("!!! Warning: The amount of data suggests the job may time out after 7 days.")
+
+    # Formatting variables
     days = int(hours // 24)
     remaining_hours = int(hours % 24)
     minutes = int((hours % 1) * 60)
