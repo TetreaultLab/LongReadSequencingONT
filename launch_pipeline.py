@@ -272,7 +272,7 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
             if tool == "dorado_basecaller":
                 slurm_filled = slurm.format(cores, "#SBATCH --gpus=h100:1", memory, time, tool, flowcell, "log", "log", "def", email)
             
-            else if tool == "dorado_demux":
+            elif tool == "dorado_demux":
                 slurm_filled = slurm.format(cores, "", memory, time, tool, "run", "out", "log", "rrg", email)
             
             # Most tools will be CPU-dependent 
