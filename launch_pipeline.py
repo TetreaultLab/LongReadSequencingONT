@@ -77,6 +77,11 @@ def main():
     # Cleanup
     if "cleanup" not in done:
         function_queue.append(cleanup)
+    
+    # Epi2Me labs workflow human-variation
+    if "epi2me" not in done:
+        nextflow_setup()
+        function.append(epi2me)
 
 
     # Create main.sh
@@ -92,7 +97,6 @@ def main():
 
 
 def create_config_final(filename):
-    
     # Read initial config file
     with open(filename, "r") as f:
         toml_config = toml.load(f)
@@ -188,6 +192,11 @@ def create_config_final(filename):
         toml.dump(toml_config, f)
 
     return toml_config
+
+
+def nextflow_setup():
+    print("Nexflow setup for Epi2Me worflow human-variation")
+
 
 def create_sample_sheet(toml_config):
 
@@ -568,6 +577,11 @@ def cleanup(toml_config):
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("\n# Cleanup temporary files and logs\n")
             f.write(f"sbatch {job} \n")
+
+
+def epi2me(toml_config):
+    print("launching epi2me wf-hv")
+
 
 
 # Launches main function
