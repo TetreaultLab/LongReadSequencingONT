@@ -155,7 +155,7 @@ def create_config_final(filename):
     # Add Dorado options
     ## general options
     toml_config["dorado"] = {}
-    toml_config['dorado']['min_q_score'] = 5
+    toml_config['dorado']['min_q_score'] = 9
     toml_config['dorado']['barcode_both_ends'] = "False"
     toml_config['dorado']['model'] = "dna_r10.4.1_e8.2_400bps_sup@v5.2.0"
 
