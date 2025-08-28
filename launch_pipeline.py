@@ -77,6 +77,10 @@ def main():
     if "qc" not in done:
         function_queue.append(qc)
 
+    # Quality Control - mosdepth
+    if "mosdepth" not in done:
+        function_queue.append(mosdepth)
+    
     # Cleanup
     if "cleanup" not in done:
         function_queue.append(cleanup)
@@ -191,6 +195,11 @@ def create_config_final(filename):
         if kit not in ["SQK-NBD114-24"]:
             raise Exception("Error: Wrong Kit for Targeted Sequencing. Options are SQK-NBD114-24")
 
+    # Add mosdepth options
+    ## general options
+    toml_config["mosdepth"] = {}
+    toml_config['mosdepth']['bins'] = 25000 # Should re-use with wf-human-variation
+    toml_config['mosdepth']['thresholds'] = "1,5,10,20,30"
 
     # Add next tool options
 
@@ -317,8 +326,8 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
             slurm_filled = slurm.format(cores, "", memory, time, tool, "run", "log", "log", "rrg", email)
 
             # Add enviroment loading commands
-            slurm_filled += "module load StdEnv/2023 apptainer samtools\n"
             slurm_filled += "source " + TOOL_PATH + "main_pipelines/long-read/launch_pipeline_env/bin/activate"
+            slurm_filled += "module load StdEnv/2023 apptainer samtools scipy-stack/2025a\n"
 
             slurm_filled += "\n#\n### Calling " + tool + "\n#\n"
             slurm_filled += command
@@ -555,6 +564,44 @@ def qc(toml_config):
         f.write("# QC\n")
         f.write(f"\nlongreadsum=$(sbatch --parsable --dependency=afterok:$samtools {job})\n")
 
+def mosdepth (toml_config):
+    # As a module until nextflow is usable
+    tool="mosdepth"
+    output = toml_config["general"]["project_path"]
+    threads = "4"
+    memory = "16"
+    time = "00-00:30"
+    email = toml_config["general"]["email"]
+
+    command_str = ""
+    for name in toml_config["general"]["samples"]:
+        # Main mosdepth function
+        command = ["apptainer", "run", 
+                    TOOL_PATH + "others/mosdepth/mosdepth.sif",
+                    "mosdepth", 
+                    "-t", threads, 
+                    "-n", "-x", 
+                    "-b", str(toml_config["mosdepth"]["bins"]),
+                    "-T", str(toml_config["mosdepth"]["thresholds"]),
+                    output + "/qc/" + name, 
+                    output + "/alignments/" + name + "_sorted.bam"
+                    ]
+        command_str += " ".join(command) + "\n"
+        # Added visualization function
+        command2 = ["python3",
+                    TOOL_PATH + "others/mosdepth/SummarizeMosdepth.py",
+                    "-p", output + "/qc/" + name, 
+                    "--bins", str(toml_config["mosdepth"]["bins"]),
+                    "--thresholds", str(toml_config["mosdepth"]["thresholds"]),
+                    ]
+        command_str += " ".join(command2) + "\n" + "\n"
+        
+    job = create_script(tool, threads, memory, time, output, email, command_str, "")
+
+    # Add slurm job to main.sh
+    with open(output + "/scripts/main.sh", "a") as f:
+        f.write("# mosdepth\n")
+        f.write(f"\nmosdepth=$(sbatch --parsable --dependency=afterok:$samtools {job})\n")
 
 def cleanup(toml_config):
 
@@ -566,6 +613,7 @@ def cleanup(toml_config):
     time = "00-00:30"
     email = toml_config["general"]["email"]
     flowcells = toml_config["general"]["fc_dir_names"]
+    samples = toml_config["general"]["samples"]
 
     # Build cleanup commands
     commands = []
