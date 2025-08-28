@@ -444,6 +444,7 @@ def dorado_demux(toml_config):
 
         # Different variable name for next set of dependencies
         var_name = f"demux_{code}"
+        var_name_bc = f"basecall_{code}"
 
         # Add slurm job to main.sh
         with open(output + "/scripts/main.sh", "a") as f:
