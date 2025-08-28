@@ -74,8 +74,8 @@ def main():
         function_queue.append(samtools)
     
     # Quality Control - LongReadSum
-    if "longreadsum" not in done:
-        function_queue.append(longreadsum)
+    if "qc" not in done:
+        function_queue.append(qc)
 
     # Cleanup
     if "cleanup" not in done:
@@ -313,7 +313,6 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
 
         with open(TOOL_PATH + "main_pipelines/long-read/LongReadSequencingONT/sbatch_template.txt", "r") as f:
             slurm = f.read()
-            # Because dorado has a different log format? (Not sure if obsolete as demux is flowcell-specific)
             # For all other tools 
             slurm_filled = slurm.format(cores, "", memory, time, tool, "run", "log", "log", "rrg", email)
 
@@ -467,6 +466,7 @@ def dorado_demux(toml_config):
             f.write(f"{var_name}=$(sbatch --parsable --dependency=afterok:${var_name_bc} {job})\n\n")
 
 def samtools(toml_config):
+
     tool="samtools"
     cores="8"
     memory="32"
@@ -496,8 +496,9 @@ def samtools(toml_config):
         f.write(f"\nsamtools=$(sbatch --parsable --dependency=afterok:{dependencies} {job})\n")
 
 
-def longreadsum(toml_config):
-    tool="longreadsum"
+def qc(toml_config):
+
+    tool="qc"
     cores="4"
     memory="16"
     time = "00-23:00"
