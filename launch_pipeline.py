@@ -24,6 +24,9 @@ def main():
         "config", type=str, help="Project config file, including path."
     )
 
+    parser.add_argument(
+        '--test', action='store_true', help='Enable testing: creates file without launching pipeline')
+
     args = parser.parse_args()
 
     # Loading initial TOML config
@@ -92,8 +95,13 @@ def main():
     for func in function_queue:
         func(toml_config)
 
-    # Call main.sh (Launch the pipeline)
-    subprocess.run(["bash", output + "/scripts/main.sh"])
+
+    # Check if in testing mode
+    if args.test:
+        print("TESTING MODE!\nThe pipeline will not be launched")
+    else:
+        # Call main.sh (Launch the pipeline)
+        subprocess.run(["bash", output + "/scripts/main.sh"])
 
 
 def create_config_final(filename):
