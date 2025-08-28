@@ -84,7 +84,7 @@ def main():
     # Epi2Me labs workflow human-variation
     if "epi2me" not in done:
         nextflow_setup()
-        function.append(epi2me)
+        function_queue.append(epi2me)
 
 
     # Create main.sh
