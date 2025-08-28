@@ -98,7 +98,7 @@ def main():
 
     # Check if in testing mode
     if args.test:
-        print("TESTING MODE!\nThe pipeline will not be launched")
+        print("\n\nTESTING MODE!\nThe pipeline will not be launched\n\n")
     else:
         # Call main.sh (Launch the pipeline)
         subprocess.run(["bash", output + "/scripts/main.sh"])
@@ -201,9 +201,8 @@ def create_config_final(filename):
 
     return toml_config
 
-
-def nextflow_setup():
-    print("Nexflow setup for Epi2Me worflow human-variation")
+# TO-DO
+# def nextflow_setup():
 
 
 def create_sample_sheet(toml_config):
@@ -587,8 +586,9 @@ def cleanup(toml_config):
             f.write(f"sbatch {job} \n")
 
 
-def epi2me(toml_config):
-    print("launching epi2me wf-hv")
+# TO-DO
+# def epi2me(toml_config):
+    
 
 
 
