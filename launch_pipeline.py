@@ -77,6 +77,10 @@ def main():
     if "qc" not in done:
         function_queue.append(qc)
 
+    # Quality Control - mosdepth
+    if "mosdepth" not in done:
+        function_queue.append(mosdepth)
+    
     # Cleanup
     if "cleanup" not in done:
         function_queue.append(cleanup)
@@ -191,6 +195,11 @@ def create_config_final(filename):
         if kit not in ["SQK-NBD114-24"]:
             raise Exception("Error: Wrong Kit for Targeted Sequencing. Options are SQK-NBD114-24")
 
+    # Add mosdepth options
+    ## general options
+    toml_config["mosdepth"] = {}
+    toml_config['mosdepth']['bins'] = 25000 # Should re-use with wf-human-variation
+    toml_config['mosdepth']['thresholds'] = "1,5,10,20,30"
 
     # Add next tool options
 
@@ -317,8 +326,8 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
             slurm_filled = slurm.format(cores, "", memory, time, tool, "run", "log", "log", "rrg", email)
 
             # Add enviroment loading commands
-            slurm_filled += "module load StdEnv/2023 apptainer samtools\n"
             slurm_filled += "source " + TOOL_PATH + "main_pipelines/long-read/launch_pipeline_env/bin/activate"
+            slurm_filled += "module load StdEnv/2023 apptainer samtools scipy-stack/2025a\n"
 
             slurm_filled += "\n#\n### Calling " + tool + "\n#\n"
             slurm_filled += command
@@ -333,9 +342,29 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
 
 def format_time(hours):
 
-    # Job time allocation formatting
-    if hours < 1:
-        hours = 1.5
+    # Optimization of time allocation (buffers within AllianceCan priority)
+    if hours < 2.5: # Rule 1: For hours < 2.5
+        if hours * 2 > 3: # Only weakness I would see is 2.0-2.5h (may timeout)
+            hours = 3.0
+        else:
+            hours = np.ceil(hours * 2)
+    elif 2.5 <= hours < 6: # Rule 2: For 2.5 ≤ hours < 10
+        hours = np.ceil(hours + 1)  # +1 hour buffer
+    elif 6 <= hours < 10:
+        hours = np.ceil(hours + 2)  # +2 hours buffer
+    elif 10 <= hours < 15: # Rule 3: For 10 ≤ hours < 20
+        hours = np.ceil(hours + 3)  # +3 hours buffer
+    elif 15 <= hours < 20:
+        hours = np.ceil(hours + 4)  # +4 hours buffer
+    elif 20 <= hours < 66: # Rule 4: For 20 ≤ hours < 66
+        hours = np.ceil(hours + 6)  # +6 hours buffer
+    elif 66 <= hours < 158: # Rule 5: For 66 ≤ hours < 158
+        hours = np.ceil(hours + 10)  # +10 hours buffer
+    elif hours >= 158: # Rule 6: For 158 ≤ hours
+        hours = 168  # Max SLURM time: 7 days
+        print("!!! Warning: The amount of data suggests the job may time out after 7 days.")
+
+    # Formatting variables
     days = int(hours // 24)
     remaining_hours = int(hours % 24)
     minutes = int((hours % 1) * 60)
@@ -535,6 +564,50 @@ def qc(toml_config):
         f.write("# QC\n")
         f.write(f"\nlongreadsum=$(sbatch --parsable --dependency=afterok:$samtools {job})\n")
 
+def mosdepth (toml_config):
+    # As a module until nextflow is usable
+    tool="mosdepth"
+    output = toml_config["general"]["project_path"]
+    threads = "4"
+    memory = "16"
+    time = "00-00:45"
+    email = toml_config["general"]["email"]
+
+    command_str = ""
+    for name in toml_config["general"]["samples"]:
+        # Main mosdepth function
+        command = ["apptainer", "run", 
+                    TOOL_PATH + "others/mosdepth/mosdepth.sif",
+                    "mosdepth", 
+                    "-t", threads, 
+                    "-n", "-x", 
+                    "-b", str(toml_config["mosdepth"]["bins"]),
+                    "-T", str(toml_config["mosdepth"]["thresholds"]),
+                    output + "/qc/" + name, 
+                    output + "/alignments/" + name + "_sorted.bam"
+                    ]
+        command_str += " ".join(command) + "\n"
+        # Added visualization function
+        command2 = ["python3",
+                    TOOL_PATH + "others/mosdepth/SummarizeMosdepth.py",
+                    "-p", output + "/qc/" + name, 
+                    "--bins", str(toml_config["mosdepth"]["bins"]),
+                    "--thresholds", str(toml_config["mosdepth"]["thresholds"]),
+                    ]
+        command_str += " ".join(command2) + "\n"
+    # Make a report with all the plots generated (Only once per run)
+    command3 = ["python3",
+                TOOL_PATH + "others/mosdepth/mosdepth_report.py",
+                "-i", output + "/qc"
+                ]
+    command_str += " ".join(command3) + "\n" + "\n"
+        
+    job = create_script(tool, threads, memory, time, output, email, command_str, "")
+
+    # Add slurm job to main.sh
+    with open(output + "/scripts/main.sh", "a") as f:
+        f.write("# mosdepth\n")
+        f.write(f"\nmosdepth=$(sbatch --parsable --dependency=afterok:$samtools {job})\n")
 
 def cleanup(toml_config):
 
@@ -546,6 +619,7 @@ def cleanup(toml_config):
     time = "00-00:30"
     email = toml_config["general"]["email"]
     flowcells = toml_config["general"]["fc_dir_names"]
+    samples = toml_config["general"]["samples"]
 
     # Build cleanup commands
     commands = []
