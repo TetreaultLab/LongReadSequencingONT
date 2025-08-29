@@ -563,7 +563,7 @@ def mosdepth (toml_config):
     output = toml_config["general"]["project_path"]
     threads = "4"
     memory = "16"
-    time = "00-00:45"
+    time = "00-01:00"
     email = toml_config["general"]["email"]
 
     command_str = ""
@@ -644,17 +644,14 @@ def epi2me(toml_config):
             f.write("# Epi2me workflow human variation")
             f.write(f"\n{epi_name}=$(sbatch --parsable --dependency=afterok:samtools {job})\n")
 
-            
-
 
 def cleanup(toml_config):
-
     # Simple function to remove redundant files and cleanup structure 
     tool="cleanup"
     output = toml_config["general"]["project_path"]
     threads = "1"
     memory = "1"
-    time = "00-00:30"
+    time = "00-01:00"
     email = toml_config["general"]["email"]
     flowcells = toml_config["general"]["fc_dir_names"]
     samples = toml_config["general"]["samples"]
