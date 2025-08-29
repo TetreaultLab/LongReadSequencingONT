@@ -177,7 +177,7 @@ done
 echo
 echo ">>> Analysis: Enter space-separated analysis modules. Leave empty to skip (default: [])."
 echo "    If default is used, will only run Dorado & QC for basic alignment and output."
-echo "    Options: none, splicing, methylation, SNP, SV, polya, repeats"
+echo "    Options: splicing, methylation, SNP, SV, CNV, polya, repeats, phasing"
 read -p "> " analysis
 analysis_list="[\"$(echo $analysis | sed 's/ /\",\"/g')\"]"
 echo "    analysis = $analysis_list" >> "$CONFIG"

@@ -14,7 +14,6 @@ from glob import glob
 TOOL_PATH = "/lustre09/project/6019267/shared/tools/"
 
 def main():
-
     parser = argparse.ArgumentParser(
         prog="PipelineLong",
         description="LongReadSequencing pipeline.",
@@ -80,17 +79,16 @@ def main():
     # Quality Control - mosdepth
     if "mosdepth" not in done:
         function_queue.append(mosdepth)
-    
-    # Cleanup
-    if "cleanup" not in done:
-        function_queue.append(cleanup)
-    
+
     # Epi2Me labs workflow human-variation
     if "epi2me" not in done:
         nextflow_setup()
         function_queue.append(epi2me)
 
-
+    # Cleanup
+    if "cleanup" not in done:
+        function_queue.append(cleanup)
+    
     # Create main.sh
     with open(output + "/scripts/main.sh", "w") as f:
         f.write("#!/bin/sh\n")
@@ -215,7 +213,6 @@ def create_config_final(filename):
 
 
 def create_sample_sheet(toml_config):
-
     path = toml_config["general"]["project_path"].rstrip("/")
     parts = path.split(os.sep)
 
@@ -269,7 +266,6 @@ def create_sample_sheet(toml_config):
 
 
 def get_reference(ref):
-
     # Reference files location
     path = TOOL_PATH + "references/gencode/"
     reference: {}  # type: ignore
@@ -285,7 +281,6 @@ def get_reference(ref):
 
 
 def create_script(tool, cores, memory, time, output, email, command, flowcell):
-
     # Enables creating a script per flowcell, or a single script if "" is added as the argument
     if flowcell != "":
         job = output + "/scripts/" + tool + "_" + flowcell + ".slurm"
@@ -341,7 +336,6 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
                 return job
 
 def format_time(hours):
-
     # Optimization of time allocation (buffers within AllianceCan priority)
     if hours < 2.5: # Rule 1: For hours < 2.5
         if hours * 2 > 3: # Only weakness I would see is 2.0-2.5h (may timeout)
@@ -375,7 +369,6 @@ def format_time(hours):
 
 
 def dorado_basecaller(toml_config):
-
     tool = "dorado_basecaller"
     output = toml_config["general"]["project_path"]
     email = toml_config["general"]["email"]
@@ -442,8 +435,8 @@ def dorado_basecaller(toml_config):
             f.write("# Flowcell : " + flowcell + "\n")
             f.write(f"{var_name_bc}=$(sbatch --parsable {job})\n")
 
-def dorado_demux(toml_config):
 
+def dorado_demux(toml_config):
     tool = "dorado_demux"
     output = toml_config["general"]["project_path"]
     email = toml_config["general"]["email"]
@@ -494,8 +487,8 @@ def dorado_demux(toml_config):
         with open(output + "/scripts/main.sh", "a") as f:
             f.write(f"{var_name}=$(sbatch --parsable --dependency=afterok:${var_name_bc} {job})\n\n")
 
-def samtools(toml_config):
 
+def samtools(toml_config):
     tool="samtools"
     cores="8"
     memory="32"
@@ -526,7 +519,6 @@ def samtools(toml_config):
 
 
 def qc(toml_config):
-
     tool="qc"
     cores="4"
     memory="16"
@@ -563,6 +555,7 @@ def qc(toml_config):
     with open(output + "/scripts/main.sh", "a") as f:
         f.write("# QC\n")
         f.write(f"\nlongreadsum=$(sbatch --parsable --dependency=afterok:$samtools {job})\n")
+
 
 def mosdepth (toml_config):
     # As a module until nextflow is usable
@@ -608,6 +601,51 @@ def mosdepth (toml_config):
     with open(output + "/scripts/main.sh", "a") as f:
         f.write("# mosdepth\n")
         f.write(f"\nmosdepth=$(sbatch --parsable --dependency=afterok:$samtools {job})\n")
+
+
+def epi2me(toml_config):
+    tool = "epi2me"
+    cores = "32"
+    memory = "128"
+    time = "00-22:00"
+
+    output = toml_config["general"]["project_path"]
+    email = toml_config["general"]["email"]
+    model = TOOL_PATH + "main_pipelines/long-read/dorado_models/" + toml_config['dorado']['model']
+
+    genome = get_reference(toml_config["general"]["reference"])["fasta"]
+    analysis = toml_config["general"]["project_path"]
+
+    todo = ""
+    arg_map = {
+    "methylation": "--mod",
+    "SNP": "--snp",
+    "SV": "--sv",
+    "CNV": "--cnv",
+    "repeats": "--str",
+    "phasing": "--phased"
+    }
+
+    for item in analysis:
+        if item in arg_map:
+            todo += " " + arg_map[item]
+
+    for sample in toml_config["general"]["samples"]:
+        job = output + "/scripts/" + tool + "_" + sample + ".slurm"
+        with open(TOOL_PATH + "main_pipelines/long-read/LongReadSequencingONT/epi2me_template.txt", "r") as f:
+            slurm = f.read()
+            slurm_filled = slurm.format(cores, memory, time, tool, email, sample, output, todo, genome, model)
+
+            with open(job, "w") as o:
+                o.write(slurm_filled)
+
+        epi_name = f"epi2me_{sample}"
+        with open(output + "/scripts/main.sh", "a") as f:
+            f.write("# Epi2me workflow human variation")
+            f.write(f"\n{epi_name}=$(sbatch --parsable --dependency=afterok:samtools {job})\n")
+
+            
+
 
 def cleanup(toml_config):
 
@@ -659,12 +697,6 @@ def cleanup(toml_config):
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("\n# Cleanup temporary files and logs\n")
             f.write(f"sbatch {job} \n")
-
-
-# TO-DO
-# def epi2me(toml_config):
-    
-
 
 
 # Launches main function
