@@ -570,7 +570,7 @@ def mosdepth (toml_config):
     output = toml_config["general"]["project_path"]
     threads = "4"
     memory = "16"
-    time = "00-00:30"
+    time = "00-00:45"
     email = toml_config["general"]["email"]
 
     command_str = ""
@@ -594,7 +594,13 @@ def mosdepth (toml_config):
                     "--bins", str(toml_config["mosdepth"]["bins"]),
                     "--thresholds", str(toml_config["mosdepth"]["thresholds"]),
                     ]
-        command_str += " ".join(command2) + "\n" + "\n"
+        command_str += " ".join(command2) + "\n"
+    # Make a report with all the plots generated (Only once per run)
+    command3 = ["python3",
+                TOOL_PATH + "others/mosdepth/mosdepth_report.py",
+                "-i", output + "/qc"
+                ]
+    command_str += " ".join(command3) + "\n" + "\n"
         
     job = create_script(tool, threads, memory, time, output, email, command_str, "")
 
