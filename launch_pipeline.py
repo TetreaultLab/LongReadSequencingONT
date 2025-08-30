@@ -582,7 +582,7 @@ def mosdepth (toml_config):
         command_str += " ".join(command) + "\n"
         # Added visualization function
         command2 = ["python3",
-                    TOOL_PATH + "others/mosdepth/SummarizeMosdepth.py",
+                    TOOL_PATH + "others/mosdepth/SummarizedMosdepth.py",
                     "-p", output + "/qc/" + name, 
                     "--bins", str(toml_config["mosdepth"]["bins"]),
                     "--thresholds", str(toml_config["mosdepth"]["thresholds"]),
