@@ -19,7 +19,7 @@ BAM="{6}/alignments/{5}_sorted.bam"
 OUT="{6}/results/{5}"
 APPTAINER_CONFIG="/lustre09/project/6019267/shared/tools/main_pipelines/long-read/apptainer_nextflow.config"
 
-mkdir -p ${OUT}
+mkdir -p $OUT
 
 nextflow run epi2me-labs/wf-human-variation \
     {7} \
