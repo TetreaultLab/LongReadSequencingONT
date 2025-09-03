@@ -22,6 +22,7 @@ with open(args.config, "r") as f:
 
 fcs = toml_config["general"]["fc_dir_names"]
 
+all_inputs = []
 # Loop over flowcells to rename
 for fc in fcs :
     print("\nRunning: rename for flowcell ", fc)
@@ -29,6 +30,7 @@ for fc in fcs :
 
     inputs = toml_config["general"]["project_path"] + "/" + fc + "/alignments"
     inputs = Path(inputs)
+    all_inputs.append(inputs)
 
     output = toml_config["general"]["project_path"] + "/alignments"
     output_path = Path(output)
@@ -63,12 +65,11 @@ for s in samples:
     print("\nRunning: Samtools for sample ", s)
     output_file = output_path / f"{s}.bam"
     
-    for fc in fcs :
-        code = fc.split('_')[-1]
-        inputs = toml_config["general"]["project_path"] + "/" + fc + "/alignments"
-        bam_files = list(inputs.glob(f"{s}_*.bam"))
+    print(all_inputs)
 
+    bam_files = list(all_inputs.glob(f"{s}_*.bam"))
     print(bam_files)
+    
     bam_files_str = " ".join(str(f) for f in bam_files)
     print(bam_files_str)
 
