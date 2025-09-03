@@ -331,6 +331,7 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
 
                 return job
 
+
 def format_time(hours):
     # Optimization of time allocation (buffers within AllianceCan priority)
     if hours < 2.5: # Rule 1: For hours < 2.5
@@ -481,7 +482,7 @@ def dorado_demux(toml_config):
 
         # Add slurm job to main.sh
         with open(output + "/scripts/main.sh", "a") as f:
-            f.write(f"\nDorado Demux for flowcell : {flowcell}")
+            f.write(f"\n# Dorado Demux for flowcell : {flowcell}")
             f.write(f"\n{var_name}=$(sbatch --parsable --dependency=afterok:${var_name_bc} {job})\n")
 
 
@@ -639,7 +640,7 @@ def epi2me(toml_config):
         epi_name = f"epi2me_{sample}"
         with open(output + "/scripts/main.sh", "a") as f:
             f.write(f"\n# Epi2me workflow human variation for {sample}")
-            f.write(f"\n{epi_name}=$(sbatch --parsable --dependency=afterok:samtools {job})\n")
+            f.write(f"\n{epi_name}=$(sbatch --parsable --dependency=afterok:$samtools {job})\n")
 
 
 def cleanup(toml_config):
