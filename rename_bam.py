@@ -64,7 +64,9 @@ for s in samples:
     output_file = output_path / f"{s}.bam"
     
     bam_files = list(inputs.glob(f"{s}_*.bam"))
+    print(bam_files)
     bam_files_str = " ".join(str(f) for f in bam_files)
+    print(bam_files_str)
 
     # merge
     print("--> Merge")
