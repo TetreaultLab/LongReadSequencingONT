@@ -687,10 +687,9 @@ def cleanup(toml_config):
 
     dependencies = ":".join([f"$epi2me_{sample}" for sample in samples])
 
-    # If QC is running, wait for it to finish
-    with open(output + "/scripts/main.sh", "a") as f:
-        f.write("\n# Cleanup temporary files and logs\n")
-        f.write(f"cleanup=$(sbatch --parsable --dependency=afterok:${dependencies} {job})\n")
+    # with open(output + "/scripts/main.sh", "a") as f:
+    #     f.write("\n# Cleanup temporary files and logs\n")
+    #     f.write(f"cleanup=$(sbatch --parsable --dependency=afterok:${dependencies} {job})\n")
 
 
 # Launches main function
