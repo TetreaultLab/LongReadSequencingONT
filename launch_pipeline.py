@@ -591,7 +591,7 @@ def mosdepth (toml_config):
                 TOOL_PATH + "others/mosdepth/mosdepth_report.py",
                 "-i", output + "/qc"
                 ]
-    command_str += " ".join(command3)
+    command_str += " ".join(command3) + "\n"
         
     job = create_script(tool, threads, memory, time, output, email, command_str, "")
 
