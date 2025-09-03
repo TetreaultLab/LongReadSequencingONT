@@ -61,12 +61,15 @@ samples = toml_config["general"]["samples"]
 # Loop over samples
 for s in samples:
     print("\nRunning: Samtools for sample ", s)
-    bam_files = list(inputs.glob(f"{s}_*.bam"))
     output_file = output_path / f"{s}.bam"
+    
+    bam_files = list(inputs.glob(f"{s}_*.bam"))
+    bam_files_str = " ".join(str(f) for f in bam_files)
 
     # merge
     print("--> Merge")
-    cmd = ["samtools", "merge", "-f", "-@", "8", "-o", str(output_file)] + [str(f) for f in bam_files]
+    cmd = ["samtools", "merge", "-f", "-@", "8", "-o", str(output_file), bam_files_str]
+    print(cmd)
     subprocess.run(cmd, check=True)
 
     # sort
@@ -86,6 +89,4 @@ path_list = rm_prefix.split("/")
 project_name_date = path_list[0].split("_", 1)
 project_name = project_name_date[1]
 print("Done ", project_name, " !")
-
-# Clean-up : TO-DO
 
