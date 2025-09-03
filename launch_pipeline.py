@@ -82,7 +82,6 @@ def main():
 
     # Epi2Me labs workflow human-variation
     if "epi2me" not in done:
-        nextflow_setup()
         function_queue.append(epi2me)
 
     # Cleanup
@@ -207,9 +206,6 @@ def create_config_final(filename):
         toml.dump(toml_config, f)
 
     return toml_config
-
-# TO-DO
-# def nextflow_setup():
 
 
 def create_sample_sheet(toml_config):
