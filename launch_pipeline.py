@@ -428,8 +428,8 @@ def dorado_basecaller(toml_config):
 
         # Add slurm job to main.sh
         with open(output + "/scripts/main.sh", "a") as f:
-            f.write("# Flowcell : " + flowcell + "\n")
-            f.write(f"{var_name_bc}=$(sbatch --parsable {job})\n")
+            f.write(f"\n# Dorado Basecall for flowcell : {flowcell}")
+            f.write(f"\n{var_name_bc}=$(sbatch --parsable {job})\n")
 
 
 def dorado_demux(toml_config):
@@ -481,7 +481,8 @@ def dorado_demux(toml_config):
 
         # Add slurm job to main.sh
         with open(output + "/scripts/main.sh", "a") as f:
-            f.write(f"{var_name}=$(sbatch --parsable --dependency=afterok:${var_name_bc} {job})\n\n")
+            f.write(f"\nDorado Demux for flowcell : {flowcell}")
+            f.write(f"\n{var_name}=$(sbatch --parsable --dependency=afterok:${var_name_bc} {job})\n")
 
 
 def samtools(toml_config):
@@ -510,7 +511,7 @@ def samtools(toml_config):
 
     # Add slurm job to main.sh
     with open(output + "/scripts/main.sh", "a") as f:
-        f.write("# Rename, merge, sort and index bams")
+        f.write("\n# Rename, merge, sort and index bams")
         f.write(f"\nsamtools=$(sbatch --parsable --dependency=afterok:{dependencies} {job})\n")
 
 
@@ -549,7 +550,7 @@ def qc(toml_config):
 
     # Add slurm job to main.sh
     with open(output + "/scripts/main.sh", "a") as f:
-        f.write("# QC\n")
+        f.write("\n# QC")
         f.write(f"\nlongreadsum=$(sbatch --parsable --dependency=afterok:$samtools {job})\n")
 
 
@@ -589,13 +590,13 @@ def mosdepth (toml_config):
                 TOOL_PATH + "others/mosdepth/mosdepth_report.py",
                 "-i", output + "/qc"
                 ]
-    command_str += " ".join(command3) + "\n" + "\n"
+    command_str += " ".join(command3)
         
     job = create_script(tool, threads, memory, time, output, email, command_str, "")
 
     # Add slurm job to main.sh
     with open(output + "/scripts/main.sh", "a") as f:
-        f.write("# mosdepth\n")
+        f.write("\n# Mosdepth")
         f.write(f"\nmosdepth=$(sbatch --parsable --dependency=afterok:$samtools {job})\n")
 
 
@@ -637,7 +638,7 @@ def epi2me(toml_config):
 
         epi_name = f"epi2me_{sample}"
         with open(output + "/scripts/main.sh", "a") as f:
-            f.write("# Epi2me workflow human variation")
+            f.write(f"\n# Epi2me workflow human variation for {sample}")
             f.write(f"\n{epi_name}=$(sbatch --parsable --dependency=afterok:samtools {job})\n")
 
 
@@ -689,7 +690,7 @@ def cleanup(toml_config):
 
     # with open(output + "/scripts/main.sh", "a") as f:
     #     f.write("\n# Cleanup temporary files and logs\n")
-    #     f.write(f"cleanup=$(sbatch --parsable --dependency=afterok:${dependencies} {job})\n")
+    #     f.write(f"\nsbatch --dependency=afterok:${dependencies} {job}\n")
 
 
 # Launches main function
