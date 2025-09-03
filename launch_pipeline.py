@@ -581,7 +581,7 @@ def mosdepth (toml_config):
                     ]
         command_str += " ".join(command) + "\n"
         # Added visualization function
-        command2 = ["python3",
+        command2 = ["python", "-u",
                     TOOL_PATH + "others/mosdepth/SummarizeMosdepth.py",
                     "-p", output + "/qc/" + name, 
                     "--bins", str(toml_config["mosdepth"]["bins"]),
@@ -589,7 +589,7 @@ def mosdepth (toml_config):
                     ]
         command_str += " ".join(command2) + "\n"
     # Make a report with all the plots generated (Only once per run)
-    command3 = ["python3",
+    command3 = ["python", "-u",
                 TOOL_PATH + "others/mosdepth/mosdepth_report.py",
                 "-i", output + "/qc"
                 ]
@@ -663,15 +663,25 @@ def cleanup(toml_config):
     commands.append(f"mv {output}/*.log {output}/scripts/logs/")
 
     # Move all files in the main directory to scripts
-    commands.append(f"mv -t {output}/scripts/ {output}/*.txt {output}/*.sh {output}/*.py")
+    commands.append(f"mv -t {output}/scripts/ {output}/*.txt {output}/*.sh {output}/*.py {output}/*.slurm")
+
+    # Remove longreadsum useless output directory
+    commands.append(f"rm -r {output}/output_LongReadSum")
+
+    # Remove empty dorado_demux.out
+    commands.append(f"rm {output}/dorado_demux_run*.out")
+
+    # Remove tmp from epi2me
+    commands.append(f"rm -r {output}/work")
+    commands.append(f"rm -r {output}/output")
 
     # Remove temp directories/files for each flowcell (MinKNOW-related OR redundant from merge)
     for flow in flowcells:
-        commands.append(f"rm -rf {output}/{flow}/fastq_*")
-        commands.append(f"rm -rf {output}/{flow}/bam_*")
-        commands.append(f"rm -rf {output}/{flow}/alignments/*.bam")
-        commands.append(f"rm -rf {output}/{flow}/alignments/*.bam.bai")
-        commands.append(f"rm -f {output}/{flow}/main_reports/sequencing_summary*.txt")
+        commands.append(f"rm -r {output}/{flow}/fastq_*")
+        commands.append(f"rm -r {output}/{flow}/bam_*")
+        commands.append(f"rm -r {output}/{flow}/alignments/*.bam")
+        commands.append(f"rm -r {output}/{flow}/alignments/*.bam.bai")
+        commands.append(f"rm {output}/{flow}/main_reports/sequencing_summary*.txt")
 
     # Join all commands into a single string
     command_str = "\n".join(commands)
@@ -679,21 +689,12 @@ def cleanup(toml_config):
     # Create slurm job (Might be wasteful of server resources?)
     job = create_script(tool, threads, memory, time, output, email, command_str, "")
 
-    done = []
-    # For future - check if step is already done
-    with open(output + "/scripts/steps_done.txt", "r") as f:
-        for line in f:
-            done.append(line.strip())
+    dependencies = ":".join([f"$epi2me_{sample}" for sample in samples])
 
     # If QC is running, wait for it to finish
-    if "qc" not in done:
-        with open(output + "/scripts/main.sh", "a") as f:
-            f.write("\n# Cleanup temporary files and logs\n")
-            f.write(f"cleanup=$(sbatch --parsable --dependency=afterok:$longreadsum {job})\n")
-    else:
-        with open(output + "/scripts/main.sh", "a") as f:
-            f.write("\n# Cleanup temporary files and logs\n")
-            f.write(f"sbatch {job} \n")
+    with open(output + "/scripts/main.sh", "a") as f:
+        f.write("\n# Cleanup temporary files and logs\n")
+        f.write(f"cleanup=$(sbatch --parsable --dependency=afterok:${dependencies} {job})\n")
 
 
 # Launches main function
