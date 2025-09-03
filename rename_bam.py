@@ -66,10 +66,12 @@ for s in samples:
     output_file = output_path / f"{s}.bam"
     
     print(all_inputs)
-
-    bam_files = list(all_inputs.glob(f"{s}_*.bam"))
-    print(bam_files)
     
+    bam_files = []
+    for p in all_inputs:
+        bam_files.extend(p.glob(f"{s}_*.bam"))
+    print(bam_files)
+
     bam_files_str = " ".join(str(f) for f in bam_files)
     print(bam_files_str)
 
