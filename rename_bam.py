@@ -63,7 +63,11 @@ for s in samples:
     print("\nRunning: Samtools for sample ", s)
     output_file = output_path / f"{s}.bam"
     
-    bam_files = list(inputs.glob(f"{s}_*.bam"))
+    for fc in fcs :
+        code = fc.split('_')[-1]
+        inputs = toml_config["general"]["project_path"] + "/" + fc + "/alignments"
+        bam_files = list(inputs.glob(f"{s}_*.bam"))
+
     print(bam_files)
     bam_files_str = " ".join(str(f) for f in bam_files)
     print(bam_files_str)
