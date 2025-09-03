@@ -610,7 +610,7 @@ def epi2me(toml_config):
     model = TOOL_PATH + "main_pipelines/long-read/dorado_models/" + toml_config['dorado']['model']
 
     genome = get_reference(toml_config["general"]["reference"])["fasta"]
-    analysis = toml_config["general"]["project_path"]
+    analysis = toml_config["general"]["project_path"]["analysis"]
 
     todo = ""
     arg_map = {
@@ -625,6 +625,7 @@ def epi2me(toml_config):
     for item in analysis:
         if item in arg_map:
             todo += " " + arg_map[item]
+    print(todo)
 
     for sample in toml_config["general"]["samples"]:
         job = output + "/scripts/" + tool + "_" + sample + ".slurm"
