@@ -294,8 +294,8 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
             # Most tools will be CPU-dependent 
             else :
                 slurm_filled = slurm.format(cores, "", memory, time, tool, flowcell, "log", "log", "rrg", email)
-                slurm_filled += "source " + TOOL_PATH + "main_pipelines/long-read/launch_pipeline_env/bin/activate\n"
                 slurm_filled += "module load StdEnv/2023 apptainer samtools\n"
+                slurm_filled += "source " + TOOL_PATH + "main_pipelines/long-read/launch_pipeline_env/bin/activate"
 
             slurm_filled += "\n#\n### Calling " + tool + " - " + flowcell + "\n#\n"
             slurm_filled += command
@@ -318,8 +318,9 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
             slurm_filled = slurm.format(cores, "", memory, time, tool, "run", "log", "log", "rrg", email)
 
             # Add enviroment loading commands
+            slurm_filled += "module load StdEnv/2023 apptainer samtools\n"
             slurm_filled += "source " + TOOL_PATH + "main_pipelines/long-read/launch_pipeline_env/bin/activate\n"
-            slurm_filled += "module load StdEnv/2023 apptainer samtools scipy-stack/2025a"
+
 
             slurm_filled += "\n#\n### Calling " + tool + "\n#\n"
             slurm_filled += command
