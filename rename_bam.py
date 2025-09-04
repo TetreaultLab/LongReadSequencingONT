@@ -68,7 +68,6 @@ for s in samples:
     bam_files = []
     for p in all_inputs:
         bam_files.extend(p.glob(f"{s}_*.bam"))
-    print(bam_files)
 
     bam_files_str = [str(p) for p in bam_files]
     print(bam_files_str)
@@ -89,11 +88,5 @@ for s in samples:
     cmd3 = ["samtools", "index", "-@", "8", "-o", output + "/" + s + "_sorted.bam.bai", output + "/" + s + "_sorted.bam"]
     subprocess.run(cmd3, check=True)
 
-path = toml_config["general"]["project_path"]
-rm_prefix = path.replace('/lustre09/project/6019267/shared/projects/Nanopore_Dock/', '')
-#rm_prefix = path.replace('/lustre09/project/6019267/shared/tools/main_pipelines/long-read/', '')
-path_list = rm_prefix.split("/")
-project_name_date = path_list[0].split("_", 1)
-project_name = project_name_date[1]
-print("Done ", project_name, " !")
+print("Samtools done !")
 
