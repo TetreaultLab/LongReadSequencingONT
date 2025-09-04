@@ -70,23 +70,24 @@ for s in samples:
         bam_files.extend(p.glob(f"{s}_*.bam"))
 
     bam_files_str = [str(p) for p in bam_files]
-    print(bam_files_str)
 
     # merge
     print("--> Merge")
     cmd = ["samtools", "merge", "-f", "-@", "8", "-o", str(output_file)] + bam_files_str
-    print(cmd)
+    print(" ".join(cmd))
     subprocess.run(cmd, check=True)
 
     # sort
     print("--> Sort")
     cmd2 = ["samtools", "sort", "-@", "8", "-o", output + "/" + s + "_sorted.bam", output + "/" + s + ".bam"]
+    print(" ".join(cmd2))
     subprocess.run(cmd2, check=True)
     
     # index
     print("--> Index")
     cmd3 = ["samtools", "index", "-@", "8", "-o", output + "/" + s + "_sorted.bam.bai", output + "/" + s + "_sorted.bam"]
+    print(" ".join(cmd3))
     subprocess.run(cmd3, check=True)
 
-print("Samtools done !")
+print("Rename and Samtools done !")
 
