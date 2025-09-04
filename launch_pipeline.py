@@ -635,7 +635,7 @@ def epi2me(toml_config):
         job = output + "/scripts/" + tool + "_" + sample + ".slurm"
         with open(TOOL_PATH + "main_pipelines/long-read/LongReadSequencingONT/epi2me_template.txt", "r") as f:
             slurm = f.read()
-            slurm_filled = slurm.format(cores, memory, time, tool, email, sample, output, todo, genome, model)
+            slurm_filled = slurm.format(cores, memory, time, tool, sample, email, output, todo, genome, model)
 
             with open(job, "w") as o:
                 o.write(slurm_filled)
