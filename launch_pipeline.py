@@ -612,7 +612,7 @@ def epi2me(toml_config):
 
     output = toml_config["general"]["project_path"]
     email = toml_config["general"]["email"]
-    model = TOOL_PATH + "main_pipelines/long-read/dorado_models/" + toml_config['dorado']['model']
+    model = toml_config['dorado']['model']
 
     genome = get_reference(toml_config["general"]["reference"])["fasta"]
     analysis = toml_config["general"]["analysis"]
