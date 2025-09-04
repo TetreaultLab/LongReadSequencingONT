@@ -68,13 +68,14 @@ for s in samples:
     bam_files = []
     for p in all_inputs:
         bam_files.extend(p.glob(f"{s}_*.bam"))
-
-    bam_files_str = " ".join(str(f) for f in bam_files)
+    print(bam_files)
+    
+    bam_files_str = ", ".join(str(f) for f in bam_files)
     print(bam_files_str)
 
     # merge
     print("--> Merge")
-    cmd = ["samtools", "merge", "-f", "-@", "8", "-o", str(output_file), bam_files_str]
+    cmd = ["samtools", "merge", "-f", "-@", "8", "-o", str(output_file)] + bam_files
     print(cmd)
     subprocess.run(cmd, check=True)
 
