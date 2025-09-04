@@ -23,7 +23,7 @@ mkdir -p $OUT
 
 nextflow run epi2me-labs/wf-human-variation \
     {7} \
-    --bam_min_coverage 0 \
+    --bam_min_coverage 4 \
     --override_basecaller_cfg {9} \
     -w $WORKDIR \
     --bam $BAM \
