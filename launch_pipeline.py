@@ -74,8 +74,8 @@ def main():
         function_queue.append(samtools)
     
     # Quality Control - LongReadSum
-    if "qc" not in done:
-        function_queue.append(qc)
+    if "longReadSum" not in done:
+        function_queue.append(longReadSum)
 
     # Quality Control - mosdepth
     if "mosdepth" not in done:
@@ -519,8 +519,8 @@ def samtools(toml_config):
         f.write(f"\nsamtools=$(sbatch --parsable --dependency=afterok:{dependencies} {job})\n")
 
 
-def qc(toml_config):
-    tool="qc"
+def longReadSum(toml_config):
+    tool="longReadSum"
     cores="4"
     memory="16"
     time = "00-23:00"
