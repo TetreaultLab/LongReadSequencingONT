@@ -12,6 +12,7 @@ from glob import glob
 
 # Global variables
 TOOL_PATH = "/lustre09/project/6019267/shared/tools/"
+DORADO = "main_pipelines/long-read/dorado-1.1.1-linux-x64/bin/dorado"
 
 def main():
     parser = argparse.ArgumentParser(
@@ -399,7 +400,7 @@ def dorado_basecaller(toml_config):
         hours = int(size_str) * 0.02
         formatted_time = format_time(hours)
 
-        command = [TOOL_PATH + "main_pipelines/long-read/dorado-1.0.0-linux-x64/bin/dorado", 
+        command = [TOOL_PATH + DORADO, 
                    "basecaller", "-v", "--device", "cuda:0", 
                    "--emit-moves", "--min-qscore", 
                    str(toml_config["dorado"]["min_q_score"]), 
@@ -467,7 +468,7 @@ def dorado_demux(toml_config):
         hours = int(size_str) * 0.01
         formatted_time = format_time(hours)
 
-        command = [TOOL_PATH + "main_pipelines/long-read/dorado-1.1.0-linux-x64/bin/dorado", 
+        command = [TOOL_PATH + DORADO, 
                     "demux", "-vv", 
                     "--threads", cores, 
                     "--no-trim", 
