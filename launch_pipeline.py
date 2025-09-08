@@ -493,8 +493,7 @@ def dorado_demux(toml_config):
 def samtools(toml_config):
     tool="samtools"
     cores="8"
-    memory="32"
-    time = "00-11:00"
+    memory="80"
 
     output = toml_config["general"]["project_path"]
     email = toml_config["general"]["email"]
@@ -502,9 +501,24 @@ def samtools(toml_config):
     flowcells = toml_config["general"]["fc_dir_names"]
 
     codes = []
+    total_size = 0
     for flowcell in flowcells:
         code = flowcell.split('_')[-1]
         codes.append(code)
+
+        # Get size of data to estimate time
+        input_file = inputs = toml_config["general"]["project_path"] + "/" + flowcell + "/alignments/" + flowcell + ".bam"
+        cmd = ["du", "-sh", "--apparent-size", "--block-size", "G", input_file]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+
+        size_str = result.stdout.split()[0].rstrip('G')
+        size = int(size_str)
+        total_size += size
+
+    # Scale required job time based on amount of data
+    hours = total_size * 0.02
+    formatted_time = format_time(hours)
+
     dependencies = ":".join([f"$demux_{code}" for code in codes])
     command = ["python", "-u", 
                 TOOL_PATH + "main_pipelines/long-read/LongReadSequencingONT/rename_bam.py", 
@@ -512,7 +526,7 @@ def samtools(toml_config):
                 ]
     command_str = " ".join(command)
     
-    job = create_script(tool, cores, memory, time, output, email, command_str, "")
+    job = create_script(tool, cores, memory, formatted_time, output, email, command_str, "")
 
     # Add slurm job to main.sh
     with open(output + "/scripts/main.sh", "a") as f:
