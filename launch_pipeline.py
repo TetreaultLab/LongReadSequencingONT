@@ -461,12 +461,12 @@ def dorado_demux(toml_config):
 
         size_str = result.stdout.split()[0].rstrip('G')
 
-        cores = "4"
-        memory = "24"
-
         # Scale required job time based on amount of data
         hours = int(size_str) * 0.01
         formatted_time = format_time(hours)
+
+        cores = "4"
+        memory = "24"
 
         command = [TOOL_PATH + DORADO, 
                     "demux", "-vv", 
@@ -564,12 +564,23 @@ def mosdepth (toml_config):
     tool="mosdepth"
     output = toml_config["general"]["project_path"]
     threads = "4"
-    memory = "16"
-    time = "00-01:00"
+    memory = "8"
     email = toml_config["general"]["email"]
 
     command_str = ""
     for name in toml_config["general"]["samples"]:
+        input_file = output + "/alignments/" + name + "_sorted.bam"
+        # Get reads files size
+        cmd = ["du", "-sh", "--apparent-size", "--block-size", "G", input_file]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+
+        size_str = result.stdout.split()[0].rstrip('G')
+
+        # Scale required job time based on amount of data
+        hours = int(size_str) * 0.003
+        formatted_time = format_time(hours)
+
+
         # Main mosdepth function
         command = ["apptainer", "run", 
                     TOOL_PATH + "others/mosdepth/mosdepth.sif",
@@ -579,7 +590,7 @@ def mosdepth (toml_config):
                     "-b", str(toml_config["mosdepth"]["bins"]),
                     "-T", str(toml_config["mosdepth"]["thresholds"]),
                     output + "/qc/" + name, 
-                    output + "/alignments/" + name + "_sorted.bam"
+                    input_file
                     ]
         command_str += " ".join(command) + "\n"
         # Added visualization function
@@ -597,7 +608,7 @@ def mosdepth (toml_config):
                 ]
     command_str += " ".join(command3) + "\n"
         
-    job = create_script(tool, threads, memory, time, output, email, command_str, "")
+    job = create_script(tool, threads, memory, formatted_time, output, email, command_str, "")
 
     # Add slurm job to main.sh
     with open(output + "/scripts/main.sh", "a") as f:
