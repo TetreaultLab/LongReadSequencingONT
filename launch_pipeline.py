@@ -695,6 +695,7 @@ def cleanup(toml_config):
 
     # Remove longreadsum useless output directory
     commands.append(f"rm -r {output}/output_LongReadSum")
+    commands.append(f"rm -r {output}/log_output.log")
 
     # Remove empty dorado_demux.out
     commands.append(f"rm {output}/dorado_demux_run*.out")
