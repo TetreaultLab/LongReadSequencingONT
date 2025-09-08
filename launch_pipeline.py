@@ -84,7 +84,8 @@ def main():
 
     # Epi2Me labs workflow human-variation
     if "epi2me" not in done:
-        function_queue.append(epi2me)
+        if toml_config["general"]["seq_type"] == "WGS":
+            function_queue.append(epi2me)
 
     # Cleanup
     if "cleanup" not in done:
