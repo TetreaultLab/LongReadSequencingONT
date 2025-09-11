@@ -493,7 +493,7 @@ def dorado_demux(toml_config):
 
 def samtools(toml_config):
     tool="samtools"
-    cores="8"
+    cores="6"
     memory="64"
 
     output = toml_config["general"]["project_path"]
