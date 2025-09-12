@@ -633,7 +633,7 @@ def mosdepth (toml_config):
 
 def epi2me(toml_config):
     tool = "epi2me"
-    cores = "20"
+    cores = "32"
     memory = "128"
     time = "00-11:00"
 
