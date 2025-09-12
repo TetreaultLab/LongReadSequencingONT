@@ -633,9 +633,9 @@ def mosdepth (toml_config):
 
 def epi2me(toml_config):
     tool = "epi2me"
-    cores = "32"
+    cores = "20"
     memory = "128"
-    time = "00-22:00"
+    time = "00-11:00"
 
     output = toml_config["general"]["project_path"]
     email = toml_config["general"]["email"]
