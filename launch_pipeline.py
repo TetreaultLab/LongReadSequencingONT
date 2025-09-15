@@ -388,7 +388,7 @@ def dorado_basecaller(toml_config):
         code = flowcell.split('_')[-1]
         codes.append(code)
 
-        cores = "8"
+        cores = "4"
         memory = "64"
 
         # Get reads files size
