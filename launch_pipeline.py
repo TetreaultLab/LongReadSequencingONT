@@ -493,7 +493,7 @@ def dorado_demux(toml_config):
 
 def samtools(toml_config):
     tool="samtools"
-    cores="6"
+    cores="8"
     memory="64"
 
     output = toml_config["general"]["project_path"]
@@ -517,7 +517,7 @@ def samtools(toml_config):
         total_size += size
 
     # Scale required job time based on amount of data
-    hours = total_size * 0.02
+    hours = total_size * 0.04
     formatted_time = format_time(hours)
 
     dependencies = ":".join([f"$demux_{code}" for code in codes])
