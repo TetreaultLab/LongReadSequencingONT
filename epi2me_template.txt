@@ -20,7 +20,7 @@ export NXF_OFFLINE=true
 export NXF_SINGULARITY_CACHEDIR="/lustre09/project/6019267/shared/tools/main_pipelines/long-read/epi2me_cache/"
 export _JAVA_OPTIONS="-XX:ActiveProcessorCount=32"
 #
-WORKDIR="{6}/work"
+WORKDIR="{6}/work/{4}"
 BAM="{6}/alignments/{4}_sorted.bam"
 OUT="{6}/results/{4}"
 APPTAINER_CONFIG="/lustre09/project/6019267/shared/tools/main_pipelines/long-read/apptainer_nextflow_no_slurm.config"
@@ -43,3 +43,5 @@ nextflow run epi2me-labs/wf-human-variation \
     --modkit_threads 1 \
     -c $APPTAINER_CONFIG \
     -profile slurm_local
+
+rm -r $WORKDIR
