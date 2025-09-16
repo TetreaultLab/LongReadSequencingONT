@@ -589,10 +589,10 @@ def mosdepth (toml_config):
     print(result)
     for line in result.stdout.splitlines():
         if line.endswith("total"):
-            total_size = line.split()[0]
-            print("Total size:", total_size)
+            size = line.split()[0]
+            print("Total size:", size)
 
-    size_str = total_size.rstrip('G')
+    size_str = size.rstrip('G')
     hours = int(size_str) * 0.003
     formatted_time = format_time(hours)
 
