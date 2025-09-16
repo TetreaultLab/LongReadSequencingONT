@@ -79,8 +79,8 @@ def main():
         function_queue.append(longReadSum)
 
     # Quality Control - mosdepth
-    #if "mosdepth" not in done:
-    #    function_queue.append(mosdepth)
+    if "mosdepth" not in done:
+        function_queue.append(mosdepth)
 
     # Epi2Me labs workflow human-variation
     if "epi2me" not in done:
@@ -508,8 +508,8 @@ def samtools(toml_config):
         codes.append(code)
 
         # Get size of data to estimate time
-        input_file = inputs = toml_config["general"]["project_path"] + "/" + flowcell + "/alignments/" + flowcell + ".bam"
-        cmd = ["du", "-sh", "--apparent-size", "--block-size", "G", input_file]
+        reads = output + "/" + flowcell + "/reads/pod5"
+        cmd = ["du", "-sh", "--apparent-size", "--block-size", "G", reads]
         result = subprocess.run(cmd, capture_output=True, text=True)
 
         size_str = result.stdout.split()[0].rstrip('G')
@@ -581,21 +581,21 @@ def mosdepth (toml_config):
     threads = "4"
     memory = "8"
     email = toml_config["general"]["email"]
+    
+    reads = output + "/2*/reads/pod5"
+    cmd = ["du", "-sh", "--apparent-size", "--block-size", "G", reads]
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    for line in result.stdout.splitlines():
+        if line.endswith("total"):
+            total_size = line.split()[0]
+            print("Total size:", total_size)
+
+    size_str = total_size.rstrip('G')
+    hours = int(size_str) * 0.003
+    formatted_time = format_time(hours)
 
     command_str = ""
     for name in toml_config["general"]["samples"]:
-        input_file = output + "/alignments/" + name + "_sorted.bam" ## Need to change to pod5 size or something else
-        # Get reads files size
-        cmd = ["du", "-sh", "--apparent-size", "--block-size", "G", input_file]
-        result = subprocess.run(cmd, capture_output=True, text=True)
-        print(result)
-        size_str = result.stdout.split()[0].rstrip('G')
-
-        # Scale required job time based on amount of data
-        hours = int(size_str) * 0.003
-        formatted_time = format_time(hours)
-
-
         # Main mosdepth function
         command = ["apptainer", "run", 
                     TOOL_PATH + "others/mosdepth/mosdepth.sif",
@@ -616,13 +616,14 @@ def mosdepth (toml_config):
                     "--thresholds", str(toml_config["mosdepth"]["thresholds"]),
                     ]
         command_str += " ".join(command2) + "\n"
+
     # Make a report with all the plots generated (Only once per run)
     command3 = ["python", "-u",
                 TOOL_PATH + "others/mosdepth/mosdepth_report.py",
                 "-i", output + "/qc"
                 ]
     command_str += " ".join(command3) + "\n"
-        
+
     job = create_script(tool, threads, memory, formatted_time, output, email, command_str, "")
 
     # Add slurm job to main.sh
