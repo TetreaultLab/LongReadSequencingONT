@@ -592,7 +592,6 @@ def mosdepth (toml_config):
             size = line.split()[0]
 
     size_str = size.rstrip('G')
-    print(size_str)
     hours = int(size_str) * 0.003
     formatted_time = format_time(hours)
 
