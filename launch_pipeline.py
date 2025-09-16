@@ -586,8 +586,8 @@ def mosdepth (toml_config):
     dirs = [f"{output}/{fc}/reads/pod5" for fc in flowcells]
     cmd = ["du", "-sh", "--apparent-size", "--block-size", "G"] + dirs
     result = subprocess.run(cmd, capture_output=True, text=True)
-    print(result)
-    size=0
+    print(result.stdout.splitlines())
+
     for line in result.stdout.splitlines():
         if line.endswith("total"):
             size = line.split()[0]
