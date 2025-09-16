@@ -578,12 +578,13 @@ def mosdepth (toml_config):
     # As a module until nextflow is usable
     tool="mosdepth"
     output = toml_config["general"]["project_path"]
+    flowcells = toml_config["general"]["fc_dir_names"]
     threads = "4"
     memory = "8"
     email = toml_config["general"]["email"]
     
-    reads = output + "/2*/reads/pod5"
-    cmd = ["du", "-sh", "--apparent-size", "--block-size", "G", reads]
+    dirs = [f"{output}/{fc}/reads/pod5" for fc in flowcells]
+    cmd = ["du", "-sh", "--apparent-size", "--block-size", "G"] + dirs
     result = subprocess.run(cmd, capture_output=True, text=True)
     print(result)
     for line in result.stdout.splitlines():
