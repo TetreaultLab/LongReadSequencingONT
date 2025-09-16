@@ -584,7 +584,7 @@ def mosdepth (toml_config):
     email = toml_config["general"]["email"]
     
     dirs = [f"{output}/{fc}/reads/pod5" for fc in flowcells]
-    cmd = ["du", "-sh", "--apparent-size", "--block-size", "G"] + dirs
+    cmd = ["du", "-sh", "--apparent-size", "--block-size", "G", "--total"] + dirs
     result = subprocess.run(cmd, capture_output=True, text=True)
     print(result.stdout.splitlines())
 
