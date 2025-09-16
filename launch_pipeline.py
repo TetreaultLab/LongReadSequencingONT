@@ -586,19 +586,19 @@ def mosdepth (toml_config):
     dirs = [f"{output}/{fc}/reads/pod5" for fc in flowcells]
     cmd = ["du", "-sh", "--apparent-size", "--block-size", "G", "--total"] + dirs
     result = subprocess.run(cmd, capture_output=True, text=True)
-    print(result.stdout.splitlines())
 
     for line in result.stdout.splitlines():
         if line.endswith("total"):
             size = line.split()[0]
-            print("Total size:", size)
 
     size_str = size.rstrip('G')
+    print(size_str)
     hours = int(size_str) * 0.003
     formatted_time = format_time(hours)
 
     command_str = ""
     for name in toml_config["general"]["samples"]:
+        input_file = output + "/alignments/" + name + "_sorted.bam"
         # Main mosdepth function
         command = ["apptainer", "run", 
                     TOOL_PATH + "others/mosdepth/mosdepth.sif",
