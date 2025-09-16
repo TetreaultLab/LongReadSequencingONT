@@ -501,24 +501,23 @@ def samtools(toml_config):
     genome = get_reference(toml_config["general"]["reference"])["fasta"]
     flowcells = toml_config["general"]["fc_dir_names"]
 
+    dirs = [f"{output}/{fc}/reads/pod5" for fc in flowcells]
+    cmd = ["du", "-sh", "--apparent-size", "--block-size", "G", "--total"] + dirs
+    result = subprocess.run(cmd, capture_output=True, text=True)
+
+    for line in result.stdout.splitlines():
+        if line.endswith("total"):
+            size = line.split()[0]
+
+    size_str = size.rstrip('G')
+    hours = int(size_str) * 0.04
+    formatted_time = format_time(hours)
+
     codes = []
     total_size = 0
     for flowcell in flowcells:
         code = flowcell.split('_')[-1]
         codes.append(code)
-
-        # Get size of data to estimate time
-        reads = output + "/" + flowcell + "/reads/pod5"
-        cmd = ["du", "-sh", "--apparent-size", "--block-size", "G", reads]
-        result = subprocess.run(cmd, capture_output=True, text=True)
-
-        size_str = result.stdout.split()[0].rstrip('G')
-        size = int(size_str)
-        total_size += size
-
-    # Scale required job time based on amount of data
-    hours = total_size * 0.04
-    formatted_time = format_time(hours)
 
     dependencies = ":".join([f"$demux_{code}" for code in codes])
     command = ["python", "-u", 
