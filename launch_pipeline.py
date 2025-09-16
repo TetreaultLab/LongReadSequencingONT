@@ -79,8 +79,8 @@ def main():
         function_queue.append(longReadSum)
 
     # Quality Control - mosdepth
-    if "mosdepth" not in done:
-        function_queue.append(mosdepth)
+    #if "mosdepth" not in done:
+    #    function_queue.append(mosdepth)
 
     # Epi2Me labs workflow human-variation
     if "epi2me" not in done:
@@ -584,7 +584,7 @@ def mosdepth (toml_config):
 
     command_str = ""
     for name in toml_config["general"]["samples"]:
-        input_file = output + "/alignments/" + name + "_sorted.bam"
+        input_file = output + "/alignments/" + name + "_sorted.bam" ## Need to change to pod5 size or something else
         # Get reads files size
         cmd = ["du", "-sh", "--apparent-size", "--block-size", "G", input_file]
         result = subprocess.run(cmd, capture_output=True, text=True)
