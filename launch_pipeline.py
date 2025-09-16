@@ -589,7 +589,7 @@ def mosdepth (toml_config):
         cmd = ["du", "-sh", "--apparent-size", "--block-size", "G", input_file]
         result = subprocess.run(cmd, capture_output=True, text=True)
 
-        size_str = result.stdout.split()[0].rstrip('G')
+        size_str = result.stdout.split().rstrip('G')
 
         # Scale required job time based on amount of data
         hours = int(size_str) * 0.003
