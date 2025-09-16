@@ -587,6 +587,7 @@ def mosdepth (toml_config):
     cmd = ["du", "-sh", "--apparent-size", "--block-size", "G"] + dirs
     result = subprocess.run(cmd, capture_output=True, text=True)
     print(result)
+    size=0
     for line in result.stdout.splitlines():
         if line.endswith("total"):
             size = line.split()[0]
