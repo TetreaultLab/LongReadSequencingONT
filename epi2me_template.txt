@@ -44,4 +44,6 @@ nextflow run epi2me-labs/wf-human-variation \
     -c $APPTAINER_CONFIG \
     -profile slurm_local
 
+echo "Deleting $WORKDIR ..."
 rm -r $WORKDIR
+echo "Deleting complete - epi2me pipeline done!"
