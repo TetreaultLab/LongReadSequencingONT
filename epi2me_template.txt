@@ -46,4 +46,4 @@ nextflow run epi2me-labs/wf-human-variation \
 
 echo "Deleting $WORKDIR ..."
 rm -r $WORKDIR
-echo "Deleting complete - epi2me pipeline done!"
+echo "Deletion complete - epi2me pipeline for {4} done!"
