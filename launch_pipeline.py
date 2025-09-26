@@ -511,27 +511,48 @@ def samtools(toml_config, done):
     to_dos = [x for x in all_fc if x not in done_fc]
     print(to_dos)
 
-    command = ["python", "-u", 
-                TOOL_PATH + "main_pipelines/long-read/LongReadSequencingONT/rename_bam.py", 
-                toml_config["general"]["project_path"] + '/scripts/config_final.toml'
-                ]
-    command_str = " ".join(command)
-    
-    job = create_script(tool, cores, memory, formatted_time, output, email, command_str, "")
 
     # Add slurm job to main.sh
-    if tool not in done:
-        if len(to_dos) > 0:
-            dependencies = ":".join([f"${to_do}" for to_do in to_dos])
+    # If at least one dorado_demux job is not done, run samtools for that/these flowcell(s)
+    if len(to_dos) > 0:
+        fcs = [x.split("_")[-1] for x in to_dos]
+
+        command = ["python", "-u", 
+                TOOL_PATH + "main_pipelines/long-read/LongReadSequencingONT/rename_bam.py", 
+                "--config", toml_config["general"]["project_path"] + '/scripts/config_final.toml',
+                "--flowcells", '' + fcs
+                ]
+        command_str = " ".join(command)
+        print(command_str)
+    
+        job = create_script(tool, cores, memory, formatted_time, output, email, command_str, "")
+
+        dependencies = ":".join([f"${to_do}" for to_do in to_dos])
+        with open(output + "/scripts/main.sh", "a") as f:
+            f.write("\n# Rename, merge, sort and index bams")
+            f.write(f"\nsamtools=$(sbatch --parsable --dependency=afterok:{dependencies} {job})\n")
+    else:
+        # If all dorado_demux are done but samtools has not run yet
+        if tool not in done:
+            fcs = [x.split("_")[-1] for x in all_fc]
+
+            command = ["python", "-u", 
+                    TOOL_PATH + "main_pipelines/long-read/LongReadSequencingONT/rename_bam.py", 
+                    "--config", toml_config["general"]["project_path"] + '/scripts/config_final.toml',
+                    "--flowcells", '' + fcs
+                    ]
+            command_str = " ".join(command)
+            print(command_str)
+        
+            job = create_script(tool, cores, memory, formatted_time, output, email, command_str, "")
+
+            dependencies = ":".join([f"${to_do}" for to_do in all_fc])
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write("\n# Rename, merge, sort and index bams")
                 f.write(f"\nsamtools=$(sbatch --parsable --dependency=afterok:{dependencies} {job})\n")
         else:
-            with open(output + "/scripts/main.sh", "a") as f:
-                f.write("\n# Rename, merge, sort and index bams")
-                f.write(f"\nsamtools=$(sbatch --parsable {job})\n")
-    else:
-        print("Done: " + tool)
+            # All dorado_demux are done and samtools is done
+            print("Done: " + tool)
 
 
 def longReadSum(toml_config, done):

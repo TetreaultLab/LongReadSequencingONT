@@ -11,7 +11,10 @@ parser = argparse.ArgumentParser(
     )
 
 parser.add_argument(
-    "config", type=str, help="Project config file, including path."
+    "--config", type=str, required=True, help="Project config file, including path."
+    )
+parser.add_argument(
+    "--flowcells", type=str, required=True, help="Flowcells to run."
     )
 
 args = parser.parse_args()
@@ -20,7 +23,7 @@ args = parser.parse_args()
 with open(args.config, "r") as f:
     toml_config = toml.load(f)
 
-fcs = toml_config["general"]["fc_dir_names"]
+flowcells = ast.literal_eval(args.flowcells)
 
 all_inputs = []
 # Loop over flowcells to rename
