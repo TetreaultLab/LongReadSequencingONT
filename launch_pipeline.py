@@ -496,11 +496,16 @@ def samtools(toml_config, done):
         if line.endswith("total"):
             size = line.split()[0]
 
+    codes = []
+    for flowcell in flowcells:
+        code = flowcell.split('_')[-1]
+        codes.append(code)
+
     size_str = size.rstrip('G')
     hours = int(size_str) * 0.032
     formatted_time = format_time(hours)
 
-    all_fc = [f"dorado_demux_{flowcell}" for flowcell in flowcells]
+    all_fc = [f"dorado_demux_{code}" for code in codes]
     done_fc = [x for x in done if x.startswith("dorado_demux")]
     to_dos = [x for x in all_fc if x not in done_fc]
 
