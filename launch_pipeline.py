@@ -492,8 +492,8 @@ def dorado_demux(toml_config, done):
 
 def samtools(toml_config, done):
     tool="samtools"
-    cores="8"
-    memory="64"
+    cores="4"
+    memory="96"
 
     output = toml_config["general"]["project_path"]
     email = toml_config["general"]["email"]
