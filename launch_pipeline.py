@@ -59,7 +59,6 @@ def main():
     if os.path.exists(steps_done_file):
         with open(steps_done_file, "r") as f:
             done = [line.strip() for line in f if line.strip()]  # ignore empty lines
-    print(done)
 
     function_queue = []
     # Setting up list of steps
@@ -370,16 +369,11 @@ def dorado_basecaller(toml_config, done):
     genome = get_reference(toml_config["general"]["reference"])["fasta"]
     flowcells = toml_config["general"]["fc_dir_names"]
     
-    # Iterate through each flowcell for basecalling and demultiplexing
-    codes = []
+    # Iterate through each flowcell for basecalling
     for flowcell in flowcells:
         reads = output + "/" + flowcell + "/reads/pod5"
         final = output + "/" + flowcell + "/alignments/"
         bam_dorado = final + flowcell + ".bam"
-
-        # Simplify flowcell name with a shorter string
-        code = flowcell.split('_')[-1]
-        codes.append(code)
 
         cores = "4"
         memory = "64"
@@ -423,7 +417,7 @@ def dorado_basecaller(toml_config, done):
         job = create_script(tool, cores, memory, formatted_time, output, email, command_str, flowcell)
 
         # Creates a variable job name for each flowcell (used for dependencies)
-        var_name_bc = f"basecall_{code}"
+        var_name_bc = f"dorado_basecaller_{flowcell}"
 
         # Add slurm job to main.sh
         if var_name_bc not in done:
@@ -441,7 +435,7 @@ def dorado_demux(toml_config, done):
     genome = get_reference(toml_config["general"]["reference"])["fasta"]
     flowcells = toml_config["general"]["fc_dir_names"]
     
-    # Iterate through each flowcell for basecalling and demultiplexing
+    # Iterate through each flowcell for demultiplexing
     for flowcell in flowcells:
         reads = output + "/" + flowcell + "/reads/pod5"
         final = output + "/" + flowcell + "/alignments/"
@@ -474,7 +468,7 @@ def dorado_demux(toml_config, done):
 
         # Different variable name for next set of dependencies
         var_name = f"dorado_demux_{flowcell}"
-        var_name_bc = f"dorado_basecall_{flowcell}"
+        var_name_bc = f"dorado_basecaller_{flowcell}"
 
         # Add slurm job to main.sh
         if var_name not in done:
@@ -514,7 +508,7 @@ def samtools(toml_config, done):
 
     all_fc = [f"dorado_demux_{flowcell}" for flowcell in flowcells]
     done_fc = [x for x in done if x.startswith("dorado_demux")]
-    to_do = all_fc - done_fc
+    to_do = [x for x in all_fc if x not in done_fc]
     print(to_dos)
 
     command = ["python", "-u", 
