@@ -280,6 +280,8 @@ def get_reference(ref):
 
 
 def create_script(tool, cores, memory, time, output, email, command, flowcell):
+    steps_done = output + "/scripts/steps_done.txt"
+    
     # Enables creating a script per flowcell, or a single script if "" is added as the argument
     if flowcell != "":
         job = output + "/scripts/" + tool + "_" + flowcell + ".slurm"
@@ -302,14 +304,10 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
 
             slurm_filled += "\n#\n### Calling " + tool + " - " + flowcell + "\n#\n"
             slurm_filled += command
-            slurm_filled += "\n\n"
-            # Pending completion to keep track of completed steps 
-            #slurm_filled += 'echo "' + tool + '" >> ' + output + '/scripts/steps_done.txt'
+            slurm_filled += "\n"
 
-            with open(job, "w") as o:
-                o.write(slurm_filled)
-
-                return job
+            # Keep track of completed steps 
+            slurm_filled += f'if [ $? -eq 0 ]; then echo "{tool}_{flowcell}" >> "{steps_done}"; fi\n\n'
             
     # This is for tools running on all the data at once
     else :
@@ -327,14 +325,15 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
 
             slurm_filled += "\n#\n### Calling " + tool + "\n#\n"
             slurm_filled += command
-            slurm_filled += "\n\n"
-            # Pending completion to keep track of completed steps
-            # slurm_filled += 'echo "' + tool + '" >> ' + output + '/scripts/steps_done.txt'
+            slurm_filled += "\n"
 
-            with open(job, "w") as o:
-                o.write(slurm_filled)
+            # Keep track of completed steps 
+            slurm_filled += f'if [ $? -eq 0 ]; then echo "{tool}" >> "{steps_done}"; fi\n\n'
 
-                return job
+    with open(job, "w") as o:
+        o.write(slurm_filled)
+
+        return job
 
 
 def format_time(hours):
