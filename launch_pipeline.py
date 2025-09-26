@@ -497,7 +497,7 @@ def samtools(toml_config, done):
             size = line.split()[0]
 
     size_str = size.rstrip('G')
-    hours = int(size_str) * 0.04
+    hours = int(size_str) * 0.032
     formatted_time = format_time(hours)
 
     all_fc = [f"dorado_demux_{flowcell}" for flowcell in flowcells]
