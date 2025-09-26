@@ -700,25 +700,26 @@ def epi2me(toml_config, done):
             todo += " " + arg_map[item]
 
     for sample in toml_config["general"]["samples"]:
+
+        job = output + "/scripts/" + tool + "_" + sample + ".slurm"
+        with open(TOOL_PATH + "main_pipelines/long-read/LongReadSequencingONT/epi2me_template.txt", "r") as f:
+            slurm = f.read()
+            slurm_filled = slurm.format(cores, memory, time, tool, sample, email, output, todo, genome, model)
+
+            with open(job, "w") as o:
+                o.write(slurm_filled)
+
         epi_name = f"epi2me_{sample}"
         if "samtools" not in done:
             print("To-Do: " + epi_name)
-            job = output + "/scripts/" + tool + "_" + sample + ".slurm"
-		    with open(TOOL_PATH + "main_pipelines/long-read/LongReadSequencingONT/epi2me_template.txt", "r") as f:
-			    slurm = f.read()
-			    slurm_filled = slurm.format(cores, memory, time, tool, sample, email, output, todo, genome, model)
-
-			    with open(job, "w") as o:
-				    o.write(slurm_filled)
-
-                with open(output + "/scripts/main.sh", "a") as f:
-				f.write(f"\n# Epi2me workflow human variation for {sample}")
-				f.write(f"\n{epi_name}=$(sbatch --parsable --dependency=afterok:$samtools {job})\n")
+            with open(output + "/scripts/main.sh", "a") as f:
+                f.write(f"\n# Epi2me workflow human variation for {sample}")
+                f.write(f"\n{epi_name}=$(sbatch --parsable --dependency=afterok:$samtools {job})\n")
         else:    
             if epi_name not in done:
                 with open(output + "/scripts/main.sh", "a") as f:
-				f.write(f"\n# Epi2me workflow human variation for {sample}")
-				f.write(f"\n{epi_name}=$(sbatch --parsable {job})\n")
+				    f.write(f"\n# Epi2me workflow human variation for {sample}")
+				    f.write(f"\n{epi_name}=$(sbatch --parsable {job})\n")
             else: 
                 print("Done: " + epi_name)
 
