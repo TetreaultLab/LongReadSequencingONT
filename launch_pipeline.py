@@ -464,18 +464,23 @@ def dorado_demux(toml_config, done):
         var_name_bc = f"dorado_basecaller_{code}"
 
         # Add slurm job to main.sh
-        if var_name not in done:
+        if var_name not in done: # demux not done
             print("To-Do: " + var_name)
-            if var_name_bc not in done:
+            if var_name_bc not in done: # basecall and demux not done
                 with open(output + "/scripts/main.sh", "a") as f:
                     f.write(f"\n# Dorado Demux for flowcell : {flowcell}")
                     f.write(f"\n{var_name}=$(sbatch --parsable --dependency=afterok:${var_name_bc} {job})\n")
-            else:
+            else: # demux not done but basecall done
                 with open(output + "/scripts/main.sh", "a") as f:
                     f.write(f"\n# Dorado Demux for flowcell : {flowcell}")
                     f.write(f"\n{var_name}=$(sbatch --parsable {job})\n")
-        else:
-            print("Done: " + var_name)
+        else: # demux done
+            if var_name_bc not in done: #demux done but not basecall, redo demux after basecall
+                with open(output + "/scripts/main.sh", "a") as f:
+                    f.write(f"\n# Dorado Demux for flowcell : {flowcell}")
+                    f.write(f"\n{var_name}=$(sbatch --parsable --dependency=afterok:${var_name_bc} {job})\n")
+            else: # demux done and basecall done, sucess
+                print("Done: " + var_name)
 
 
 def samtools(toml_config, done):
