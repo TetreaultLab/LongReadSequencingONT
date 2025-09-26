@@ -71,24 +71,11 @@ def main():
     # Renaming bams and running samtools merge, sort and index
     function_queue.append(samtools)
     
-    # Quality Control - LongReadSum
-    #function_queue.append(longReadSum)
-
-    # Quality Control - mosdepth
-    function_queue.append(mosdepth)
-
-    # Epi2Me labs workflow human-variation
-    if toml_config["general"]["seq_type"] == "WGS":
-            function_queue.append(epi2me)
-
-    # Cleanup
-    function_queue.append(cleanup)
-    
     # Create main.sh
     with open(output + "/scripts/main.sh", "w") as f:
         f.write("#!/bin/sh\n")
 
-    # Calling each steps
+    # Calling main steps
     for func in function_queue:
         func(toml_config, done)
 
@@ -528,6 +515,9 @@ def samtools(toml_config, done):
     
         job = create_script(tool, cores, memory, formatted_time, output, email, command_str, "")
 
+        #remove samtools from done so all subsequent jobs run after samtools
+        done.remove("samtools")
+
         dependencies = ":".join([f"${to_do}" for to_do in to_dos])
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("\n# Rename, merge, sort and index bams")
@@ -554,6 +544,17 @@ def samtools(toml_config, done):
         else:
             # All dorado_demux are done and samtools is done
             print("Done: " + tool)
+
+
+    # Call all other functions for downstream analysis
+    # longReadSum(toml_config, done)
+
+    mosdepth(toml_config, done)
+
+    if toml_config["general"]["seq_type"] == "WGS":
+            function_queue.append(epi2me)
+    
+    cleanup(toml_config, done)
 
 
 def longReadSum(toml_config, done):
@@ -604,7 +605,7 @@ def longReadSum(toml_config, done):
         print("Done: " + tool)
 
 
-def mosdepth (toml_config, done):
+def mosdepth(toml_config, done):
     # As a module until nextflow is usable
     tool = "mosdepth"
     output = toml_config["general"]["project_path"]
