@@ -46,7 +46,7 @@ nextflow run epi2me-labs/wf-human-variation \
     --modkit_threads 1 \
     -c $APPTAINER_CONFIG \
     -profile slurm_local
-#
+
 if [ $? -eq 0 ]; then
     echo "epi2me_{4}" >> "$STEPS_DONE"
 fi
