@@ -668,8 +668,8 @@ def mosdepth(toml_config, done):
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write("\n# Mosdepth")
                 f.write(f"\nmosdepth=$(sbatch --parsable {job})\n")
-    else:
-        print("Done: " + tool)
+        else:
+            print("Done: " + tool)
 
 
 def epi2me(toml_config, done):
