@@ -508,7 +508,7 @@ def samtools(toml_config, done):
         command = ["python", "-u", 
                 TOOL_PATH + "main_pipelines/long-read/LongReadSequencingONT/rename_bam.py", 
                 "--config", toml_config["general"]["project_path"] + '/scripts/config_final.toml',
-                "--flowcells", fcs
+                "--flowcells", str(fcs)
                 ]
         command_str = " ".join(command)
         print(command_str)
