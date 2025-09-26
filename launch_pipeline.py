@@ -505,12 +505,11 @@ def samtools(toml_config, done):
     # If at least one dorado_demux job is not done, run samtools for that/these flowcell(s)
     if len(to_dos) > 0:
         print("To-Do: " + tool)
-        fcs = [x.split("_")[-1] for x in to_dos]
 
         command = ["python", "-u", 
                 TOOL_PATH + "main_pipelines/long-read/LongReadSequencingONT/rename_bam.py", 
                 "--config", toml_config["general"]["project_path"] + '/scripts/config_final.toml',
-                "--flowcells", str(fcs)
+                "--flowcells", str(to_dos)
                 ]
         command_str = " ".join(command)
         print(command_str)
@@ -518,7 +517,7 @@ def samtools(toml_config, done):
         job = create_script(tool, cores, memory, formatted_time, output, email, command_str, "")
 
         #remove samtools from done so all subsequent jobs run after samtools
-        done.remove("samtools")
+        done = done.remove("samtools")
 
         dependencies = ":".join([f"${to_do}" for to_do in to_dos])
         with open(output + "/scripts/main.sh", "a") as f:
@@ -527,12 +526,10 @@ def samtools(toml_config, done):
     else:
         # If all dorado_demux are done but samtools has not run yet
         if tool not in done:
-            fcs = [x.split("_")[-1] for x in all_fc]
-
             command = ["python", "-u", 
                     TOOL_PATH + "main_pipelines/long-read/LongReadSequencingONT/rename_bam.py", 
                     "--config", toml_config["general"]["project_path"] + '/scripts/config_final.toml',
-                    "--flowcells", '"' + fcs + '"'
+                    "--flowcells", str(all_fc)
                     ]
             command_str = " ".join(command)
             print(command_str)
