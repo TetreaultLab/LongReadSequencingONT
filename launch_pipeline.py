@@ -524,6 +524,7 @@ def samtools(toml_config, done):
     else:
         # If all dorado_demux are done but samtools has not run yet
         if tool not in done:
+            print("To-Do: " + tool)
             command = ["python", "-u", 
                     TOOL_PATH + "main_pipelines/long-read/LongReadSequencingONT/rename_bam.py", 
                     "--config", toml_config["general"]["project_path"] + '/scripts/config_final.toml',
@@ -595,6 +596,7 @@ def longReadSum(toml_config, done):
             f.write(f"\nlongreadsum=$(sbatch --parsable --dependency=afterok:$samtools {job})\n")
     else :
         if tool not in done:
+            print("To-Do: " + tool)
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write("\n# QC")
                 f.write(f"\nlongreadsum=$(sbatch --parsable {job})\n")
@@ -665,6 +667,7 @@ def mosdepth(toml_config, done):
             
     else:
         if tool not in done:
+            print("To-Do: " + tool)
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write("\n# Mosdepth")
                 f.write(f"\nmosdepth=$(sbatch --parsable {job})\n")
