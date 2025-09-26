@@ -515,6 +515,12 @@ def samtools(toml_config, done):
     done_fc = [x for x in done if x.startswith("dorado_demux")]
     to_dos = [x for x in all_fc if x not in done_fc]
 
+    full_fcs = [fc for short in all_fc 
+    for fc in flowcells if short.split('_')[-1] in fc]
+
+    to_do_fcs = [fc for short in to_dos 
+    for fc in flowcells if short.split('_')[-1] in fc]
+
     # Add slurm job to main.sh
     # If at least one dorado_demux job is not done, run samtools for that/these flowcell(s)
     if len(to_dos) > 0:
@@ -523,15 +529,14 @@ def samtools(toml_config, done):
         command = ["python", "-u", 
                 TOOL_PATH + "main_pipelines/long-read/LongReadSequencingONT/rename_bam.py", 
                 "--config", toml_config["general"]["project_path"] + '/scripts/config_final.toml',
-                "--flowcells", '"' + str(to_dos) + '"'
+                "--flowcells", '"' + str(to_do_fcs) + '"'
                 ]
         command_str = " ".join(command)
         print(command_str)
     
         job = create_script(tool, cores, memory, formatted_time, output, email, command_str, "")
 
-        to_dos_code = [x.split("_")[-1] for x in to_dos]
-        dependencies = ":".join([f"$dorado_demux_{code}" for code in to_dos_code])
+        dependencies = ":".join([f"$dorado_demux_{code}" for code in to_dos])
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("\n# Rename, merge, sort and index bams")
             f.write(f"\nsamtools=$(sbatch --parsable --dependency=afterok:{dependencies} {job})\n")
@@ -547,7 +552,7 @@ def samtools(toml_config, done):
             command = ["python", "-u", 
                     TOOL_PATH + "main_pipelines/long-read/LongReadSequencingONT/rename_bam.py", 
                     "--config", toml_config["general"]["project_path"] + '/scripts/config_final.toml',
-                    "--flowcells", '"' + str(all_fc) + '"'
+                    "--flowcells", '"' + str(full_fcs) + '"'
                     ]
             command_str = " ".join(command)
         
