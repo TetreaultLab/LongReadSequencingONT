@@ -421,6 +421,7 @@ def dorado_basecaller(toml_config, done):
 
         # Add slurm job to main.sh
         if var_name_bc not in done:
+            print("To-Do: " + var_name_bc)
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write(f"\n# Dorado Basecall for flowcell : {flowcell}")
                 f.write(f"\n{var_name_bc}=$(sbatch --parsable {job})\n")
@@ -472,6 +473,7 @@ def dorado_demux(toml_config, done):
 
         # Add slurm job to main.sh
         if var_name not in done:
+            print("To-Do: " + var_name)
             if var_name_bc not in done:
                 with open(output + "/scripts/main.sh", "a") as f:
                     f.write(f"\n# Dorado Demux for flowcell : {flowcell}")
@@ -515,6 +517,7 @@ def samtools(toml_config, done):
     # Add slurm job to main.sh
     # If at least one dorado_demux job is not done, run samtools for that/these flowcell(s)
     if len(to_dos) > 0:
+        print("To-Do: " + tool)
         fcs = [x.split("_")[-1] for x in to_dos]
 
         command = ["python", "-u", 
@@ -590,6 +593,7 @@ def longReadSum(toml_config, done):
 
     # Add slurm job to main.sh
     if tool not in done:
+        print("To-Do: " + tool)
         if "samtools" not in done:
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write("\n# QC")
@@ -658,6 +662,7 @@ def mosdepth (toml_config, done):
     
     # Add slurm job to main.sh
     if tool not in done:
+        print("To-Do: " + tool)
         if "samtools" not in done:
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write("\n# Mosdepth")
@@ -701,6 +706,7 @@ def epi2me(toml_config, done):
         epi_name = f"epi2me_{sample}"
         # Check if epi2me is already done for this sample
         if epi_name not in done:
+            print("To-Do: " + epi_name)
             job = output + "/scripts/" + tool + "_" + sample + ".slurm"
             with open(TOOL_PATH + "main_pipelines/long-read/LongReadSequencingONT/epi2me_template.txt", "r") as f:
                 slurm = f.read()
