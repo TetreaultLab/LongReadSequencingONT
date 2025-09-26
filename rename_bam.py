@@ -96,6 +96,7 @@ try:
         subprocess.run(cmd3, check=True)
 
     print("Rename and Samtools done !")
+    
 except Exception as e:
     print(f"Error: {e}")
     sys.exit(1)
