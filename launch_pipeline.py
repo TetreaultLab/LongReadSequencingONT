@@ -264,6 +264,7 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
     
     # Enables creating a script per flowcell, or a single script if "" is added as the argument
     if flowcell != "":
+        code = flowcell.split('_')[-1]
         job = output + "/scripts/" + tool + "_" + flowcell + ".slurm"
 
         # Uses a slurm template for each job script
@@ -287,7 +288,7 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
             slurm_filled += "\n"
 
             # Keep track of completed steps 
-            slurm_filled += f'if [ $? -eq 0 ]; then echo "{tool}_{flowcell}" >> "{steps_done}"; fi\n\n'
+            slurm_filled += f'if [ $? -eq 0 ]; then echo "{tool}_{code}" >> "{steps_done}"; fi\n\n'
             
     # This is for tools running on all the data at once
     else :
@@ -371,6 +372,8 @@ def dorado_basecaller(toml_config, done):
 
         size_str = result.stdout.split()[0].rstrip('G')
 
+        code = flowcell.split('_')[-1]
+
         # Scale required job time based on amount of data 
         hours = int(size_str) * 0.02
         formatted_time = format_time(hours)
@@ -404,7 +407,7 @@ def dorado_basecaller(toml_config, done):
         job = create_script(tool, cores, memory, formatted_time, output, email, command_str, flowcell)
 
         # Creates a variable job name for each flowcell (used for dependencies)
-        var_name_bc = f"dorado_basecaller_{flowcell}"
+        var_name_bc = f"dorado_basecaller_{code}"
 
         # Add slurm job to main.sh
         if var_name_bc not in done:
@@ -442,6 +445,8 @@ def dorado_demux(toml_config, done):
         cores = "4"
         memory = "24"
 
+        code = flowcell.split('_')[-1]
+
         command = [TOOL_PATH + DORADO, 
                     "demux", "-vv", 
                     "--threads", cores, 
@@ -455,8 +460,8 @@ def dorado_demux(toml_config, done):
         job = create_script(tool, cores, memory, formatted_time, output, email, command_str, flowcell)
 
         # Different variable name for next set of dependencies
-        var_name = f"dorado_demux_{flowcell}"
-        var_name_bc = f"dorado_basecaller_{flowcell}"
+        var_name = f"dorado_demux_{code}"
+        var_name_bc = f"dorado_basecaller_{code}"
 
         # Add slurm job to main.sh
         if var_name not in done:
@@ -513,14 +518,15 @@ def samtools(toml_config, done):
     
         job = create_script(tool, cores, memory, formatted_time, output, email, command_str, "")
 
-        #remove samtools from done so all subsequent jobs run after samtools
-        done.remove("samtools")
-        print(done)
-
-        dependencies = ":".join([f"${to_do}" for to_do in to_dos])
+        to_dos_code = [x.split("_")[-1] for x in to_dos]
+        dependencies = ":".join([f"$dorado_demux_{code}" for code in to_dos_code])
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("\n# Rename, merge, sort and index bams")
             f.write(f"\nsamtools=$(sbatch --parsable --dependency=afterok:{dependencies} {job})\n")
+
+        #remove samtools from done so all subsequent jobs run after samtools
+        done.remove("samtools")
+
     else:
         # If all dorado_demux are done but samtools has not run yet
         if tool not in done:
@@ -534,8 +540,9 @@ def samtools(toml_config, done):
             print(command_str)
         
             job = create_script(tool, cores, memory, formatted_time, output, email, command_str, "")
-
-            dependencies = ":".join([f"${to_do}" for to_do in all_fc])
+            
+            to_dos_code = [x.split("_")[-1] for x in all_fc]
+            dependencies = ":".join([f"$dorado_demux_{to_do}" for to_do in to_dos_code])
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write("\n# Rename, merge, sort and index bams")
                 f.write(f"\nsamtools=$(sbatch --parsable --dependency=afterok:{dependencies} {job})\n")
