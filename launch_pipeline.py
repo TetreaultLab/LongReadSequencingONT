@@ -498,8 +498,6 @@ def samtools(toml_config, done):
     all_fc = [f"dorado_demux_{flowcell}" for flowcell in flowcells]
     done_fc = [x for x in done if x.startswith("dorado_demux")]
     to_dos = [x for x in all_fc if x not in done_fc]
-    print(all_fc)
-    print(to_dos)
 
     # Add slurm job to main.sh
     # If at least one dorado_demux job is not done, run samtools for that/these flowcell(s)
@@ -512,7 +510,6 @@ def samtools(toml_config, done):
                 "--flowcells", str(to_dos)
                 ]
         command_str = " ".join(command)
-        print(command_str)
     
         job = create_script(tool, cores, memory, formatted_time, output, email, command_str, "")
 
