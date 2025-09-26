@@ -30,7 +30,7 @@ try:
 
     all_inputs = []
     # Loop over flowcells to rename
-    for fc in fcs :
+    for fc in flowcells :
         print("\nRunning: rename for flowcell ", fc)
         code = fc.split('_')[-1]
 
