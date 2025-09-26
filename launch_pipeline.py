@@ -715,12 +715,12 @@ def epi2me(toml_config, done):
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write(f"\n# Epi2me workflow human variation for {sample}")
                 f.write(f"\n{epi_name}=$(sbatch --parsable --dependency=afterok:$samtools {job})\n")
-        else:    
+        else:
             if epi_name not in done:
                 with open(output + "/scripts/main.sh", "a") as f:
 				    f.write(f"\n# Epi2me workflow human variation for {sample}")
 				    f.write(f"\n{epi_name}=$(sbatch --parsable {job})\n")
-            else: 
+            else:
                 print("Done: " + epi_name)
 
 
