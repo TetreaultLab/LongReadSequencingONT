@@ -535,7 +535,7 @@ def samtools(toml_config, done):
     
         job = create_script(tool, cores, memory, formatted_time, output, email, command_str, "")
 
-        dependencies = ":".join([f"$dorado_demux_{code}" for code in to_dos])
+        dependencies = ":".join([f"${code}" for code in to_dos])
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("\n# Rename, merge, sort and index bams")
             f.write(f"\nsamtools=$(sbatch --parsable --dependency=afterok:{dependencies} {job})\n")
