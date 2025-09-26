@@ -442,15 +442,10 @@ def dorado_demux(toml_config, done):
     flowcells = toml_config["general"]["fc_dir_names"]
     
     # Iterate through each flowcell for basecalling and demultiplexing
-    codes = []
     for flowcell in flowcells:
         reads = output + "/" + flowcell + "/reads/pod5"
         final = output + "/" + flowcell + "/alignments/"
         bam_dorado = final + flowcell + ".bam"
-
-        # Simplify flowcell name with a shorter string
-        code = flowcell.split('_')[-1]
-        codes.append(code)
 
         # Get reads files size
         cmd = ["du", "-sh", "--apparent-size", "--block-size", "G", reads]
@@ -478,14 +473,19 @@ def dorado_demux(toml_config, done):
         job = create_script(tool, cores, memory, formatted_time, output, email, command_str, flowcell)
 
         # Different variable name for next set of dependencies
-        var_name = f"demux_{code}"
-        var_name_bc = f"basecall_{code}"
+        var_name = f"dorado_demux_{flowcell}"
+        var_name_bc = f"dorado_basecall_{flowcell}"
 
         # Add slurm job to main.sh
         if var_name not in done:
-            with open(output + "/scripts/main.sh", "a") as f:
-                f.write(f"\n# Dorado Demux for flowcell : {flowcell}")
-                f.write(f"\n{var_name}=$(sbatch --parsable --dependency=afterok:${var_name_bc} {job})\n")
+            if var_name_bc not in done:
+                with open(output + "/scripts/main.sh", "a") as f:
+                    f.write(f"\n# Dorado Demux for flowcell : {flowcell}")
+                    f.write(f"\n{var_name}=$(sbatch --parsable --dependency=afterok:${var_name_bc} {job})\n")
+            else:
+                with open(output + "/scripts/main.sh", "a") as f:
+                    f.write(f"\n# Dorado Demux for flowcell : {flowcell}")
+                    f.write(f"\n{var_name}=$(sbatch --parsable {job})\n")
         else:
             print("Done: " + var_name)
 
@@ -512,13 +512,11 @@ def samtools(toml_config, done):
     hours = int(size_str) * 0.04
     formatted_time = format_time(hours)
 
-    codes = []
-    total_size = 0
-    for flowcell in flowcells:
-        code = flowcell.split('_')[-1]
-        codes.append(code)
+    all_fc = [f"dorado_demux_{flowcell}" for flowcell in flowcells]
+    done_fc = [x for x in done if x.startswith("dorado_demux")]
+    to_do = all_fc - done_fc
+    print(to_dos)
 
-    dependencies = ":".join([f"$demux_{code}" for code in codes])
     command = ["python", "-u", 
                 TOOL_PATH + "main_pipelines/long-read/LongReadSequencingONT/rename_bam.py", 
                 toml_config["general"]["project_path"] + '/scripts/config_final.toml'
@@ -529,9 +527,15 @@ def samtools(toml_config, done):
 
     # Add slurm job to main.sh
     if tool not in done:
-        with open(output + "/scripts/main.sh", "a") as f:
-            f.write("\n# Rename, merge, sort and index bams")
-            f.write(f"\nsamtools=$(sbatch --parsable --dependency=afterok:{dependencies} {job})\n")
+        if len(to_dos) > 0:
+            dependencies = ":".join([f"${to_do}" for to_do in to_dos])
+            with open(output + "/scripts/main.sh", "a") as f:
+                f.write("\n# Rename, merge, sort and index bams")
+                f.write(f"\nsamtools=$(sbatch --parsable --dependency=afterok:{dependencies} {job})\n")
+        else:
+            with open(output + "/scripts/main.sh", "a") as f:
+                f.write("\n# Rename, merge, sort and index bams")
+                f.write(f"\nsamtools=$(sbatch --parsable {job})\n")
     else:
         print("Done: " + tool)
 
@@ -569,11 +573,16 @@ def longReadSum(toml_config, done):
 
     job = create_script(tool, cores, memory, time, output, email, command_str, "")
 
+    # Add slurm job to main.sh
     if tool not in done:
-        # Add slurm job to main.sh
-        with open(output + "/scripts/main.sh", "a") as f:
-            f.write("\n# QC")
-            f.write(f"\nlongreadsum=$(sbatch --parsable --dependency=afterok:$samtools {job})\n")
+        if "samtools" not in done:
+            with open(output + "/scripts/main.sh", "a") as f:
+                f.write("\n# QC")
+                f.write(f"\nlongreadsum=$(sbatch --parsable --dependency=afterok:$samtools {job})\n")
+        else :
+            with open(output + "/scripts/main.sh", "a") as f:
+                f.write("\n# QC")
+                f.write(f"\nlongreadsum=$(sbatch --parsable {job})\n")
     else:
         print("Done: " + tool)
 
@@ -631,12 +640,17 @@ def mosdepth (toml_config, done):
     command_str += " ".join(command3) + "\n"
 
     job = create_script(tool, threads, memory, formatted_time, output, email, command_str, "")
-
+    
+    # Add slurm job to main.sh
     if tool not in done:
-        # Add slurm job to main.sh
-        with open(output + "/scripts/main.sh", "a") as f:
-            f.write("\n# Mosdepth")
-            f.write(f"\nmosdepth=$(sbatch --parsable --dependency=afterok:$samtools {job})\n")
+        if "samtools" not in done:
+            with open(output + "/scripts/main.sh", "a") as f:
+                f.write("\n# Mosdepth")
+                f.write(f"\nmosdepth=$(sbatch --parsable --dependency=afterok:$samtools {job})\n")
+        else:
+            with open(output + "/scripts/main.sh", "a") as f:
+                f.write("\n# Mosdepth")
+                f.write(f"\nmosdepth=$(sbatch --parsable {job})\n")
     else:
         print("Done: " + tool)
 
@@ -680,10 +694,15 @@ def epi2me(toml_config, done):
                 with open(job, "w") as o:
                     o.write(slurm_filled)
 
-            
-            with open(output + "/scripts/main.sh", "a") as f:
-                f.write(f"\n# Epi2me workflow human variation for {sample}")
-                f.write(f"\n{epi_name}=$(sbatch --parsable --dependency=afterok:$samtools {job})\n")
+            if "samtools" not in done:
+                with open(output + "/scripts/main.sh", "a") as f:
+                    f.write(f"\n# Epi2me workflow human variation for {sample}")
+                    f.write(f"\n{epi_name}=$(sbatch --parsable --dependency=afterok:$samtools {job})\n")
+            else:
+                with open(output + "/scripts/main.sh", "a") as f:
+                    f.write(f"\n# Epi2me workflow human variation for {sample}")
+                    f.write(f"\n{epi_name}=$(sbatch --parsable {job})\n")
+
         else :
             print("Done: " + epi_name)
 
