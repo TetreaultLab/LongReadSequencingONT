@@ -514,7 +514,8 @@ def samtools(toml_config, done):
         job = create_script(tool, cores, memory, formatted_time, output, email, command_str, "")
 
         #remove samtools from done so all subsequent jobs run after samtools
-        done = done.remove("samtools")
+        done.remove("samtools")
+        print(done)
 
         dependencies = ":".join([f"${to_do}" for to_do in to_dos])
         with open(output + "/scripts/main.sh", "a") as f:
