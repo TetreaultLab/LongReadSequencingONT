@@ -552,7 +552,7 @@ def samtools(toml_config, done):
     mosdepth(toml_config, done)
 
     if toml_config["general"]["seq_type"] == "WGS":
-            function_queue.append(epi2me)
+        epi2me(toml_config, done)
     
     cleanup(toml_config, done)
 
