@@ -588,18 +588,18 @@ def longReadSum(toml_config, done):
     job = create_script(tool, cores, memory, time, output, email, command_str, "")
 
     # Add slurm job to main.sh
-    if tool not in done:
+    if "samtools" not in done:
         print("To-Do: " + tool)
-        if "samtools" not in done:
-            with open(output + "/scripts/main.sh", "a") as f:
-                f.write("\n# QC")
-                f.write(f"\nlongreadsum=$(sbatch --parsable --dependency=afterok:$samtools {job})\n")
-        else :
+        with open(output + "/scripts/main.sh", "a") as f:
+            f.write("\n# QC")
+            f.write(f"\nlongreadsum=$(sbatch --parsable --dependency=afterok:$samtools {job})\n")
+    else :
+        if tool not in done:
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write("\n# QC")
                 f.write(f"\nlongreadsum=$(sbatch --parsable {job})\n")
-    else:
-        print("Done: " + tool)
+        else:
+            print("Done: " + tool)
 
 
 def mosdepth(toml_config, done):
@@ -657,13 +657,14 @@ def mosdepth(toml_config, done):
     job = create_script(tool, threads, memory, formatted_time, output, email, command_str, "")
     
     # Add slurm job to main.sh
-    if tool not in done:
+    if "samtools" not in done:
         print("To-Do: " + tool)
-        if "samtools" not in done:
-            with open(output + "/scripts/main.sh", "a") as f:
+        with open(output + "/scripts/main.sh", "a") as f:
                 f.write("\n# Mosdepth")
                 f.write(f"\nmosdepth=$(sbatch --parsable --dependency=afterok:$samtools {job})\n")
-        else:
+            
+    else:
+        if tool not in done:
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write("\n# Mosdepth")
                 f.write(f"\nmosdepth=$(sbatch --parsable {job})\n")
@@ -700,28 +701,27 @@ def epi2me(toml_config, done):
 
     for sample in toml_config["general"]["samples"]:
         epi_name = f"epi2me_{sample}"
-        # Check if epi2me is already done for this sample
-        if epi_name not in done:
+        if "samtools" not in done:
             print("To-Do: " + epi_name)
             job = output + "/scripts/" + tool + "_" + sample + ".slurm"
-            with open(TOOL_PATH + "main_pipelines/long-read/LongReadSequencingONT/epi2me_template.txt", "r") as f:
-                slurm = f.read()
-                slurm_filled = slurm.format(cores, memory, time, tool, sample, email, output, todo, genome, model)
+		    with open(TOOL_PATH + "main_pipelines/long-read/LongReadSequencingONT/epi2me_template.txt", "r") as f:
+			    slurm = f.read()
+			    slurm_filled = slurm.format(cores, memory, time, tool, sample, email, output, todo, genome, model)
 
-                with open(job, "w") as o:
-                    o.write(slurm_filled)
+			    with open(job, "w") as o:
+				    o.write(slurm_filled)
 
-            if "samtools" not in done:
                 with open(output + "/scripts/main.sh", "a") as f:
-                    f.write(f"\n# Epi2me workflow human variation for {sample}")
-                    f.write(f"\n{epi_name}=$(sbatch --parsable --dependency=afterok:$samtools {job})\n")
-            else:
+				f.write(f"\n# Epi2me workflow human variation for {sample}")
+				f.write(f"\n{epi_name}=$(sbatch --parsable --dependency=afterok:$samtools {job})\n")
+        else:    
+            if epi_name not in done:
                 with open(output + "/scripts/main.sh", "a") as f:
-                    f.write(f"\n# Epi2me workflow human variation for {sample}")
-                    f.write(f"\n{epi_name}=$(sbatch --parsable {job})\n")
+				f.write(f"\n# Epi2me workflow human variation for {sample}")
+				f.write(f"\n{epi_name}=$(sbatch --parsable {job})\n")
+            else: 
+                print("Done: " + epi_name)
 
-        else :
-            print("Done: " + epi_name)
 
 
 
