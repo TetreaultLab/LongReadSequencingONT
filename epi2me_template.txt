@@ -24,9 +24,10 @@ WORKDIR="/lustre10/scratch/$USER/epi2me_work/{4}"
 BAM="{6}/alignments/{4}_sorted.bam"
 OUT="{6}/results/{4}"
 APPTAINER_CONFIG="/lustre09/project/6019267/shared/tools/main_pipelines/long-read/apptainer_nextflow_no_slurm.config"
-
+STEPS_DONE="{6}/scripts/steps_done.txt"
+#
 mkdir -p $OUT
-
+#
 nextflow run epi2me-labs/wf-human-variation \
     {7} \
     --bam_min_coverage 4 \
@@ -43,7 +44,11 @@ nextflow run epi2me-labs/wf-human-variation \
     --modkit_threads 1 \
     -c $APPTAINER_CONFIG \
     -profile slurm_local
-
+#
+if [ $? -eq 0 ]; then
+    echo "epi2me_{4}" >> "$STEPS_DONE"
+fi
+#
 echo "Deleting $WORKDIR ..."
 rm -r $WORKDIR
 echo "Deletion complete - epi2me pipeline for {4} done!"
