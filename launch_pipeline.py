@@ -532,7 +532,6 @@ def samtools(toml_config, done):
                 "--flowcells", '"' + str(to_do_fcs) + '"'
                 ]
         command_str = " ".join(command)
-        print(command_str)
     
         job = create_script(tool, cores, memory, formatted_time, output, email, command_str, "")
 
