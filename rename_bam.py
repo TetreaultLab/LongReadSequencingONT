@@ -4,6 +4,7 @@ from collections import defaultdict
 import argparse
 import toml
 import subprocess
+import ast
 
 parser = argparse.ArgumentParser(
         prog="Rename Bam files after dorado demultiplexing",
