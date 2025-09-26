@@ -525,7 +525,8 @@ def samtools(toml_config, done):
             f.write(f"\nsamtools=$(sbatch --parsable --dependency=afterok:{dependencies} {job})\n")
 
         #remove samtools from done so all subsequent jobs run after samtools
-        done.remove("samtools")
+        if "samtools" in done:
+            done.remove("samtools")
 
     else:
         # If all dorado_demux are done but samtools has not run yet
