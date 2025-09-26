@@ -476,6 +476,7 @@ def dorado_demux(toml_config, done):
                     f.write(f"\n{var_name}=$(sbatch --parsable {job})\n")
         else: # demux done
             if var_name_bc not in done: #demux done but not basecall, redo demux after basecall
+                print("To-Do: " + var_name)
                 with open(output + "/scripts/main.sh", "a") as f:
                     f.write(f"\n# Dorado Demux for flowcell : {flowcell}")
                     f.write(f"\n{var_name}=$(sbatch --parsable --dependency=afterok:${var_name_bc} {job})\n")
