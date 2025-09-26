@@ -73,7 +73,7 @@ def main():
     function_queue.append(samtools)
     
     # Quality Control - LongReadSum
-    function_queue.append(longReadSum)
+    #function_queue.append(longReadSum)
 
     # Quality Control - mosdepth
     function_queue.append(mosdepth)
