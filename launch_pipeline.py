@@ -504,25 +504,23 @@ def samtools(toml_config, done):
     #     if line.endswith("total"):
     #         size = line.split()[0]
 
-    # codes = []
-    # for flowcell in flowcells:
-    #     code = flowcell.split('_')[-1]
-    #     codes.append(code)
-
     # size_str = size.rstrip('G')
     # hours = int(size_str) / n_samples * 0.032
     # formatted_time = format_time(hours)
-    formatted_time="02-00:00"
+    formatted_time="00-23:00"
+
+    codes = []
+    for flowcell in flowcells:
+        code = flowcell.split('_')[-1]
+        codes.append(code)
 
     all_fc = [f"dorado_demux_{code}" for code in codes]
     done_fc = [x for x in done if x.startswith("dorado_demux")]
     to_dos = [x for x in all_fc if x not in done_fc]
 
-    full_fcs = [fc for short in all_fc 
-    for fc in flowcells if short.split('_')[-1] in fc]
+    full_fcs = [fc for short in all_fc for fc in flowcells if short.split('_')[-1] in fc]
 
-    to_do_fcs = [fc for short in to_dos 
-    for fc in flowcells if short.split('_')[-1] in fc]
+    to_do_fcs = [fc for short in to_dos for fc in flowcells if short.split('_')[-1] in fc]
 
     # Add slurm job to main.sh
     # If at least one dorado_demux job is not done, run samtools for that/these flowcell(s)
