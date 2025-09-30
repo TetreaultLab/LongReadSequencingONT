@@ -550,7 +550,7 @@ def samtools(toml_config, done):
         if tool not in done:
             print("To-Do: " + tool)
             command = ["python", "-u", 
-                    TOOL_PATH + "main_pipelines/long-read/LongReadSequencingONT/rename_bam.py", 
+                    TOOL_PATH + "main_pipelines/long-read/LongReadSequencingONT/rename_bam_multiprocess.py", 
                     "--config", toml_config["general"]["project_path"] + '/scripts/config_final.toml',
                     "--flowcells", '"' + str(full_fcs) + '"'
                     ]
