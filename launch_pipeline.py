@@ -486,30 +486,33 @@ def dorado_demux(toml_config, done):
 
 def samtools(toml_config, done):
     tool="samtools"
-    cores="4"
     memory="96"
 
     output = toml_config["general"]["project_path"]
     email = toml_config["general"]["email"]
     genome = get_reference(toml_config["general"]["reference"])["fasta"]
     flowcells = toml_config["general"]["fc_dir_names"]
+    samples = toml_config["general"]["samples"]
+    n_samples = len(samples)
+    cores=str(4*n_samples)
 
     dirs = [f"{output}/{fc}/reads/pod5" for fc in flowcells]
     cmd = ["du", "-sh", "--apparent-size", "--block-size", "G", "--total"] + dirs
     result = subprocess.run(cmd, capture_output=True, text=True)
 
-    for line in result.stdout.splitlines():
-        if line.endswith("total"):
-            size = line.split()[0]
+    # for line in result.stdout.splitlines():
+    #     if line.endswith("total"):
+    #         size = line.split()[0]
 
-    codes = []
-    for flowcell in flowcells:
-        code = flowcell.split('_')[-1]
-        codes.append(code)
+    # codes = []
+    # for flowcell in flowcells:
+    #     code = flowcell.split('_')[-1]
+    #     codes.append(code)
 
-    size_str = size.rstrip('G')
-    hours = int(size_str) * 0.032
-    formatted_time = format_time(hours)
+    # size_str = size.rstrip('G')
+    # hours = int(size_str) / n_samples * 0.032
+    # formatted_time = format_time(hours)
+    formatted_time="02-00:00"
 
     all_fc = [f"dorado_demux_{code}" for code in codes]
     done_fc = [x for x in done if x.startswith("dorado_demux")]
@@ -527,7 +530,7 @@ def samtools(toml_config, done):
         print("To-Do: " + tool)
 
         command = ["python", "-u", 
-                TOOL_PATH + "main_pipelines/long-read/LongReadSequencingONT/rename_bam.py", 
+                TOOL_PATH + "main_pipelines/long-read/LongReadSequencingONT/rename_bam_multiprocess.py", 
                 "--config", toml_config["general"]["project_path"] + '/scripts/config_final.toml',
                 "--flowcells", '"' + str(to_do_fcs) + '"'
                 ]
@@ -541,8 +544,8 @@ def samtools(toml_config, done):
             f.write(f"\nsamtools=$(sbatch --parsable --dependency=afterok:{dependencies} {job})\n")
 
         #remove samtools from done so all subsequent jobs run after samtools
-        if "samtools" in done:
-            done.remove("samtools")
+        if tool in done:
+            done.remove(tool)
 
     else:
         # If all dorado_demux are done but samtools has not run yet
