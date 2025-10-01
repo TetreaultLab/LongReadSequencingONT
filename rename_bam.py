@@ -9,16 +9,16 @@ import sys
 
 try:
     parser = argparse.ArgumentParser(
-            prog="Rename Bam files after dorado demultiplexing",
-            description="Change long names for bam files to a easier format",
-        )
+        prog="Rename Bam files after dorado demultiplexing",
+        description="Change long names for bam files to a easier format",
+    )
 
     parser.add_argument(
         "--config", type=str, required=True, help="Project config file, including path."
-        )
+    )
     parser.add_argument(
         "--flowcells", type=str, required=True, help="Flowcells to run."
-        )
+    )
 
     args = parser.parse_args()
 
@@ -30,9 +30,9 @@ try:
 
     all_inputs = []
     # Loop over flowcells to rename
-    for fc in flowcells :
+    for fc in flowcells:
         print("\nRunning: rename for flowcell ", fc)
-        code = fc.split('_')[-1]
+        code = fc.split("_")[-1]
 
         inputs = toml_config["general"]["project_path"] + "/" + fc + "/alignments"
         inputs = Path(inputs)
@@ -42,8 +42,10 @@ try:
         output_path = Path(output)
 
         # Load the CSV file
-        df = pd.read_csv(toml_config["general"]["project_path"] + "/scripts/" + fc + ".csv", header=0)
-        df["code"] = df["flow_cell_id"].str.split('_').str[-1]
+        df = pd.read_csv(
+            toml_config["general"]["project_path"] + "/scripts/" + fc + ".csv", header=0
+        )
+        df["code"] = df["flow_cell_id"].str.split("_").str[-1]
 
         # Create a mapping from barcode -> alias
         barcode_to_alias = dict(zip(zip(df["barcode"], df["alias"]), df["code"]))
@@ -57,11 +59,10 @@ try:
                             new_name = f"{alias}_{barcode}_{code}.bam"
                         else:
                             continue
-                            
+
                         new_path = inputs / new_name
                         file.rename(new_path)
                         print(f"Renamed {file.name} -> {new_name}")
-
 
     # Merge bams
     samples = toml_config["general"]["samples"]
@@ -79,25 +80,50 @@ try:
 
         # merge
         print("--> Merge")
-        cmd = ["samtools", "merge", "-f", "--threads", "3", "-o", str(output_file)] + bam_files_str
+        cmd = [
+            "samtools",
+            "merge",
+            "-f",
+            "--threads",
+            "3",
+            "-o",
+            str(output_file),
+        ] + bam_files_str
         print(" ".join(cmd))
         subprocess.run(cmd, check=True)
 
         # sort
         print("--> Sort + Index")
-        cmd2 = ["samtools", "sort", "--threads", "3", "-m", "4G", "-o", output + "/" + s + "_sorted.bam", output + "/" + s + ".bam"]
+        cmd2 = [
+            "samtools",
+            "sort",
+            "--threads",
+            "3",
+            "-m",
+            "4G",
+            "-o",
+            output + "/" + s + "_sorted.bam",
+            output + "/" + s + ".bam",
+        ]
         print(" ".join(cmd2))
         subprocess.run(cmd2, check=True)
-        
+
         # index
         print("--> Index")
-        cmd3 = ["samtools", "index", "--threads", "3", "-o", output + "/" + s + "_sorted.bam.bai", output + "/" + s + "_sorted.bam"]
+        cmd3 = [
+            "samtools",
+            "index",
+            "--threads",
+            "3",
+            "-o",
+            output + "/" + s + "_sorted.bam.bai",
+            output + "/" + s + "_sorted.bam",
+        ]
         print(" ".join(cmd3))
         subprocess.run(cmd3, check=True)
 
     print("Rename and Samtools done !")
-    
+
 except Exception as e:
     print(f"Error: {e}")
     sys.exit(1)
-
