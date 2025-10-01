@@ -486,28 +486,28 @@ def dorado_demux(toml_config, done):
 
 def samtools(toml_config, done):
     tool="samtools"
-    memory="32"
-
+    
     output = toml_config["general"]["project_path"]
     email = toml_config["general"]["email"]
     genome = get_reference(toml_config["general"]["reference"])["fasta"]
     flowcells = toml_config["general"]["fc_dir_names"]
     samples = toml_config["general"]["samples"]
     n_samples = len(samples)
+    
     cores="4"
+    memory="32"
 
     dirs = [f"{output}/{fc}/reads/pod5" for fc in flowcells]
     cmd = ["du", "-sh", "--apparent-size", "--block-size", "G", "--total"] + dirs
     result = subprocess.run(cmd, capture_output=True, text=True)
 
-    # for line in result.stdout.splitlines():
-    #     if line.endswith("total"):
-    #         size = line.split()[0]
+    for line in result.stdout.splitlines():
+        if line.endswith("total"):
+            size = line.split()[0]
 
-    # size_str = size.rstrip('G')
-    # hours = int(size_str) / n_samples * 0.032
-    # formatted_time = format_time(hours)
-    formatted_time="00-02:00"
+    size_str = size.rstrip('G')
+    hours = int(size_str) / n_samples * 0.003
+    formatted_time = format_time(hours)
 
     codes = []
     for flowcell in flowcells:
