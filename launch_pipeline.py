@@ -1,12 +1,9 @@
 import argparse
 import toml
 import time
-from datetime import datetime
 import subprocess
-import sys
 import pandas as pd
 import numpy as np
-import traceback
 import os
 from glob import glob
 
@@ -522,7 +519,6 @@ def dorado_demux(toml_config, done):
     tool = "dorado_demux"
     output = toml_config["general"]["project_path"]
     email = toml_config["general"]["email"]
-    genome = get_reference(toml_config["general"]["reference"])["fasta"]
     flowcells = toml_config["general"]["fc_dir_names"]
 
     # Iterate through each flowcell for demultiplexing
@@ -602,7 +598,6 @@ def samtools(toml_config, done):
 
     output = toml_config["general"]["project_path"]
     email = toml_config["general"]["email"]
-    genome = get_reference(toml_config["general"]["reference"])["fasta"]
     flowcells = toml_config["general"]["fc_dir_names"]
     samples = toml_config["general"]["samples"]
     n_samples = len(samples)
@@ -965,12 +960,12 @@ def cleanup(toml_config, done):
         commands.append(f"rm {output}/{flow}/main_reports/sequencing_summary*.txt")
 
     # Join all commands into a single string
-    command_str = "\n".join(commands)
+    # command_str = "\n".join(commands)
 
     # Create slurm job (Might be wasteful of server resources?)
-    job = create_script(tool, threads, memory, time, output, email, command_str, "")
+    # job = create_script(tool, threads, memory, time, output, email, command_str, "")
 
-    dependencies = ":".join([f"$epi2me_{sample}" for sample in samples])
+    # dependencies = ":".join([f"$epi2me_{sample}" for sample in samples])
 
     # with open(output + "/scripts/main.sh", "a") as f:
     #     f.write("\n# Cleanup temporary files and logs\n")
