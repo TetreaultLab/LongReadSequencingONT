@@ -32,7 +32,7 @@ try:
     all_inputs = []
     # Loop over flowcells to rename
     for fc in flowcells:
-        print("\nRunning: rename for flowcell ", fc)
+        print(f"\nRunning: rename for flowcell {fc}")
         code = fc.split("_")[-1]
 
         inputs = toml_config["general"]["project_path"] + "/" + fc + "/alignments"
@@ -106,7 +106,7 @@ try:
         cmd3 = ["samtools", "index", "--threads", "3", str(sorted_bam)]
         subprocess.run(cmd3, check=True)
 
-        print(f"Done {s}")
+        print(f"Done Samtools for {s}")
 
     # Run all samples in parallel
     samples = toml_config["general"]["samples"]

@@ -31,7 +31,7 @@ try:
     all_inputs = []
     # Loop over flowcells to rename
     for fc in flowcells:
-        print("\nRunning: rename for flowcell ", fc)
+        print(f"\nRunning: rename for flowcell {fc}")
         code = fc.split("_")[-1]
 
         inputs = toml_config["general"]["project_path"] + "/" + fc + "/alignments"
@@ -69,7 +69,7 @@ try:
 
     # Loop over samples
     for s in samples:
-        print("\nRunning: Samtools for sample ", s)
+        print(f"\nRunning: Samtools for sample {s}")
         output_file = output_path / f"{s}.bam"
 
         bam_files = []
@@ -122,7 +122,7 @@ try:
         print(" ".join(cmd3))
         subprocess.run(cmd3, check=True)
 
-    print("Rename and Samtools done !")
+    print("Samtools done !")
 
 except Exception as e:
     print(f"Error: {e}")
