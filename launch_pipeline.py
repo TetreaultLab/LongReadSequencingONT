@@ -960,10 +960,10 @@ def cleanup(toml_config, done):
         commands.append(f"rm {output}/{flow}/main_reports/sequencing_summary*.txt")
 
     # Join all commands into a single string
-    # command_str = "\n".join(commands)
+    command_str = "\n".join(commands)
 
     # Create slurm job (Might be wasteful of server resources?)
-    # job = create_script(tool, threads, memory, time, output, email, command_str, "")
+    job = create_script(tool, threads, memory, time, output, email, command_str, "")
 
     # dependencies = ":".join([f"$epi2me_{sample}" for sample in samples])
 
