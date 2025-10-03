@@ -603,7 +603,7 @@ def samtools(toml_config, done):
     n_samples = len(samples)
 
     cores = "4"
-    memory = "32"
+    memory = "64"
 
     dirs = [f"{output}/{fc}/reads/pod5" for fc in flowcells]
     cmd = ["du", "-sh", "--apparent-size", "--block-size", "G", "--total"] + dirs
@@ -614,7 +614,7 @@ def samtools(toml_config, done):
             size = line.split()[0]
 
     size_str = size.rstrip("G")
-    hours = int(size_str) / n_samples * 0.003
+    hours = int(size_str) / n_samples * 0.004
     formatted_time = format_time(hours)
 
     codes = []
@@ -643,7 +643,7 @@ def samtools(toml_config, done):
             "python",
             "-u",
             TOOL_PATH
-            + "main_pipelines/long-read/LongReadSequencingONT/rename_bam_multiprocess.py",
+            + "main_pipelines/long-read/LongReadSequencingONT/samtools_multiprocess.py",
             "--config",
             toml_config["general"]["project_path"] + "/scripts/config_final.toml",
             "--flowcells",
