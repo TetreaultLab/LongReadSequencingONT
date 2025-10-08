@@ -190,9 +190,9 @@ def create_config_final(filename):
 
     if methylation_status:
         toml_config["dorado"]["modified_bases"] = (
-            "dna_r10.4.1_e8.2_400bps_sup@v5.2.0_5mC_5hmC@v1"
+            "dna_r10.4.1_e8.2_400bps_sup@v5.2.0_5mC_5hmC@v2"
         )
-        toml_config["dorado"]["modified_bases_threshold"] = 0.05
+        toml_config["dorado"]["modified_bases_threshold"] = 0.0
 
     if seq_type == "Targeted":
         toml_config["dorado"]["mm2_opts"] = '"-x splice --junc-bed anno.bed12"'
