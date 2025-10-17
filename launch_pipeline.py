@@ -521,6 +521,9 @@ def dorado_demux(toml_config, done):
     email = toml_config["general"]["email"]
     flowcells = toml_config["general"]["fc_dir_names"]
 
+    cores = "4"
+    memory = "24"
+
     # Iterate through each flowcell for demultiplexing
     for flowcell in flowcells:
         reads = output + "/" + flowcell + "/reads/pod5"
@@ -536,9 +539,6 @@ def dorado_demux(toml_config, done):
         # Scale required job time based on amount of data
         hours = int(size_str) * 0.01
         formatted_time = format_time(hours)
-
-        cores = "4"
-        memory = "24"
 
         code = flowcell.split("_")[-1]
 
