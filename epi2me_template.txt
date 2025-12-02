@@ -45,6 +45,7 @@ nextflow run epi2me-labs/wf-human-variation \
     --ubam_bam2fq_threads 1 \
     --modkit_threads 1 \
     -c $APPTAINER_CONFIG \
+    --cleanup-workdir \
     -profile slurm_local
 
 if [ $? -eq 0 ]; then
