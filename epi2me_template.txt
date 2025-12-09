@@ -9,7 +9,7 @@
 #SBATCH --account=rrg-tetreaum
 #SBATCH --mail-user={5}
 #
-module load nextflow
+module load nextflow/25.04.6
 module load apptainer
 #
 export NXF_DEFAULT_CPUS=1
