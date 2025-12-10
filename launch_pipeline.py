@@ -674,7 +674,7 @@ def samtools(toml_config, done):
                 "python",
                 "-u",
                 TOOL_PATH
-                + "main_pipelines/long-read/LongReadSequencingONT/rename_bam_multiprocess.py",
+                + "main_pipelines/long-read/LongReadSequencingONT/samtools_multiprocess.py",
                 "--config",
                 toml_config["general"]["project_path"] + "/scripts/config_final.toml",
                 "--flowcells",
