@@ -879,6 +879,8 @@ def toulligqc(toml_config, done):
     hours = int(size_str) * 0.003
     formatted_time = format_time(hours)
 
+    subprocess.run(["rm", "-r", output + "/qc/"])
+
     seq_summary = []
     for fc in flowcells:
         pattern = f"{output}/{fc}/main_reports/sequencing_summary_*.txt"
