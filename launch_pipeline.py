@@ -698,6 +698,8 @@ def samtools(toml_config, done):
 
     mosdepth(toml_config, done)
 
+    toulligqc(toml_config, done)
+
     if toml_config["general"]["seq_type"] == "WGS":
         epi2me(toml_config, done)
 
@@ -853,6 +855,87 @@ def mosdepth(toml_config, done):
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write("\n# Mosdepth")
                 f.write(f"\nmosdepth=$(sbatch --parsable {job})\n")
+        else:
+            print("Done: " + tool)
+
+
+def toulligqc(toml_config, done):
+    tool = "toulligqc"
+    output = toml_config["general"]["project_path"]
+    flowcells = toml_config["general"]["fc_dir_names"]
+    threads = "4"
+    memory = "8"
+    email = toml_config["general"]["email"]
+
+    dirs = [f"{output}/{fc}/reads/pod5" for fc in flowcells]
+    cmd = ["du", "-sh", "--apparent-size", "--block-size", "G", "--total"] + dirs
+    result = subprocess.run(cmd, capture_output=True, text=True)
+
+    for line in result.stdout.splitlines():
+        if line.endswith("total"):
+            size = line.split()[0]
+
+    size_str = size.rstrip("G")
+    hours = int(size_str) * 0.003
+    formatted_time = format_time(hours)
+
+    seq_summary = []
+    for fc in flowcells:
+        pattern = f"{output}/{fc}/flowcell/main_reports/sequencing_summary_*.txt"
+        for f in glob.glob(pattern):
+            seq_summary.append(f"-a {f}")
+
+    samplesheets = []
+    for fc in flowcells:
+        pattern = f"{output}/scripts/{fc}.csv"
+        for f in glob.glob(pattern):
+            samplesheets.append(f"-s {f}")
+
+    bams = []
+    for name in toml_config["general"]["samples"]:
+        input_file = output + "/alignments/" + name + "_sorted.bam"
+        bams.append(f"-u {input_file}")
+
+    command = (
+        [
+            "apptainer",
+            "run",
+            TOOL_PATH + "main_pipelines/long-read/toulligqc.sif",
+            "toulligqc",
+            "--output-directory",
+            output + "/qc/",
+            "--report-name",
+            "toulligqc",
+            "--thread",
+            threads,
+            "--barcoding",
+        ]
+        + seq_summary
+        + samplesheets
+        + bams
+    )
+
+    command_str = " ".join(command)
+    print(command_str)
+
+    job = create_script(
+        tool, threads, memory, formatted_time, output, email, command_str, ""
+    )
+
+    if "samtools" not in done:
+        print("To-Do: " + tool)
+        with open(output + "/scripts/main.sh", "a") as f:
+            f.write("\n# ToulligQC")
+            f.write(
+                f"\ntoulligqc=$(sbatch --parsable --dependency=afterok:$samtools {job})\n"
+            )
+
+    else:
+        if tool not in done:
+            print("To-Do: " + tool)
+            with open(output + "/scripts/main.sh", "a") as f:
+                f.write("\n# ToulligQC")
+                f.write(f"\ntoulligqc=$(sbatch --parsable {job})\n")
         else:
             print("Done: " + tool)
 
