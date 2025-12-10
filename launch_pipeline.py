@@ -698,7 +698,7 @@ def samtools(toml_config, done):
 
     mosdepth(toml_config, done)
 
-    toulligqc(toml_config, done)
+    # toulligqc(toml_config, done)
 
     if toml_config["general"]["seq_type"] == "WGS":
         epi2me(toml_config, done)
