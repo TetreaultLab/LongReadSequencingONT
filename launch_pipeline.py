@@ -913,7 +913,7 @@ def toulligqc(toml_config, done):
             "--barcoding",
         ]
         + seq_summary
-        + samplesheets
+        # + samplesheets
         + bams
     )
 
