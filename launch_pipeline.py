@@ -881,13 +881,13 @@ def toulligqc(toml_config, done):
 
     seq_summary = []
     for fc in flowcells:
-        pattern = f"{output}/{fc}/flowcell/main_reports/sequencing_summary_*.txt"
+        pattern = f"{output}/{fc}/main_reports/sequencing_summary_*.txt"
         for f in glob(pattern):
             seq_summary.append(f"-a {f}")
 
     samplesheets = []
     for fc in flowcells:
-        pattern = f"{output}/scripts/{fc}.csv"
+        pattern = f"{output}/{fc}/main_reports/sample_sheet_*.csv"
         for f in glob(pattern):
             samplesheets.append(f"-s {f}")
 
