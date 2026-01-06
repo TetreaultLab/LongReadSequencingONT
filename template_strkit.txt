@@ -42,7 +42,7 @@ $IMAGE strkit call {2}/alignments/{0}_sorted.bam \
 # STRkit Visualizer
 $IMAGE strkit visualize {2}/alignments/{0}_sorted.bam \
 --ref hg38 \
---json $WORKDIR/{0}_call.json \
+--json $WORKDIR/{0}_last.json \
 -i 1
 
 if [ $? -eq 0 ]; then
