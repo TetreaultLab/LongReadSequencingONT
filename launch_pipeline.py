@@ -81,38 +81,38 @@ def main():
         function_queue.append(epi2me)
 
     # Repeat expansions
-    if toml_config["general"]["analysis"] == "repeats":
+    if "repeats" in toml_config["general"]["analysis"]:
         function_queue.append(trgt)
         function_queue.append(strkit)
 
     # # Methylation
-    # if toml_config["general"]["analysis"] == "methylation":
+    # if "methylation" in toml_config["general"]["analysis"]:
     #     function_queue.append()
 
     # # RNA specific
     # if toml_config["general"]["seq_type"] == "RNA":
     #     # Splicing
-    #     if toml_config["general"]["analysis"] == "splicing":
+    #     if "splicing" in toml_config["general"]["analysis"]:
     #         function_queue.append()
 
     #     # Polyadenylation
-    #     if toml_config["general"]["analysis"] == "polya":
+    #     if "polya" in toml_config["general"]["analysis"]:
     #         function_queue.append()
 
     # # CNVs
-    # if toml_config["general"]["analysis"] == "CNV":
+    # if "CNV" in toml_config["general"]["analysis"]:
     #     function_queue.append()
 
     # # SNPs
-    # if toml_config["general"]["analysis"] == "SNP":
+    # if "SNP" in toml_config["general"]["analysis"]:
     #     function_queue.append()
 
     # # SVs
-    # if toml_config["general"]["analysis"] == "SV":
+    # if "SV" in toml_config["general"]["analysis"]:
     #     function_queue.append()
 
     # # Phasing
-    # if toml_config["general"]["analysis"] == "phasing":
+    # if "phasing" in toml_config["general"]["analysis"]:
     #     function_queue.append()
 
     # Clean up
