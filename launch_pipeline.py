@@ -84,17 +84,20 @@ def main():
     if toml_config["general"]["analysis"] == "methylation":
         function_queue.append()
 
-    # Splicing
-    if toml_config["general"]["analysis"] == "splicing":
-        function_queue.append()
-
     # Repeat expansions
     if toml_config["general"]["analysis"] == "repeats":
-        function_queue.append()
+        function_queue.append(trgt)
+        function_queue.append(strkit)
 
-    # Polyadenylation
-    if toml_config["general"]["analysis"] == "polya":
-        function_queue.append()
+    # RNA specific
+    if toml_config["general"]["seq_type"] == "RNA":
+        # Splicing
+        if toml_config["general"]["analysis"] == "splicing":
+            function_queue.append()
+
+        # Polyadenylation
+        if toml_config["general"]["analysis"] == "polya":
+            function_queue.append()
 
     # CNVs
     if toml_config["general"]["analysis"] == "CNV":
@@ -347,7 +350,7 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
         # Uses a slurm template for each job script
         with open(
             TOOL_PATH
-            + "main_pipelines/long-read/LongReadSequencingONT/sbatch_template.txt",
+            + "main_pipelines/long-read/LongReadSequencingONT/template_sbatch.txt",
             "r",
         ) as f:
             slurm = f.read()
@@ -398,7 +401,7 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
 
         with open(
             TOOL_PATH
-            + "main_pipelines/long-read/LongReadSequencingONT/sbatch_template.txt",
+            + "main_pipelines/long-read/LongReadSequencingONT/template_sbatch.txt",
             "r",
         ) as f:
             slurm = f.read()
@@ -1003,7 +1006,7 @@ def epi2me(toml_config, done):
         job = output + "/scripts/" + tool + "_" + sample + ".slurm"
         with open(
             TOOL_PATH
-            + "main_pipelines/long-read/LongReadSequencingONT/epi2me_template.txt",
+            + "main_pipelines/long-read/LongReadSequencingONT/template_epi2me.txt",
             "r",
         ) as f:
             slurm = f.read()
@@ -1031,6 +1034,14 @@ def epi2me(toml_config, done):
                     f.write(f"\n{epi_name}=$(sbatch --parsable {job})\n")
             else:
                 print("Done: " + epi_name)
+
+
+def trgt(toml_config, done):
+    tool = "trgt"
+
+
+def strkit(toml_config, done):
+    tool = "strkit"
 
 
 def cleanup(toml_config, done):
