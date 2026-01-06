@@ -1043,6 +1043,41 @@ def trgt(toml_config, done):
 def strkit(toml_config, done):
     tool = "strkit"
 
+    output = toml_config["general"]["project_path"]
+    email = toml_config["general"]["email"]
+    genome = get_reference(toml_config["general"]["reference"])["fasta"]
+
+    for sample in toml_config["general"]["samples"]:
+        job = output + "/scripts/" + tool + "_" + sample + ".slurm"
+        with open(
+            TOOL_PATH
+            + "main_pipelines/long-read/LongReadSequencingONT/template_strkit.txt",
+            "r",
+        ) as f:
+            slurm = f.read()
+            slurm_filled = slurm.format(sample, email, output, genome)
+
+            with open(job, "w") as o:
+                o.write(slurm_filled)
+
+        strkit_name = f"strkit_{sample}"
+
+        if "samtools" not in done:
+            print("To-Do: " + strkit_name)
+            with open(output + "/scripts/main.sh", "a") as f:
+                f.write(f"\n# STRkit for {sample}")
+                f.write(
+                    f"\n{strkit_name}=$(sbatch --parsable --dependency=afterok:$samtools {job})\n"
+                )
+        else:
+            if strkit_name not in done:
+                print("To-Do: " + strkit_name)
+                with open(output + "/scripts/main.sh", "a") as f:
+                    f.write(f"\n# STRkit for {sample}")
+                    f.write(f"\n{strkit_name}=$(sbatch --parsable {job})\n")
+            else:
+                print("Done: " + strkit_name)
+
 
 def cleanup(toml_config, done):
     # Simple function to remove redundant files and cleanup structure
