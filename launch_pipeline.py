@@ -80,40 +80,40 @@ def main():
     if toml_config["general"]["seq_type"] == "WGS":
         function_queue.append(epi2me)
 
-    # Methylation
-    if toml_config["general"]["analysis"] == "methylation":
-        function_queue.append()
-
     # Repeat expansions
     if toml_config["general"]["analysis"] == "repeats":
         function_queue.append(trgt)
         function_queue.append(strkit)
 
-    # RNA specific
-    if toml_config["general"]["seq_type"] == "RNA":
-        # Splicing
-        if toml_config["general"]["analysis"] == "splicing":
-            function_queue.append()
+    # # Methylation
+    # if toml_config["general"]["analysis"] == "methylation":
+    #     function_queue.append()
 
-        # Polyadenylation
-        if toml_config["general"]["analysis"] == "polya":
-            function_queue.append()
+    # # RNA specific
+    # if toml_config["general"]["seq_type"] == "RNA":
+    #     # Splicing
+    #     if toml_config["general"]["analysis"] == "splicing":
+    #         function_queue.append()
 
-    # CNVs
-    if toml_config["general"]["analysis"] == "CNV":
-        function_queue.append()
+    #     # Polyadenylation
+    #     if toml_config["general"]["analysis"] == "polya":
+    #         function_queue.append()
 
-    # SNPs
-    if toml_config["general"]["analysis"] == "SNP":
-        function_queue.append()
+    # # CNVs
+    # if toml_config["general"]["analysis"] == "CNV":
+    #     function_queue.append()
 
-    # SVs
-    if toml_config["general"]["analysis"] == "SV":
-        function_queue.append()
+    # # SNPs
+    # if toml_config["general"]["analysis"] == "SNP":
+    #     function_queue.append()
 
-    # Phasing
-    if toml_config["general"]["analysis"] == "phasing":
-        function_queue.append()
+    # # SVs
+    # if toml_config["general"]["analysis"] == "SV":
+    #     function_queue.append()
+
+    # # Phasing
+    # if toml_config["general"]["analysis"] == "phasing":
+    #     function_queue.append()
 
     # Clean up
     function_queue.append(cleanup)
