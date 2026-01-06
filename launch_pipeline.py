@@ -72,6 +72,49 @@ def main():
     # Renaming bams and running samtools merge, sort and index
     function_queue.append(samtools)
 
+    # Call all other functions for downstream analysis
+    # QC
+    function_queue.append(mosdepth)
+
+    # EPI2ME
+    if toml_config["general"]["seq_type"] == "WGS":
+        function_queue.append(epi2me)
+
+    # Methylation
+    if toml_config["general"]["analysis"] == "methylation":
+        function_queue.append()
+
+    # Splicing
+    if toml_config["general"]["analysis"] == "splicing":
+        function_queue.append()
+
+    # Repeat expansions
+    if toml_config["general"]["analysis"] == "repeats":
+        function_queue.append()
+
+    # Polyadenylation
+    if toml_config["general"]["analysis"] == "polya":
+        function_queue.append()
+
+    # CNVs
+    if toml_config["general"]["analysis"] == "CNV":
+        function_queue.append()
+
+    # SNPs
+    if toml_config["general"]["analysis"] == "SNP":
+        function_queue.append()
+
+    # SVs
+    if toml_config["general"]["analysis"] == "SV":
+        function_queue.append()
+
+    # Phasing
+    if toml_config["general"]["analysis"] == "phasing":
+        function_queue.append()
+
+    # Clean up
+    function_queue.append(cleanup)
+
     # Create main.sh
     with open(output + "/scripts/main.sh", "w") as f:
         f.write("#!/bin/sh\n")
@@ -614,7 +657,7 @@ def samtools(toml_config, done):
             size = line.split()[0]
 
     size_str = size.rstrip("G")
-    hours = int(size_str) / n_samples * 0.004
+    hours = int(size_str) / n_samples * 0.008
     formatted_time = format_time(hours)
 
     codes = []
@@ -692,18 +735,6 @@ def samtools(toml_config, done):
         else:
             # All dorado_demux are done and samtools is done
             print("Done: " + tool)
-
-    # Call all other functions for downstream analysis
-    # longReadSum(toml_config, done)
-
-    mosdepth(toml_config, done)
-
-    # toulligqc(toml_config, done)
-
-    if toml_config["general"]["seq_type"] == "WGS":
-        epi2me(toml_config, done)
-
-    cleanup(toml_config, done)
 
 
 def longReadSum(toml_config, done):
