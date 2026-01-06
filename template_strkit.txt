@@ -39,13 +39,12 @@ $IMAGE strkit call {2}/alignments/{0}_sorted.bam \
 --no-tsv \
 --count-kmers both
 
-if [ $? -eq 0 ]; then
-    echo "strkit_{0}" >> "$STEPS_DONE"
-fi
-
 # STRkit Visualizer
-${IMAGE} strkit visualize {2}/alignments/{0}_sorted.bam \
+$IMAGE strkit visualize {2}/alignments/{0}_sorted.bam \
 --ref hg38 \
 --json $WORKDIR/results/strkit/{0}_call.json \
 -i 1
 
+if [ $? -eq 0 ]; then
+    echo "strkit_{0}" >> "$STEPS_DONE"
+fi

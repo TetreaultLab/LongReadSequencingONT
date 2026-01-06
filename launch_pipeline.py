@@ -253,6 +253,11 @@ def create_config_final(filename):
     toml_config["mosdepth"]["bins"] = 25000  # Should re-use with wf-human-variation
     toml_config["mosdepth"]["thresholds"] = "1,5,10,20,30"
 
+    # Add TRGT options
+    toml_config["trgt"] = {}
+    toml_config["trgt"]["gene_interest"] = ""
+    toml_config["trgt"]["motif"] = ""
+
     # Add next tool options
 
     # Save new config file
@@ -1038,6 +1043,46 @@ def epi2me(toml_config, done):
 
 def trgt(toml_config, done):
     tool = "trgt"
+
+    output = toml_config["general"]["project_path"]
+    email = toml_config["general"]["email"]
+    genome = get_reference(toml_config["general"]["reference"])["fasta"]
+
+    gene_interest = toml_config["trgt"]["gene_interest"]
+    motif = toml_config["trgt"]["motif"]
+
+    for sample in toml_config["general"]["samples"]:
+        job = output + "/scripts/" + tool + "_" + sample + ".slurm"
+        with open(
+            TOOL_PATH
+            + "main_pipelines/long-read/LongReadSequencingONT/template_trgt.txt",
+            "r",
+        ) as f:
+            slurm = f.read()
+            slurm_filled = slurm.format(
+                sample, email, output, genome, gene_interest, motif
+            )
+
+            with open(job, "w") as o:
+                o.write(slurm_filled)
+
+        trgt_name = f"trgt_{sample}"
+
+        if "samtools" not in done:
+            print("To-Do: " + trgt_name)
+            with open(output + "/scripts/main.sh", "a") as f:
+                f.write(f"\n# TRGT for {sample}")
+                f.write(
+                    f"\n{trgt_name}=$(sbatch --parsable --dependency=afterok:$samtools {job})\n"
+                )
+        else:
+            if trgt_name not in done:
+                print("To-Do: " + trgt_name)
+                with open(output + "/scripts/main.sh", "a") as f:
+                    f.write(f"\n# TRGT for {sample}")
+                    f.write(f"\n{trgt_name}=$(sbatch --parsable {job})\n")
+            else:
+                print("Done: " + trgt_name)
 
 
 def strkit(toml_config, done):
