@@ -499,7 +499,6 @@ def dorado_basecaller(toml_config, done):
             "-v",
             "--device",
             "cuda:0",
-            "--emit-moves",
             "--min-qscore",
             str(toml_config["dorado"]["min_q_score"]),
             "--reference",
