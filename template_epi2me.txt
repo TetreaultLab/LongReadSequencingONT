@@ -19,9 +19,9 @@ export NXF_DISABLE_UPDATE_CHECK=true
 export NXF_OFFLINE=true
 export NXF_SINGULARITY_CACHEDIR="/lustre09/project/6019267/shared/tools/main_pipelines/long-read/epi2me_cache/"
 export _JAVA_OPTIONS="-XX:ActiveProcessorCount={0}"
-export NXF_TEMP=/lustre10/scratch/$USER/epi2me_work_{4}
+export NXF_TEMP=/lustre10/scratch/$USER/LRS_pipeline/{4}/epi2me
 #
-WORKDIR="/lustre10/scratch/$USER/epi2me_work_{4}"
+WORKDIR="/lustre10/scratch/$USER/LRS_pipeline/{4}/epi2me"
 BAM="{6}/alignments/{4}_sorted.bam"
 OUT="{6}/results/{4}"
 APPTAINER_CONFIG="/lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/apptainer_nextflow.config"
