@@ -37,6 +37,7 @@ nextflow run epi2me-labs/wf-human-variation \
     -w $WORKDIR \
     --bam $BAM \
     --ref {8} \
+    --modkit_args="--cpg --combine-strands --filter-threshold 0.70" \
     --sample_name {4} \
     --out_dir $OUT \
     --threads 1 \
