@@ -89,19 +89,15 @@ def main():
     # if "methylation" in toml_config["general"]["analysis"]:
     #     function_queue.append()
 
-    # # RNA specific
-    # if toml_config["general"]["seq_type"] == "RNA":
-    #     # Splicing
-    #     if "splicing" in toml_config["general"]["analysis"]:
-    #         function_queue.append()
+    # RNA specific
+    if toml_config["general"]["seq_type"] == "RNA":
+        # Splicing
+        if "splicing" in toml_config["general"]["analysis"]:
+            function_queue.append(flair)
 
     #     # Polyadenylation
     #     if "polya" in toml_config["general"]["analysis"]:
     #         function_queue.append()
-
-    # # CNVs
-    # if "CNV" in toml_config["general"]["analysis"]:
-    #     function_queue.append()
 
     # # SNPs
     # if "SNP" in toml_config["general"]["analysis"]:
@@ -1122,6 +1118,49 @@ def strkit(toml_config, done):
                     f.write(f"\n{strkit_name}=$(sbatch --parsable {job})\n")
             else:
                 print("Done: " + strkit_name)
+
+
+def flair(toml_config, done):
+    tool = "flair"
+
+    output = toml_config["general"]["project_path"]
+    email = toml_config["general"]["email"]
+    genome = get_reference(toml_config["general"]["reference"])["fasta"]
+    gtf = get_reference(toml_config["general"]["reference"])["gtf"]
+
+    for sample in toml_config["general"]["samples"]:
+        results = output + "/results/FLAIR"
+        bam = output + "/alignments/" + sample + "_sorted.bam"
+
+        job = output + "/scripts/" + tool + "_" + sample + ".slurm"
+        with open(
+            TOOL_PATH
+            + "main_pipelines/long-read/LongReadSequencingONT/template_flair.txt",
+            "r",
+        ) as f:
+            slurm = f.read()
+            slurm_filled = slurm.format(sample, email, results, genome, bam, gtf)
+
+            with open(job, "w") as o:
+                o.write(slurm_filled)
+
+        flair_name = f"flair_{sample}"
+
+        if "samtools" not in done:
+            print("To-Do: " + flair_name)
+            with open(output + "/scripts/main.sh", "a") as f:
+                f.write(f"\n# FLAIR for {sample}")
+                f.write(
+                    f"\n{flair_name}=$(sbatch --parsable --dependency=afterok:$samtools {job})\n"
+                )
+        else:
+            if flair_name not in done:
+                print("To-Do: " + flair_name)
+                with open(output + "/scripts/main.sh", "a") as f:
+                    f.write(f"\n# FLAIR for {sample}")
+                    f.write(f"\n{flair_name}=$(sbatch --parsable {job})\n")
+            else:
+                print("Done: " + flair_name)
 
 
 def cleanup(toml_config, done):
