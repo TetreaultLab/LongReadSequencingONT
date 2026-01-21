@@ -77,8 +77,7 @@ def main():
     function_queue.append(mosdepth)
 
     # EPI2ME
-    if toml_config["general"]["seq_type"] == "WGS":
-        function_queue.append(epi2me)
+    function_queue.append(epi2me)
 
     # Repeat expansions
     if "repeats" in toml_config["general"]["analysis"]:
