@@ -343,12 +343,12 @@ def get_reference(ref):
 
 def create_script(tool, cores, memory, time, output, email, command, flowcell):
     steps_done = output + "/scripts/steps_done.txt"
+    name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
 
     # Enables creating a script per flowcell, or a single script if "" is added as the argument
     if flowcell != "":
         code = flowcell.split("_")[-1]
         job = output + "/scripts/" + tool + "_" + flowcell + ".slurm"
-        name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
 
         # Uses a slurm template for each job script
         with open(
