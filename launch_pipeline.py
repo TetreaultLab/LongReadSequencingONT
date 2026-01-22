@@ -116,6 +116,7 @@ def main():
     # Create main.sh
     with open(output + "/scripts/main.sh", "w") as f:
         f.write("#!/bin/sh\n")
+        f.write("newgrp rrg-tetreaum\n")
 
     # Calling main steps
     for func in function_queue:
@@ -481,6 +482,9 @@ def dorado_basecaller(toml_config, done):
         reads = output + "/" + flowcell + "/reads/pod5"
         final = "/lustre10/scratch/$USER/" + name + "/" + flowcell + "/"
         bam_dorado = final + flowcell + ".bam"
+
+        if not os.path.exists(final):
+            os.makedirs(final)
 
         cores = "4"
         memory = "64"
