@@ -12,3 +12,6 @@
 #
 ### Load environment
 #
+mkdir -p /lustre10/scratch/$USER/{10}
+mkdir -p /lustre10/scratch/$USER/{10}/results/
+mkdir -p /lustre10/scratch/$USER/{10}/alignments/

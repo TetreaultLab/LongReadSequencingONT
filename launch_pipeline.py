@@ -348,6 +348,7 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
     if flowcell != "":
         code = flowcell.split("_")[-1]
         job = output + "/scripts/" + tool + "_" + flowcell + ".slurm"
+        name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
 
         # Uses a slurm template for each job script
         with open(
@@ -369,17 +370,38 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
                     "log",
                     "def",
                     email,
+                    name,
                 )
 
             elif tool == "dorado_demux":
                 slurm_filled = slurm.format(
-                    cores, "", memory, time, tool, flowcell, "out", "log", "rrg", email
+                    cores,
+                    "",
+                    memory,
+                    time,
+                    tool,
+                    flowcell,
+                    "out",
+                    "log",
+                    "rrg",
+                    email,
+                    name,
                 )
 
             # Most tools will be CPU-dependent
             else:
                 slurm_filled = slurm.format(
-                    cores, "", memory, time, tool, flowcell, "log", "log", "rrg", email
+                    cores,
+                    "",
+                    memory,
+                    time,
+                    tool,
+                    flowcell,
+                    "log",
+                    "log",
+                    "rrg",
+                    email,
+                    name,
                 )
                 slurm_filled += "module load StdEnv/2023 apptainer samtools\n"
                 slurm_filled += (
@@ -409,7 +431,7 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
             slurm = f.read()
             # For all other tools
             slurm_filled = slurm.format(
-                cores, "", memory, time, tool, "run", "log", "log", "rrg", email
+                cores, "", memory, time, tool, "run", "log", "log", "rrg", email, name
             )
 
             # Add enviroment loading commands
