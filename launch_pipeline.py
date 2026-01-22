@@ -113,10 +113,15 @@ def main():
     # Clean up
     function_queue.append(cleanup)
 
+    name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
+
     # Create main.sh
     with open(output + "/scripts/main.sh", "w") as f:
         f.write("#!/bin/sh\n")
         f.write("newgrp rrg-tetreaum\n")
+        f.write("mkdir -p /lustre10/scratch/$USER/" + name + "\n")
+        f.write("mkdir -p /lustre10/scratch/$USER/" + name + "/results/\n")
+        f.write("mkdir -p /lustre10/scratch/$USER/" + name + "/alignments/\n")
 
     # Calling main steps
     for func in function_queue:
