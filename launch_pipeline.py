@@ -987,6 +987,7 @@ def epi2me(toml_config, done):
 
     genome = get_reference(toml_config["general"]["reference"])["fasta"]
     analysis = toml_config["general"]["analysis"]
+    name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
 
     todo = ""
     arg_map = {
@@ -1011,7 +1012,17 @@ def epi2me(toml_config, done):
         ) as f:
             slurm = f.read()
             slurm_filled = slurm.format(
-                cores, memory, time, tool, sample, email, output, todo, genome, model
+                cores,
+                memory,
+                time,
+                tool,
+                sample,
+                email,
+                name,
+                output,
+                todo,
+                model,
+                genome,
             )
 
             with open(job, "w") as o:
@@ -1042,6 +1053,7 @@ def trgt(toml_config, done):
     output = toml_config["general"]["project_path"]
     email = toml_config["general"]["email"]
     genome = get_reference(toml_config["general"]["reference"])["fasta"]
+    name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
 
     gene_interest = toml_config["trgt"]["gene_interest"]
     motif = toml_config["trgt"]["motif"]
@@ -1055,7 +1067,7 @@ def trgt(toml_config, done):
         ) as f:
             slurm = f.read()
             slurm_filled = slurm.format(
-                sample, email, output, genome, gene_interest, motif
+                sample, email, name, output, genome, gene_interest, motif
             )
 
             with open(job, "w") as o:
@@ -1086,6 +1098,7 @@ def strkit(toml_config, done):
     output = toml_config["general"]["project_path"]
     email = toml_config["general"]["email"]
     genome = get_reference(toml_config["general"]["reference"])["fasta"]
+    name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
 
     for sample in toml_config["general"]["samples"]:
         job = output + "/scripts/" + tool + "_" + sample + ".slurm"
@@ -1095,7 +1108,7 @@ def strkit(toml_config, done):
             "r",
         ) as f:
             slurm = f.read()
-            slurm_filled = slurm.format(sample, email, output, genome)
+            slurm_filled = slurm.format(sample, email, name, output, genome)
 
             with open(job, "w") as o:
                 o.write(slurm_filled)
@@ -1126,9 +1139,9 @@ def flair(toml_config, done):
     email = toml_config["general"]["email"]
     genome = get_reference(toml_config["general"]["reference"])["fasta"]
     gtf = get_reference(toml_config["general"]["reference"])["gtf"]
+    name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
 
     for sample in toml_config["general"]["samples"]:
-        results = output + "/results/FLAIR"
         bam = output + "/alignments/" + sample + "_sorted.bam"
 
         job = output + "/scripts/" + tool + "_" + sample + ".slurm"
@@ -1138,7 +1151,7 @@ def flair(toml_config, done):
             "r",
         ) as f:
             slurm = f.read()
-            slurm_filled = slurm.format(sample, email, results, genome, bam, gtf)
+            slurm_filled = slurm.format(sample, email, name, genome, bam, gtf)
 
             with open(job, "w") as o:
                 o.write(slurm_filled)

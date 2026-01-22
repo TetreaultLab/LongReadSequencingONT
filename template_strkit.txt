@@ -14,13 +14,13 @@ ml apptainer
 IMAGE="apptainer run /lustre09/project/6019267/shared/tools/repeat_expansions/STRkit/strkit.sif"
 
 # Project Directory
-WORKDIR="/lustre10/scratch/$USER/LRS_pipeline/{0}/STRkit"
+WORKDIR="/lustre10/scratch/$USER/{2}/STRkit/{0}"
 
 # Steps done
-STEPS_DONE="{2}/scripts/steps_done.txt"
+STEPS_DONE="{3}/scripts/steps_done.txt"
 
 # Reference Genome Path
-GENOME={3}
+GENOME={4}
 
 # Repeat Definition File Path
 REPEATS="/lustre09/project/6019267/shared/tools/repeat_expansions/reference_regions/strkit_pathogenic_converted.hg38.bed"
@@ -28,7 +28,7 @@ REPEATS="/lustre09/project/6019267/shared/tools/repeat_expansions/reference_regi
 mkdir -p $WORKDIR
 
 # Main STRkit Command
-$IMAGE strkit call {2}/alignments/{0}_sorted.bam \
+$IMAGE strkit call {3}/alignments/{0}_sorted.bam \
 --hq \
 --realign \
 --ref $GENOME \
@@ -40,7 +40,7 @@ $IMAGE strkit call {2}/alignments/{0}_sorted.bam \
 --count-kmers both
 
 # STRkit Visualizer
-# $IMAGE strkit visualize {2}/alignments/{0}_sorted.bam \
+# $IMAGE strkit visualize {3}/alignments/{0}_sorted.bam \
 # --ref hg38 \
 # --json $WORKDIR/{0}_last.json \
 # -i 1
