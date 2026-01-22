@@ -34,17 +34,17 @@ try:
         print(f"\nRunning: rename for flowcell {fc}")
         code = fc.split("_")[-1]
 
-        inputs = toml_config["general"]["project_path"] + "/" + fc + "/alignments"
+        dir_proj = toml_config["general"]["project_path"]
+        name = dir_proj.rstrip("/").split("/")[-2].split("_", 1)[1]
+        inputs = "/lustre10/scratch/$USER/" + name + "/" + fc + "/"
         inputs = Path(inputs)
         all_inputs.append(inputs)
 
-        output = toml_config["general"]["project_path"] + "/alignments"
+        output = "/lustre10/scratch/$USER/" + name + "/alignments"
         output_path = Path(output)
 
         # Load the CSV file
-        df = pd.read_csv(
-            toml_config["general"]["project_path"] + "/scripts/" + fc + ".csv", header=0
-        )
+        df = pd.read_csv(dir_proj + "/scripts/" + fc + ".csv", header=0)
         df["code"] = df["flow_cell_id"].str.split("_").str[-1]
 
         # Create a mapping from barcode -> alias

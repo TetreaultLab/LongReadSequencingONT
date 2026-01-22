@@ -474,11 +474,12 @@ def dorado_basecaller(toml_config, done):
     email = toml_config["general"]["email"]
     genome = get_reference(toml_config["general"]["reference"])["fasta"]
     flowcells = toml_config["general"]["fc_dir_names"]
+    name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
 
     # Iterate through each flowcell for basecalling
     for flowcell in flowcells:
         reads = output + "/" + flowcell + "/reads/pod5"
-        final = output + "/" + flowcell + "/alignments/"
+        final = "/lustre10/scratch/$USER/" + name + "/" + flowcell + "/"
         bam_dorado = final + flowcell + ".bam"
 
         cores = "4"
@@ -565,6 +566,7 @@ def dorado_demux(toml_config, done):
     output = toml_config["general"]["project_path"]
     email = toml_config["general"]["email"]
     flowcells = toml_config["general"]["fc_dir_names"]
+    name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
 
     cores = "4"
     memory = "24"
@@ -572,7 +574,7 @@ def dorado_demux(toml_config, done):
     # Iterate through each flowcell for demultiplexing
     for flowcell in flowcells:
         reads = output + "/" + flowcell + "/reads/pod5"
-        final = output + "/" + flowcell + "/alignments/"
+        final = "/lustre10/scratch/$USER/" + name + "/" + flowcell + "/"
         bam_dorado = final + flowcell + ".bam"
 
         # Get reads files size
