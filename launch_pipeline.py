@@ -1144,7 +1144,9 @@ def flair(toml_config, done):
     name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
 
     for sample in toml_config["general"]["samples"]:
-        bam = output + "/alignments/" + sample + "_sorted.bam"
+        bam = (
+            "/lustre10/scratch/$USER/" + name + "/alignments/" + sample + "_sorted.bam"
+        )
 
         job = output + "/scripts/" + tool + "_" + sample + ".slurm"
         with open(
