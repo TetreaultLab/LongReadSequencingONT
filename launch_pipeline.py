@@ -483,9 +483,6 @@ def dorado_basecaller(toml_config, done):
         final = "/lustre10/scratch/$USER/" + name + "/" + flowcell + "/"
         bam_dorado = final + flowcell + ".bam"
 
-        if not os.path.exists(final):
-            os.makedirs(final)
-
         cores = "4"
         memory = "64"
 
