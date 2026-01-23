@@ -506,7 +506,7 @@ def dorado_basecaller(toml_config, done):
         final = "/lustre10/scratch/$USER/" + name + "/" + flowcell + "/"
         bam_dorado = final + flowcell + ".bam"
 
-        cores = "4"
+        cores = "8"
         memory = "64"
 
         # Get reads files size
@@ -518,7 +518,7 @@ def dorado_basecaller(toml_config, done):
         code = flowcell.split("_")[-1]
 
         # Scale required job time based on amount of data
-        hours = int(size_str) * 0.02
+        hours = int(size_str) * 0.04
         formatted_time = format_time(hours)
 
         command = [
@@ -592,7 +592,7 @@ def dorado_demux(toml_config, done):
     flowcells = toml_config["general"]["fc_dir_names"]
     name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
 
-    cores = "4"
+    cores = "6"
     memory = "24"
 
     # Iterate through each flowcell for demultiplexing
@@ -608,7 +608,7 @@ def dorado_demux(toml_config, done):
         size_str = result.stdout.split()[0].rstrip("G")
 
         # Scale required job time based on amount of data
-        hours = int(size_str) * 0.01
+        hours = int(size_str) * 0.02
         formatted_time = format_time(hours)
 
         code = flowcell.split("_")[-1]
