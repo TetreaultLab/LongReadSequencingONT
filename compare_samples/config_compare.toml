@@ -1,0 +1,20 @@
+[general]
+    group1 = [] # sample names for controls ["ctrl1", "ctrl2", "ctrl3"].
+    group2 = [] # sample names for disease/case group ["case1", "case2", "case3"].
+    comparison_name = "" # comparison name for output folder.
+    analyses = [] # What analyses to run. Possible choices : ["degs", "as", "apa", "dmrs"].
+    email = "" # Your e-mail address to receive notification.
+
+[flair_diffexp]
+    counts_matrix = "" # Tab-delimited isoform count matrix from flair quantify.
+
+[flair_diffsplice]
+    isoforms_bed = "" # Isoforms in bed format from flair collapse.
+    counts_matrix = "" # Tab-delimited isoform count matrix from flair quantify.
+
+[apa_tool] # to change
+
+
+[modkit]
+    ctrl_bed = ""
+    treatment_bed = ""
