@@ -97,23 +97,23 @@ def main():
             function_queue.append(flair)
 
         # Polyadenylation
-        if "polya" in toml_config["general"]["analysis"]:
-            function_queue.append()
+        # if "polya" in toml_config["general"]["analysis"]:
+        #     function_queue.append()
 
     # General variants analyses possible for DNA and RNA
     # SNPs
-    if "SNP" in toml_config["general"]["analysis"]:
-        function_queue.append()
+    # if "SNP" in toml_config["general"]["analysis"]:
+    #     function_queue.append()
 
-    # SVs
-    if "SV" in toml_config["general"]["analysis"]:
-        function_queue.append()
+    # # SVs
+    # if "SV" in toml_config["general"]["analysis"]:
+    #     function_queue.append()
 
-    # Annotation
+    # # Annotation
 
-    # Phasing
-    if "phasing" in toml_config["general"]["analysis"]:
-        function_queue.append()
+    # # Phasing
+    # if "phasing" in toml_config["general"]["analysis"]:
+    #     function_queue.append()
 
     # Clean up
     function_queue.append(cleanup)
