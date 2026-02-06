@@ -597,6 +597,7 @@ def dorado_demux(toml_config, done):
     email = toml_config["general"]["email"]
     flowcells = toml_config["general"]["fc_dir_names"]
     name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
+    username = os.environ.get("USER")
 
     cores = "6"
     memory = "24"
@@ -604,7 +605,7 @@ def dorado_demux(toml_config, done):
     # Iterate through each flowcell for demultiplexing
     for flowcell in flowcells:
         reads = output + "/" + flowcell + "/reads/pod5"
-        final = "/lustre10/scratch/$USER/" + name + "/" + flowcell + "/"
+        final = f"/lustre10/scratch/{username}/{name}/{flowcell}/"
         bam_dorado = final + flowcell + ".bam"
 
         # Get reads files size
@@ -1170,9 +1171,10 @@ def ont_methyldmr_kit(toml_config, done):
     output = toml_config["general"]["project_path"]
     email = toml_config["general"]["email"]
     name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
+    username = os.environ.get("USER")
 
     for sample in toml_config["general"]["samples"]:
-        bedmethyl = f"/lustre10/scratch/$USER/{name}/results/epi2me/{sample}"
+        bedmethyl = f"/lustre10/scratch/{username}/{name}/results/epi2me/{sample}"
 
         job = output + "/scripts/" + tool + "_" + sample + ".slurm"
         with open(
@@ -1213,11 +1215,10 @@ def flair(toml_config, done):
     genome = get_reference(toml_config["general"]["reference"])["fasta"]
     gtf = get_reference(toml_config["general"]["reference"])["gtf"]
     name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
+    username = os.environ.get("USER")
 
     for sample in toml_config["general"]["samples"]:
-        bam = (
-            "/lustre10/scratch/$USER/" + name + "/alignments/" + sample + "_sorted.bam"
-        )
+        bam = f"/lustre10/scratch/{username}/{name}/alignments/{sample}_sorted.bam"
 
         job = output + "/scripts/" + tool + "_" + sample + ".slurm"
         with open(
@@ -1257,11 +1258,10 @@ def deepvariant(toml_config, done):
     email = toml_config["general"]["email"]
     genome = get_reference(toml_config["general"]["reference"])["fasta"]
     name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
+    username = os.environ.get("USER")
 
     for sample in toml_config["general"]["samples"]:
-        bam = (
-            "/lustre10/scratch/$USER/" + name + "/alignments/" + sample + "_sorted.bam"
-        )
+        bam = f"/lustre10/scratch/{username}/{name}/alignments/{sample}_sorted.bam"
 
         job = output + "/scripts/" + tool + "_" + sample + ".slurm"
         with open(
@@ -1301,11 +1301,10 @@ def cutesv(toml_config, done):
     email = toml_config["general"]["email"]
     genome = get_reference(toml_config["general"]["reference"])["fasta"]
     name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
+    username = os.environ.get("USER")
 
     for sample in toml_config["general"]["samples"]:
-        bam = (
-            "/lustre10/scratch/$USER/" + name + "/alignments/" + sample + "_sorted.bam"
-        )
+        bam = f"/lustre10/scratch/{username}/{name}/alignments/{sample}_sorted.bam"
 
         job = output + "/scripts/" + tool + "_" + sample + ".slurm"
         with open(
