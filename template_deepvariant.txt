@@ -21,7 +21,7 @@ $DEEPVARIANT_IMAGE /opt/deepvariant/bin/run_deepvariant \
         --reads {3} \
         --ref {4} \
         --model_type ONT_R104 \
-        --output_vcf $WORKDIR/{0}.vcf \
+        --output_vcf $WORKDIR/{0}_deepvariant.vcf \
         --logging_dir $WORKDIR/logs \
         --runtime_report \
         --vcf_stats_report \
