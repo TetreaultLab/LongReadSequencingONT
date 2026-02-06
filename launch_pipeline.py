@@ -504,11 +504,12 @@ def dorado_basecaller(toml_config, done):
     genome = get_reference(toml_config["general"]["reference"])["fasta"]
     flowcells = toml_config["general"]["fc_dir_names"]
     name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
+    username = os.environ.get("USER")
 
     # Iterate through each flowcell for basecalling
     for flowcell in flowcells:
         reads = output + "/" + flowcell + "/reads/pod5"
-        final = "/lustre10/scratch/$USER/" + name + "/" + flowcell + "/"
+        final = f"/lustre10/scratch/{username}/{name}/{flowcell}/"
         bam_dorado = final + flowcell + ".bam"
 
         cores = "8"
