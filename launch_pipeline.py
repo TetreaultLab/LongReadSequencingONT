@@ -79,14 +79,16 @@ def main():
     # EPI2ME
     function_queue.append(epi2me)
 
-    # Repeat expansions
-    if "repeats" in toml_config["general"]["analysis"]:
-        function_queue.append(trgt)
-        function_queue.append(strkit)
+    # DNA specific
+    if toml_config["general"]["seq_type"] == "RNA":
+        # Repeat expansions
+        if "repeats" in toml_config["general"]["analysis"]:
+            function_queue.append(trgt)
+            function_queue.append(strkit)
 
-    # # Methylation
-    # if "methylation" in toml_config["general"]["analysis"]:
-    #     function_queue.append()
+        # Methylation
+        if "methylation" in toml_config["general"]["analysis"]:
+            function_queue.append(ont_methyldmr_kit)
 
     # RNA specific
     if toml_config["general"]["seq_type"] == "RNA":
@@ -94,21 +96,24 @@ def main():
         if "splicing" in toml_config["general"]["analysis"]:
             function_queue.append(flair)
 
-    #     # Polyadenylation
-    #     if "polya" in toml_config["general"]["analysis"]:
-    #         function_queue.append()
+        # Polyadenylation
+        if "polya" in toml_config["general"]["analysis"]:
+            function_queue.append()
 
-    # # SNPs
-    # if "SNP" in toml_config["general"]["analysis"]:
-    #     function_queue.append()
+    # General variants analyses possible for DNA and RNA
+    # SNPs
+    if "SNP" in toml_config["general"]["analysis"]:
+        function_queue.append()
 
-    # # SVs
-    # if "SV" in toml_config["general"]["analysis"]:
-    #     function_queue.append()
+    # SVs
+    if "SV" in toml_config["general"]["analysis"]:
+        function_queue.append()
 
-    # # Phasing
-    # if "phasing" in toml_config["general"]["analysis"]:
-    #     function_queue.append()
+    # Annotation
+
+    # Phasing
+    if "phasing" in toml_config["general"]["analysis"]:
+        function_queue.append()
 
     # Clean up
     function_queue.append(cleanup)
@@ -1156,6 +1161,47 @@ def strkit(toml_config, done):
                     f.write(f"\n{strkit_name}=$(sbatch --parsable {job})\n")
             else:
                 print("Done: " + strkit_name)
+
+
+def ont_methyldmr_kit(toml_config, done):
+    tool = "ont_methyldmr_kit"
+
+    output = toml_config["general"]["project_path"]
+    email = toml_config["general"]["email"]
+    name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
+
+    for sample in toml_config["general"]["samples"]:
+        bedmethyl = f"/lustre10/scratch/$USER/{name}/results/epi2me/{sample}"
+
+        job = output + "/scripts/" + tool + "_" + sample + ".slurm"
+        with open(
+            TOOL_PATH
+            + "main_pipelines/long-read/LongReadSequencingONT/template_ont-methyldmr-kit.txt",
+            "r",
+        ) as f:
+            slurm = f.read()
+            slurm_filled = slurm.format(sample, email, name, bedmethyl)
+
+            with open(job, "w") as o:
+                o.write(slurm_filled)
+
+        ont_methyldmr_kit_name = f"ont_methyldmr_kit_{sample}"
+
+        if f"epi2me_{sample}" not in done:
+            print("To-Do: " + ont_methyldmr_kit_name)
+            with open(output + "/scripts/main.sh", "a") as f:
+                f.write(f"\n# ont-methylDMR-kit for {sample}")
+                f.write(
+                    f"\n{ont_methyldmr_kit_name}=$(sbatch --parsable --dependency=afterok:$epi2me_{sample} {job})\n"
+                )
+        else:
+            if ont_methyldmr_kit_name not in done:
+                print("To-Do: " + ont_methyldmr_kit_name)
+                with open(output + "/scripts/main.sh", "a") as f:
+                    f.write(f"\n# ont-methylDMR-kit for {sample}")
+                    f.write(f"\n{ont_methyldmr_kit_name}=$(sbatch --parsable {job})\n")
+            else:
+                print("Done: " + ont_methyldmr_kit_name)
 
 
 def flair(toml_config, done):
