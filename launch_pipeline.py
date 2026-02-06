@@ -80,7 +80,7 @@ def main():
     function_queue.append(epi2me)
 
     # DNA specific
-    if toml_config["general"]["seq_type"] == "DNA":
+    if toml_config["general"]["seq_type"] == "WGS":
         # Repeat expansions
         if "repeats" in toml_config["general"]["analysis"]:
             function_queue.append(trgt)
