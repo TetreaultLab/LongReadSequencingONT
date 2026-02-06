@@ -1293,6 +1293,50 @@ def deepvariant(toml_config, done):
                 print("Done: " + deepvariant_name)
 
 
+def cutesv(toml_config, done):
+    tool = "cutesv"
+
+    output = toml_config["general"]["project_path"]
+    email = toml_config["general"]["email"]
+    genome = get_reference(toml_config["general"]["reference"])["fasta"]
+    name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
+
+    for sample in toml_config["general"]["samples"]:
+        bam = (
+            "/lustre10/scratch/$USER/" + name + "/alignments/" + sample + "_sorted.bam"
+        )
+
+        job = output + "/scripts/" + tool + "_" + sample + ".slurm"
+        with open(
+            TOOL_PATH
+            + "main_pipelines/long-read/LongReadSequencingONT/template_cutesv.txt",
+            "r",
+        ) as f:
+            slurm = f.read()
+            slurm_filled = slurm.format(sample, email, name, bam, genome)
+
+            with open(job, "w") as o:
+                o.write(slurm_filled)
+
+        cutesv_name = f"cutesv_{sample}"
+
+        if "samtools" not in done:
+            print("To-Do: " + cutesv_name)
+            with open(output + "/scripts/main.sh", "a") as f:
+                f.write(f"\n# cuteSV for {sample}")
+                f.write(
+                    f"\n{cutesv_name}=$(sbatch --parsable --dependency=afterok:$samtools {job})\n"
+                )
+        else:
+            if cutesv_name not in done:
+                print("To-Do: " + cutesv_name)
+                with open(output + "/scripts/main.sh", "a") as f:
+                    f.write(f"\n# cuteSV for {sample}")
+                    f.write(f"\n{cutesv_name}=$(sbatch --parsable {job})\n")
+            else:
+                print("Done: " + cutesv_name)
+
+
 def cleanup(toml_config, done):
     # Simple function to remove redundant files and cleanup structure
     tool = "cleanup"
