@@ -106,8 +106,8 @@ def main():
         function_queue.append(deepvariant)
 
     # # SVs
-    # if "SV" in toml_config["general"]["analysis"]:
-    #     function_queue.append()
+    if "SV" in toml_config["general"]["analysis"]:
+        function_queue.append(cutesv)
 
     # # Annotation
 

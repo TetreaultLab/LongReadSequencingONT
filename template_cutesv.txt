@@ -20,7 +20,7 @@ mkdir -p $WORKDIR/tmp
 $CUTESV_IMAGE cuteSV \
         {3} \
         {4} \
-        $WORKDIR/{0}.vcf \
+        $WORKDIR/{0}_cutesv.vcf \
         $WORKDIR/tmp \
         --max_size 1000000 \
         --min_support 3 \
