@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 from pathlib import Path
 import argparse
 import toml
@@ -28,6 +29,8 @@ try:
 
     flowcells = ast.literal_eval(args.flowcells)
 
+    username = os.environ.get("USER")
+
     all_inputs = []
     # Loop over flowcells to rename
     for fc in flowcells:
@@ -36,11 +39,11 @@ try:
 
         dir_proj = toml_config["general"]["project_path"]
         name = dir_proj.rstrip("/").split("/")[-2].split("_", 1)[1]
-        inputs = "/lustre10/scratch/$USER/" + name + "/" + fc + "/"
+        inputs = f"/lustre10/scratch/{username}/{name}/{fc}/"
         inputs = Path(inputs)
         all_inputs.append(inputs)
 
-        output = "/lustre10/scratch/$USER/" + name + "/alignments"
+        output = f"/lustre10/scratch/{username}/{name}/alignments"
         output_path = Path(output)
 
         # Load the CSV file
