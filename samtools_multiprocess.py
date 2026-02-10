@@ -81,6 +81,7 @@ try:
         cmd = [
             "samtools",
             "merge",
+            "-c",
             "-f",
             "--threads",
             "3",
