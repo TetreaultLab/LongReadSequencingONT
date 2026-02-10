@@ -692,7 +692,7 @@ def samtools(toml_config, done):
             size = line.split()[0]
 
     size_str = size.rstrip("G")
-    hours = int(size_str) / n_samples * 0.008
+    hours = int(size_str) / n_samples * 0.02
     formatted_time = format_time(hours)
 
     codes = []
