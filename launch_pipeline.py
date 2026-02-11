@@ -469,33 +469,43 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
         else:
             job = output + "/scripts/" + tool + ".slurm"
 
-        with open(
-            TOOL_PATH
-            + "main_pipelines/long-read/LongReadSequencingONT/template_sbatch.txt",
-            "r",
-        ) as f:
-            slurm = f.read()
-            # For all other tools
-            slurm_filled = slurm.format(
-                cores, "", memory, time, tool, "run", "log", "log", "rrg", email, name
-            )
+            with open(
+                TOOL_PATH
+                + "main_pipelines/long-read/LongReadSequencingONT/template_sbatch.txt",
+                "r",
+            ) as f:
+                slurm = f.read()
+                # For all other tools
+                slurm_filled = slurm.format(
+                    cores,
+                    "",
+                    memory,
+                    time,
+                    tool,
+                    "run",
+                    "log",
+                    "log",
+                    "rrg",
+                    email,
+                    name,
+                )
 
-            # Add enviroment loading commands
-            slurm_filled += "module load StdEnv/2023 apptainer samtools\n"
-            slurm_filled += (
-                "source "
-                + TOOL_PATH
-                + "main_pipelines/long-read/launch_pipeline_env/bin/activate\n"
-            )
+                # Add enviroment loading commands
+                slurm_filled += "module load StdEnv/2023 apptainer samtools\n"
+                slurm_filled += (
+                    "source "
+                    + TOOL_PATH
+                    + "main_pipelines/long-read/launch_pipeline_env/bin/activate\n"
+                )
 
-            slurm_filled += "\n#\n### Calling " + tool + "\n#\n"
-            slurm_filled += command
-            slurm_filled += "\n"
+                slurm_filled += "\n#\n### Calling " + tool + "\n#\n"
+                slurm_filled += command
+                slurm_filled += "\n"
 
-            # Keep track of completed steps
-            slurm_filled += (
-                f'if [ $? -eq 0 ]; then echo "{tool}" >> "{steps_done}"; fi\n\n'
-            )
+                # Keep track of completed steps
+                slurm_filled += (
+                    f'if [ $? -eq 0 ]; then echo "{tool}" >> "{steps_done}"; fi\n\n'
+                )
 
     with open(job, "w") as o:
         o.write(slurm_filled)
@@ -770,7 +780,7 @@ def samtools(toml_config, done):
             "for",
             "s",
             "in",
-            '"' + str(samples) + '"',
+            str(samples),
             ";",
             "do",
             "srun",
@@ -827,7 +837,7 @@ def samtools(toml_config, done):
                 "for",
                 "s",
                 "in",
-                '"' + str(samples) + '"',
+                str(samples),
                 ";",
                 "do",
                 "srun",
