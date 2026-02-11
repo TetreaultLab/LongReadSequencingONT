@@ -780,7 +780,6 @@ def samtools(toml_config, done):
             "parallel",
             "-j",
             "5",
-            "--verbose",
             "python",
             "-u",
             TOOL_PATH
@@ -826,7 +825,6 @@ def samtools(toml_config, done):
                 "parallel",
                 "-j",
                 "5",
-                "--verbose",
                 "python",
                 "-u",
                 TOOL_PATH
