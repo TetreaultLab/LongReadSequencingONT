@@ -783,7 +783,6 @@ def samtools(toml_config, done):
             ";",
             "do",
             "srun",
-            "--exclusive",
             "-N1",
             "-n1",
             "-c4",
@@ -797,8 +796,9 @@ def samtools(toml_config, done):
             '"' + str(to_do_fcs) + '"',
             "--sample",
             "$s",
-            "&;",
+            "&",
             "done",
+            ";",
             "\nwait",
         ]
         command_str = " ".join(command)
@@ -839,7 +839,6 @@ def samtools(toml_config, done):
                 ";",
                 "do",
                 "srun",
-                "--exclusive",
                 "-N1",
                 "-n1",
                 "-c4",
@@ -853,8 +852,9 @@ def samtools(toml_config, done):
                 '"' + str(full_fcs) + '"',
                 "--sample",
                 "$s",
-                "&;",
+                "&",
                 "done",
+                ";",
                 "\nwait",
             ]
             command_str = " ".join(command)
