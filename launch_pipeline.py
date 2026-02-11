@@ -438,7 +438,7 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
                 # For all other tools
                 slurm_filled = slurm.format(
                     cores,
-                    "#SBATCH --ntasks=5",
+                    "#SBATCH --ntasks 5",
                     memory,
                     time,
                     tool,
