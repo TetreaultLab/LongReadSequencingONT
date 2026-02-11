@@ -796,7 +796,9 @@ def samtools(toml_config, done):
             "--flowcells",
             '"' + str(to_do_fcs) + '"',
             "--sample",
-            "$s;",
+            "$s",
+            "&",
+            ";",
             "done",
             "\nwait",
         ]
@@ -851,7 +853,9 @@ def samtools(toml_config, done):
                 "--flowcells",
                 '"' + str(full_fcs) + '"',
                 "--sample",
-                "$s;",
+                "$s",
+                "&",
+                ";",
                 "done",
                 "\nwait",
             ]
