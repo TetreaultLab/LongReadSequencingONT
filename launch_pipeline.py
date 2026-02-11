@@ -426,7 +426,48 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
 
     # This is for tools running on all the data at once
     else:
-        job = output + "/scripts/" + tool + ".slurm"
+        if tool == "samtools":
+            job = output + "/scripts/" + tool + ".slurm"
+
+            with open(
+                TOOL_PATH
+                + "main_pipelines/long-read/LongReadSequencingONT/template_sbatch.txt",
+                "r",
+            ) as f:
+                slurm = f.read()
+                # For all other tools
+                slurm_filled = slurm.format(
+                    cores,
+                    "#SBATCH --ntasks=5",
+                    memory,
+                    time,
+                    tool,
+                    "run",
+                    "log",
+                    "log",
+                    "rrg",
+                    email,
+                    name,
+                )
+
+                # Add enviroment loading commands
+                slurm_filled += "module load StdEnv/2023 apptainer samtools\n"
+                slurm_filled += (
+                    "source "
+                    + TOOL_PATH
+                    + "main_pipelines/long-read/launch_pipeline_env/bin/activate\n"
+                )
+
+                slurm_filled += "\n#\n### Calling " + tool + "\n#\n"
+                slurm_filled += command
+                slurm_filled += "\n"
+
+                # Keep track of completed steps
+                slurm_filled += (
+                    f'if [ $? -eq 0 ]; then echo "{tool}" >> "{steps_done}"; fi\n\n'
+                )
+        else:
+            job = output + "/scripts/" + tool + ".slurm"
 
         with open(
             TOOL_PATH
@@ -680,8 +721,8 @@ def samtools(toml_config, done):
     samples = toml_config["general"]["samples"]
     n_samples = len(samples)
 
-    cores = "24"
-    memory = "96"
+    cores = "4"
+    memory = "64"
 
     dirs = [f"{output}/{fc}/reads/pod5" for fc in flowcells]
     cmd = ["du", "-sh", "--apparent-size", "--block-size", "G", "--total"] + dirs
@@ -720,12 +761,36 @@ def samtools(toml_config, done):
         command = [
             "python",
             "-u",
+            TOOL_PATH + "main_pipelines/long-read/LongReadSequencingONT/rename_bam.py",
+            "--config",
+            toml_config["general"]["project_path"] + "/scripts/config_final.toml",
+            "--flowcells",
+            '"' + str(to_do_fcs) + '"',
+            "\n\n",
+            "for",
+            "s",
+            "in",
+            samples,
+            ";",
+            "do",
+            "srun",
+            "--exclusive",
+            "-N1",
+            "-n1",
+            "-c4",
+            "python",
+            "-u",
             TOOL_PATH
             + "main_pipelines/long-read/LongReadSequencingONT/samtools_multiprocess.py",
             "--config",
             toml_config["general"]["project_path"] + "/scripts/config_final.toml",
             "--flowcells",
             '"' + str(to_do_fcs) + '"',
+            "--sample",
+            "s",
+            "&",
+            "done;",
+            "wait",
         ]
         command_str = " ".join(command)
 
@@ -752,11 +817,36 @@ def samtools(toml_config, done):
                 "python",
                 "-u",
                 TOOL_PATH
+                + "main_pipelines/long-read/LongReadSequencingONT/rename_bam.py",
+                "--config",
+                toml_config["general"]["project_path"] + "/scripts/config_final.toml",
+                "--flowcells",
+                '"' + str(full_fcs) + '"',
+                "\n\n",
+                "for",
+                "s",
+                "in",
+                samples,
+                ";",
+                "do",
+                "srun",
+                "--exclusive",
+                "-N1",
+                "-n1",
+                "-c4",
+                "python",
+                "-u",
+                TOOL_PATH
                 + "main_pipelines/long-read/LongReadSequencingONT/samtools_multiprocess.py",
                 "--config",
                 toml_config["general"]["project_path"] + "/scripts/config_final.toml",
                 "--flowcells",
                 '"' + str(full_fcs) + '"',
+                "--sample",
+                "s",
+                "&",
+                "done;",
+                "wait",
             ]
             command_str = " ".join(command)
 

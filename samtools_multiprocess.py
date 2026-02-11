@@ -20,6 +20,7 @@ try:
     parser.add_argument(
         "--flowcells", type=str, required=True, help="Flowcells to run."
     )
+    parser.add_argument("--sample", type=str, required=True, help="Sample.")
 
     args = parser.parse_args()
 
@@ -30,42 +31,20 @@ try:
     flowcells = ast.literal_eval(args.flowcells)
 
     username = os.environ.get("USER")
+    dir_proj = toml_config["general"]["project_path"]
+    name = dir_proj.rstrip("/").split("/")[-2].split("_", 1)[1]
+
+    output = f"/lustre10/scratch/{username}/{name}/alignments"
+    output_path = Path(output)
 
     all_inputs = []
-    # Loop over flowcells to rename
+    # Loop over flowcells to get inputs
     for fc in flowcells:
-        print(f"\nRunning: rename for flowcell {fc}")
-        code = fc.split("_")[-1]
-
-        dir_proj = toml_config["general"]["project_path"]
-        name = dir_proj.rstrip("/").split("/")[-2].split("_", 1)[1]
         inputs = f"/lustre10/scratch/{username}/{name}/{fc}/"
         inputs = Path(inputs)
         all_inputs.append(inputs)
 
-        output = f"/lustre10/scratch/{username}/{name}/alignments"
-        output_path = Path(output)
-
-        # Load the CSV file
-        df = pd.read_csv(dir_proj + "/scripts/" + fc + ".csv", header=0)
-        df["code"] = df["flow_cell_id"].str.split("_").str[-1]
-
-        # Create a mapping from barcode -> alias
-        barcode_to_alias = dict(zip(zip(df["barcode"], df["alias"]), df["code"]))
-
-        # Process each file in the directory
-        for file in inputs.iterdir():
-            if file.is_file() and file.name.startswith(code):
-                for (barcode, alias), code in barcode_to_alias.items():
-                    if barcode in file.name:
-                        if file.name.endswith(".bam"):
-                            new_name = f"{alias}_{barcode}_{code}.bam"
-                        else:
-                            continue
-
-                        new_path = inputs / new_name
-                        file.rename(new_path)
-                        print(f"Renamed {file.name} -> {new_name}")
+    s = args.sample
 
     def process_sample(s):
         print(f"\nRunning Samtools for sample {s}")
@@ -110,13 +89,6 @@ try:
         subprocess.run(cmd3, check=True)
 
         print(f"Done Samtools for {s}")
-
-    # Run all samples in parallel
-    samples = toml_config["general"]["samples"]
-    n = len(samples)
-    with Pool(processes=n) as pool:
-        pool.map(process_sample, samples)
-
 
 except Exception as e:
     print(f"Error: {e}")

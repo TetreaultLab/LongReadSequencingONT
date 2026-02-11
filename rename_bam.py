@@ -2,7 +2,6 @@ import pandas as pd
 from pathlib import Path
 import argparse
 import toml
-import subprocess
 import ast
 import sys
 
@@ -62,66 +61,6 @@ try:
                         new_path = inputs / new_name
                         file.rename(new_path)
                         print(f"Renamed {file.name} -> {new_name}")
-
-    # Merge bams
-    samples = toml_config["general"]["samples"]
-
-    # Loop over samples
-    for s in samples:
-        print(f"\nRunning: Samtools for sample {s}")
-        output_file = output_path / f"{s}.bam"
-
-        bam_files = []
-        for p in all_inputs:
-            bam_files.extend(p.glob(f"{s}_*.bam"))
-
-        bam_files_str = [str(p) for p in bam_files]
-
-        # merge
-        print("--> Merge")
-        cmd = [
-            "samtools",
-            "merge",
-            "-f",
-            "--threads",
-            "3",
-            "-o",
-            str(output_file),
-        ] + bam_files_str
-        print(" ".join(cmd))
-        subprocess.run(cmd, check=True)
-
-        # sort
-        print("--> Sort + Index")
-        cmd2 = [
-            "samtools",
-            "sort",
-            "--threads",
-            "3",
-            "-m",
-            "4G",
-            "-o",
-            output + "/" + s + "_sorted.bam",
-            output + "/" + s + ".bam",
-        ]
-        print(" ".join(cmd2))
-        subprocess.run(cmd2, check=True)
-
-        # index
-        print("--> Index")
-        cmd3 = [
-            "samtools",
-            "index",
-            "--threads",
-            "3",
-            "-o",
-            output + "/" + s + "_sorted.bam.bai",
-            output + "/" + s + "_sorted.bam",
-        ]
-        print(" ".join(cmd3))
-        subprocess.run(cmd3, check=True)
-
-    print("Samtools done !")
 
 except Exception as e:
     print(f"Error: {e}")
