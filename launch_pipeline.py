@@ -787,7 +787,6 @@ def samtools(toml_config, done):
             "-N1",
             "-n1",
             "-c4",
-            "--acount=rrg-tetreaum",
             "python",
             "-u",
             TOOL_PATH
@@ -844,7 +843,6 @@ def samtools(toml_config, done):
                 "-N1",
                 "-n1",
                 "-c4",
-                "--acount=rrg-tetreaum",
                 "python",
                 "-u",
                 TOOL_PATH
