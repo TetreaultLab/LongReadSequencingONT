@@ -796,10 +796,8 @@ def samtools(toml_config, done):
             "--flowcells",
             '"' + str(to_do_fcs) + '"',
             "--sample",
-            "s",
-            "&",
-            "done;",
-            "wait",
+            "$s;",
+            "done",
         ]
         command_str = " ".join(command)
 
@@ -852,10 +850,8 @@ def samtools(toml_config, done):
                 "--flowcells",
                 '"' + str(full_fcs) + '"',
                 "--sample",
-                "$s",
-                "&",
-                "done;",
-                "wait",
+                "$s;",
+                "done",
             ]
             command_str = " ".join(command)
 
