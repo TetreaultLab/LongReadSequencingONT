@@ -8,15 +8,12 @@ import sys
 
 try:
     parser = argparse.ArgumentParser(
-        prog="Rename Bam files after dorado demultiplexing",
-        description="Change long names for bam files to a easier format",
+        prog="Run samtools",
+        description="Samtools merge, sort and index",
     )
 
     parser.add_argument(
         "--config", type=str, required=True, help="Project config file, including path."
-    )
-    parser.add_argument(
-        "--flowcells", type=str, required=True, help="Flowcells to run."
     )
     parser.add_argument("--sample", type=str, required=True, help="Sample.")
 
@@ -26,7 +23,7 @@ try:
     with open(args.config, "r") as f:
         toml_config = toml.load(f)
 
-    flowcells = ast.literal_eval(args.flowcells)
+    flowcells = toml_config["general"]["fc_dir_names"]
 
     username = os.environ.get("USER")
     dir_proj = toml_config["general"]["project_path"]
