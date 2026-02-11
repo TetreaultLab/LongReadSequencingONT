@@ -478,7 +478,7 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
                 # For all other tools
                 slurm_filled = slurm.format(
                     cores,
-                    "",
+                    "TEST",
                     memory,
                     time,
                     tool,
