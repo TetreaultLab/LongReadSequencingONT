@@ -680,8 +680,8 @@ def samtools(toml_config, done):
     samples = toml_config["general"]["samples"]
     n_samples = len(samples)
 
-    cores = "4"
-    memory = "64"
+    cores = "24"
+    memory = "96"
 
     dirs = [f"{output}/{fc}/reads/pod5" for fc in flowcells]
     cmd = ["du", "-sh", "--apparent-size", "--block-size", "G", "--total"] + dirs
