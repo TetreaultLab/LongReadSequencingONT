@@ -770,7 +770,7 @@ def samtools(toml_config, done):
             "for",
             "s",
             "in",
-            samples,
+            '"' + str(samples) + '"',
             ";",
             "do",
             "srun",
@@ -793,6 +793,7 @@ def samtools(toml_config, done):
             "wait",
         ]
         command_str = " ".join(command)
+        print(command_str)
 
         job = create_script(
             tool, cores, memory, formatted_time, output, email, command_str, ""
@@ -826,7 +827,7 @@ def samtools(toml_config, done):
                 "for",
                 "s",
                 "in",
-                samples,
+                '"' + str(samples) + '"',
                 ";",
                 "do",
                 "srun",
@@ -849,6 +850,7 @@ def samtools(toml_config, done):
                 "wait",
             ]
             command_str = " ".join(command)
+            print(command_str)
 
             job = create_script(
                 tool, cores, memory, formatted_time, output, email, command_str, ""
