@@ -798,8 +798,7 @@ def samtools(toml_config, done):
             "--sample",
             "s",
             "&",
-            "done",
-            "\n\n",
+            "done;",
             "wait",
         ]
         command_str = " ".join(command)
@@ -855,8 +854,7 @@ def samtools(toml_config, done):
                 "--sample",
                 "$s",
                 "&",
-                "done",
-                "\n\n",
+                "done;",
                 "wait",
             ]
             command_str = " ".join(command)
