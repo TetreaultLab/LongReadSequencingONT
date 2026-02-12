@@ -779,7 +779,8 @@ def samtools(toml_config, done):
             "\n\n",
             "for",
             "s",
-            "in ".join(samples),
+            "in",
+            "".join(samples),
             ";",
             "do",
             "srun",
@@ -795,8 +796,8 @@ def samtools(toml_config, done):
             "--sample",
             "$s",
             "&",
-            "done",
             ";",
+            "done",
             "\nwait",
         ]
         command_str = " ".join(command)
@@ -832,7 +833,8 @@ def samtools(toml_config, done):
                 "\n\n",
                 "for",
                 "s",
-                "in ".join(samples),
+                "in",
+                "".join(samples),
                 ";",
                 "do",
                 "srun",
@@ -848,8 +850,8 @@ def samtools(toml_config, done):
                 "--sample",
                 "$s",
                 "&",
-                "done",
                 ";",
+                "done",
                 "\nwait",
             ]
             command_str = " ".join(command)
