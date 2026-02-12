@@ -25,6 +25,8 @@ $DEEPVARIANT_IMAGE /opt/deepvariant/bin/run_deepvariant \
         --logging_dir $WORKDIR/logs \
         --runtime_report \
         --vcf_stats_report \
+        --make_examples_extra_args='small_model_call_multiallelics=false' \
+        --postprocess_cpus 0 \
         --num_shards=$SLURM_CPUS_PER_TASK
 
 
