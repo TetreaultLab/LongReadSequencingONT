@@ -795,9 +795,8 @@ def samtools(toml_config, done):
             toml_config["general"]["project_path"] + "/scripts/config_final.toml",
             "--sample",
             "$s",
-            "&",
-            "done;",
-            "\nwait",
+            ";",
+            "done",
         ]
         command_str = " ".join(command)
 
@@ -837,7 +836,6 @@ def samtools(toml_config, done):
                 ";",
                 "do",
                 "srun",
-                "-N1",
                 "-n1",
                 "-c4",
                 "python",
@@ -848,9 +846,8 @@ def samtools(toml_config, done):
                 toml_config["general"]["project_path"] + "/scripts/config_final.toml",
                 "--sample",
                 "$s",
-                "&",
-                "done;",
-                "\nwait",
+                ";",
+                "done",
             ]
             command_str = " ".join(command)
 
