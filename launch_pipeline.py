@@ -772,8 +772,8 @@ def samtools(toml_config, done):
             if samtools_name not in done:
                 print("To-Do: " + samtools_name)
                 with open(output + "/scripts/main.sh", "a") as f:
-                    f.write("\n# Rename, merge, sort and index bams")
-                    f.write(f"\{samtools_name}=$(sbatch --parsable {job})\n")
+                    f.write("\n# Rename, merge, sort and index bams for {sample}")
+                    f.write(f"\n{samtools_name}=$(sbatch --parsable {job})\n")
             else:
                 # All dorado_demux are done and samtools is done
                 print("Done: " + samtools_name)
