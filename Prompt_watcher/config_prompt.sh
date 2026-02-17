@@ -6,6 +6,18 @@ TARGET_DIR="${1:-$(pwd)}"
 CONFIG="$TARGET_DIR/config_initial.txt"
 echo "[general]" > "$CONFIG"
 
+# Function to not double lines when backing
+write_or_replace() {
+	local key="$1"
+	local value="$2"
+
+	if grep -q "^[[:space:]]*$key =" "$CONFIG"; then
+		sed -i "s|^[[:space:]]*$key = .*|    $key = $value|" "$CONFIG"
+	else
+		echo "    $key = $value" >> "$CONFIG"
+	fi
+}
+
 # Definition of inputs format for file configuration
 prompt() {
 	local varname=$1
@@ -76,7 +88,7 @@ while true; do
 		continue
 	fi
 
-	echo "    project_path = \"/lustre09/project/6019267/shared/projects/Nanopore_Dock/$project_path\"" >> "$CONFIG"
+	write_or_replace "project_path" "\"/lustre09/project/6019267/shared/projects/Nanopore_Dock/$project_path\""
 	((current_step++))
 	break
 done
@@ -110,7 +122,7 @@ done
 # --- Not adding further filters yet -----
 
 samples_list="[\"$(echo $samples | sed 's/ /\",\"/g')\"]"
-echo "    samples = $samples_list" >> "$CONFIG"
+write_or_replace "samples" "$samples_list"
 ((current_step++))
 ;;
 
@@ -139,7 +151,7 @@ while true; do
 	fi
 
 	conditions_list="[\"$(echo $conditions | sed 's/ /\",\"/g')\"]"
-	echo "    conditions = $conditions_list" >> "$CONFIG"
+	write_or_replace "conditions" "$conditions_list"
 	((current_step++))
 	break
 done
@@ -190,7 +202,7 @@ while true; do
 
 	barcode_list="[${barcode_array[*]}]"
 	barcode_list=$(echo "$barcode_list" | sed 's/ /, /g')
-	echo "    barcode = $barcode_list" >> "$CONFIG"
+	write_or_replace "barcode" "$barcode_list"
 	((current_step++))
 	break
 done
@@ -216,7 +228,7 @@ while true; do
 
 	# Validation from modifyable list
 	if [[ " ${valid_seq[@]} " =~ " $seq_type " ]]; then
-		echo "    seq_type = \"$seq_type\"" >> "$CONFIG"
+		write_or_replace "seq_type" "\"$seq_type\""
 		((current_step++))
 		break
 	else
@@ -247,7 +259,7 @@ while true; do
 
 	# Validation from modifyable list
 	if [[ " ${valid_kits[@]} " =~ " $kit " ]]; then
-		echo "    kit = \"$kit\"" >> "$CONFIG"
+		write_or_replace "kit" "\"$kit\""
 		((current_step++))
 		break
 	else
@@ -273,7 +285,7 @@ while true; do
 
 	# Quick check if looks like an email address
 	if [[ "$email" =~ ^[^@]+@[^@]+\.[^@]+$ ]]; then
-		echo "    email = \"$email\"" >> "$CONFIG"
+		write_or_replace "email" "\"$email\""
 		((current_step++))
 		break
 	else
@@ -298,7 +310,7 @@ if [[ "$analysis" == "back" ]]; then
 fi
 
 analysis_list="[\"$(echo $analysis | sed 's/ /\",\"/g')\"]"
-echo "    analysis = $analysis_list" >> "$CONFIG"
+write_or_replace "analysis" "$analysis_list"
 ((current_step++))
 ;;
 
@@ -316,7 +328,7 @@ if [[ "$file_type" == "back" ]]; then
 	continue
 fi
 
-echo "    file_type = \"$file_type\"" >> "$CONFIG"
+write_or_replace "file_type"  "\"$file_type\""
 ((current_step++))
 ;;
 
@@ -334,7 +346,7 @@ if [[ "$reference" == "back" ]]; then
 	continue
 fi
 
-echo "    reference = \"$reference\"" >> "$CONFIG"
+write_or_replace "reference" "\"$reference\""
 ((current_step++))
 ;;
 
