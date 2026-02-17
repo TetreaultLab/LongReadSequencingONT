@@ -74,7 +74,7 @@ def main():
 
     # Call all other functions for downstream analysis
     # QC
-    function_queue.append(mosdepth)
+    # function_queue.append(mosdepth)
 
     # EPI2ME
     function_queue.append(epi2me)
@@ -1068,14 +1068,15 @@ def epi2me(toml_config, done):
             with open(job, "w") as o:
                 o.write(slurm_filled)
 
+        samtools_name = f"samtools_{sample}"
         epi_name = f"epi2me_{sample}"
 
-        if "samtools" not in done:
+        if samtools_name not in done:
             print("To-Do: " + epi_name)
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write(f"\n# Epi2me workflow human variation for {sample}")
                 f.write(
-                    f"\n{epi_name}=$(sbatch --parsable --dependency=afterok:$samtools {job})\n"
+                    f"\n{epi_name}=$(sbatch --parsable --dependency=afterok:${samtools_name} {job})\n"
                 )
         else:
             if epi_name not in done:
@@ -1113,14 +1114,15 @@ def trgt(toml_config, done):
             with open(job, "w") as o:
                 o.write(slurm_filled)
 
+        samtools_name = f"samtools_{sample}"
         trgt_name = f"trgt_{sample}"
 
-        if "samtools" not in done:
+        if samtools_name not in done:
             print("To-Do: " + trgt_name)
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write(f"\n# TRGT for {sample}")
                 f.write(
-                    f"\n{trgt_name}=$(sbatch --parsable --dependency=afterok:$samtools {job})\n"
+                    f"\n{trgt_name}=$(sbatch --parsable --dependency=afterok:${samtools_name} {job})\n"
                 )
         else:
             if trgt_name not in done:
@@ -1153,14 +1155,15 @@ def strkit(toml_config, done):
             with open(job, "w") as o:
                 o.write(slurm_filled)
 
+        samtools_name = f"samtools_{sample}"
         strkit_name = f"strkit_{sample}"
 
-        if "samtools" not in done:
+        if samtools_name not in done:
             print("To-Do: " + strkit_name)
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write(f"\n# STRkit for {sample}")
                 f.write(
-                    f"\n{strkit_name}=$(sbatch --parsable --dependency=afterok:$samtools {job})\n"
+                    f"\n{strkit_name}=$(sbatch --parsable --dependency=afterok:${samtools_name} {job})\n"
                 )
         else:
             if strkit_name not in done:
@@ -1195,14 +1198,15 @@ def ont_methyldmr_kit(toml_config, done):
             with open(job, "w") as o:
                 o.write(slurm_filled)
 
+        epi_name = f"epi2me_{sample}"
         ont_methyldmr_kit_name = f"ont_methyldmr_kit_{sample}"
 
-        if f"epi2me_{sample}" not in done:
+        if epi_name not in done:
             print("To-Do: " + ont_methyldmr_kit_name)
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write(f"\n# ont-methylDMR-kit for {sample}")
                 f.write(
-                    f"\n{ont_methyldmr_kit_name}=$(sbatch --parsable --dependency=afterok:$epi2me_{sample} {job})\n"
+                    f"\n{ont_methyldmr_kit_name}=$(sbatch --parsable --dependency=afterok:${epi_name} {job})\n"
                 )
         else:
             if ont_methyldmr_kit_name not in done:
@@ -1239,14 +1243,15 @@ def flair(toml_config, done):
             with open(job, "w") as o:
                 o.write(slurm_filled)
 
+        samtools_name = f"samtools_{sample}"
         flair_name = f"flair_{sample}"
 
-        if "samtools" not in done:
+        if samtools_name not in done:
             print("To-Do: " + flair_name)
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write(f"\n# FLAIR for {sample}")
                 f.write(
-                    f"\n{flair_name}=$(sbatch --parsable --dependency=afterok:$samtools {job})\n"
+                    f"\n{flair_name}=$(sbatch --parsable --dependency=afterok:${samtools_name} {job})\n"
                 )
         else:
             if flair_name not in done:
@@ -1282,14 +1287,15 @@ def deepvariant(toml_config, done):
             with open(job, "w") as o:
                 o.write(slurm_filled)
 
+        samtools_name = f"samtools_{sample}"
         deepvariant_name = f"deepvariant_{sample}"
 
-        if "samtools" not in done:
+        if samtools_name not in done:
             print("To-Do: " + deepvariant_name)
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write(f"\n# DeepVariant for {sample}")
                 f.write(
-                    f"\n{deepvariant_name}=$(sbatch --parsable --dependency=afterok:$samtools {job})\n"
+                    f"\n{deepvariant_name}=$(sbatch --parsable --dependency=afterok:${samtools_name} {job})\n"
                 )
         else:
             if deepvariant_name not in done:
@@ -1325,14 +1331,15 @@ def cutesv(toml_config, done):
             with open(job, "w") as o:
                 o.write(slurm_filled)
 
+        samtools_name = f"samtools_{sample}"
         cutesv_name = f"cutesv_{sample}"
 
-        if "samtools" not in done:
+        if samtools_name not in done:
             print("To-Do: " + cutesv_name)
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write(f"\n# cuteSV for {sample}")
                 f.write(
-                    f"\n{cutesv_name}=$(sbatch --parsable --dependency=afterok:$samtools {job})\n"
+                    f"\n{cutesv_name}=$(sbatch --parsable --dependency=afterok:${samtools_name} {job})\n"
                 )
         else:
             if cutesv_name not in done:
