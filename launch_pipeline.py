@@ -748,7 +748,7 @@ def samtools(toml_config, done):
             "r",
         ) as f:
             slurm = f.read()
-            slurm_filled = slurm.format(sample, email, config, sample)
+            slurm_filled = slurm.format(sample, email, output, config, sample)
 
             with open(job, "w") as o:
                 o.write(slurm_filled)

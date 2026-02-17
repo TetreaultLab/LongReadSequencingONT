@@ -11,11 +11,12 @@
 
 ml samtools
 source /lustre09/project/6019267/shared/tools/main_pipelines/long-read/launch_pipeline_env/bin/activate
+STEPS_DONE="{2}/scripts/steps_done.txt"
 
 python -u \
     /lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/samtools_per_sample.py \
-    --config {2} \
-    --sample {3}
+    --config {3} \
+    --sample {4}
 
 if [ $? -eq 0 ]; then
     echo "samtools_{0}" >> "$STEPS_DONE"
