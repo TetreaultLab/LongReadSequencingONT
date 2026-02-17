@@ -761,7 +761,7 @@ def samtools(toml_config, done):
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write("\n# Rename, merge, sort and index bams")
                 f.write(
-                    f"\{samtools_name}=$(sbatch --parsable --dependency=afterok:{dependencies} {job})\n"
+                    f"\n{samtools_name}=$(sbatch --parsable --dependency=afterok:{dependencies} {job})\n"
                 )
 
             # remove samtools from done so all subsequent jobs run after samtools
