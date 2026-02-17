@@ -729,22 +729,7 @@ def samtools(toml_config, done):
     email = toml_config["general"]["email"]
     flowcells = toml_config["general"]["fc_dir_names"]
     samples = toml_config["general"]["samples"]
-    n_samples = len(samples)
-
-    cores = "4"
-    memory = "64"
-
-    dirs = [f"{output}/{fc}/reads/pod5" for fc in flowcells]
-    cmd = ["du", "-sh", "--apparent-size", "--block-size", "G", "--total"] + dirs
-    result = subprocess.run(cmd, capture_output=True, text=True)
-
-    for line in result.stdout.splitlines():
-        if line.endswith("total"):
-            size = line.split()[0]
-
-    size_str = size.rstrip("G")
-    hours = int(size_str) / n_samples * 0.02
-    formatted_time = format_time(hours)
+    config = toml_config["general"]["project_path"] + "/scripts/config_final.toml"
 
     codes = []
     for flowcell in flowcells:
@@ -755,99 +740,43 @@ def samtools(toml_config, done):
     done_fc = [x for x in done if x.startswith("dorado_demux")]
     to_dos = [x for x in all_fc if x not in done_fc]
 
-    full_fcs = [
-        fc for short in all_fc for fc in flowcells if short.split("_")[-1] in fc
-    ]
-
-    to_do_fcs = [
-        fc for short in to_dos for fc in flowcells if short.split("_")[-1] in fc
-    ]
-
-    # Add slurm job to main.sh
-    # If at least one dorado_demux job is not done, run samtools for that/these flowcell(s)
-    if len(to_dos) > 0:
-        print("To-Do: " + tool)
-
-        command = [
-            "python",
-            "-u",
-            TOOL_PATH + "main_pipelines/long-read/LongReadSequencingONT/rename_bam.py",
-            "--config",
-            toml_config["general"]["project_path"] + "/scripts/config_final.toml",
-            "--flowcells",
-            '"' + str(to_do_fcs) + '"',
-            "\n\n",
-            "parallel",
-            "-j",
-            "5",
-            "python",
-            "-u",
+    for sample in samples:
+        job = output + "/scripts/" + tool + "_" + sample + ".slurm"
+        with open(
             TOOL_PATH
-            + "main_pipelines/long-read/LongReadSequencingONT/samtools_multiprocess.py",
-            "--config",
-            toml_config["general"]["project_path"] + "/scripts/config_final.toml",
-            "--sample",
-            "{}",
-            ":::",
-            " ".join(samples),
-        ]
-        command_str = " ".join(command)
+            + "main_pipelines/long-read/LongReadSequencingONT/template_samtools.txt",
+            "r",
+        ) as f:
+            slurm = f.read()
+            slurm_filled = slurm.format(sample, email, config, sample)
 
-        job = create_script(
-            tool, cores, memory, formatted_time, output, email, command_str, ""
-        )
+            with open(job, "w") as o:
+                o.write(slurm_filled)
 
-        dependencies = ":".join([f"${code}" for code in to_dos])
-        with open(output + "/scripts/main.sh", "a") as f:
-            f.write("\n# Rename, merge, sort and index bams")
-            f.write(
-                f"\nsamtools=$(sbatch --parsable --dependency=afterok:{dependencies} {job})\n"
-            )
+        samtools_name = f"samtools_{sample}"
 
-        # remove samtools from done so all subsequent jobs run after samtools
-        if tool in done:
-            done.remove(tool)
-
-    else:
-        # If all dorado_demux are done but samtools has not run yet
-        if tool not in done:
-            print("To-Do: " + tool)
-            command = [
-                "python",
-                "-u",
-                TOOL_PATH
-                + "main_pipelines/long-read/LongReadSequencingONT/rename_bam.py",
-                "--config",
-                toml_config["general"]["project_path"] + "/scripts/config_final.toml",
-                "--flowcells",
-                '"' + str(full_fcs) + '"',
-                "\n\n",
-                "parallel",
-                "-j",
-                "5",
-                "python",
-                "-u",
-                TOOL_PATH
-                + "main_pipelines/long-read/LongReadSequencingONT/samtools_multiprocess.py",
-                "--config",
-                toml_config["general"]["project_path"] + "/scripts/config_final.toml",
-                "--sample",
-                "{}",
-                ":::",
-                " ".join(samples),
-            ]
-            command_str = " ".join(command)
-
-            job = create_script(
-                tool, cores, memory, formatted_time, output, email, command_str, ""
-            )
-
+        if len(to_dos) > 0:
+            print("To-Do: " + samtools_name)
+            dependencies = ":".join([f"${code}" for code in to_dos])
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write("\n# Rename, merge, sort and index bams")
-                f.write(f"\nsamtools=$(sbatch --parsable {job})\n")
+                f.write(
+                    f"\samtools_name=$(sbatch --parsable --dependency=afterok:{dependencies} {job})\n"
+                )
+
+            # remove samtools from done so all subsequent jobs run after samtools
+            if samtools_name in done:
+                done.remove(samtools_name)
         else:
-            # All dorado_demux are done and samtools is done
-            print("Done: " + tool)
+            # If all dorado_demux are done but samtools has not run yet
+            if samtools_name not in done:
+                print("To-Do: " + samtools_name)
+                with open(output + "/scripts/main.sh", "a") as f:
+                    f.write("\n# Rename, merge, sort and index bams")
+                    f.write(f"\samtools_name=$(sbatch --parsable {job})\n")
+            else:
+                # All dorado_demux are done and samtools is done
+                print("Done: " + samtools_name)
 
 
 def longReadSum(toml_config, done):

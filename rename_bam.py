@@ -58,9 +58,10 @@ try:
                         else:
                             continue
 
-                        new_path = inputs / new_name
-                        file.rename(new_path)
-                        print(f"Renamed {file.name} -> {new_name}")
+                        if new_name.startswith(s):
+                            new_path = inputs / new_name
+                            file.rename(new_path)
+                            print(f"Renamed {file.name} -> {new_name}")
 
 except Exception as e:
     print(f"Error: {e}")
