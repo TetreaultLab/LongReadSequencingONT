@@ -28,7 +28,6 @@ try:
     username = os.environ.get("USER")
     tmpdir = os.environ.get("SLURM_TMPDIR")
     tmp = Path(tmpdir)
-    subprocess.run(["du", "-sh", tmpdir], check=True)
     dir_proj = toml_config["general"]["project_path"]
     name = dir_proj.rstrip("/").split("/")[-2].split("_", 1)[1]
     output = f"/lustre10/scratch/{username}/{name}/alignments"
