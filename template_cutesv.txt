@@ -17,6 +17,7 @@ STEPS_DONE="{3}/scripts/steps_done.txt"
 
 mkdir -p $WORKDIR
 mkdir -p $WORKDIR/tmp
+rm -r $WORKDIR/tmp/*
 
 $CUTESV_IMAGE cuteSV \
         {4} \
