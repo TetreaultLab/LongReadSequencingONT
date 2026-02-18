@@ -17,6 +17,8 @@ STEPS_DONE="{1}/scripts/steps_done.txt"
 
 for sample in {2}
 do
+    echo -e "\n===== Running $sample =====\n"
+    
     WORKDIR="/lustre10/scratch/{3}/{4}/results/cutesv/$sample"
 
     mkdir -p $WORKDIR
