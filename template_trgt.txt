@@ -3,63 +3,43 @@
 #SBATCH -n 1 # number of cores                                                              
 #SBATCH --mem 3G # memory pool for all cores                                                
 #SBATCH -t 0-01:00 # time (D-HH:MM)                                                         
-#SBATCH -o trgt_{0}.%N.%j.log                                                                   
-#SBATCH -e trgt_{0}.%N.%j.log                                                                                                                                              
+#SBATCH -o trgt.%N.%j.log                                                                   
+#SBATCH -e trgt.%N.%j.log                                                                                                                                              
 #SBATCH --mail-type=FAIL                                                                    
 #SBATCH --account=rrg-tetreaum                                                              
-#SBATCH --mail-user={1}
+#SBATCH --mail-user={0}
 
-ml apptainer samtools bcftools                                                                                                                                                                             # Tool                                                                                      
-
+ml apptainer samtools bcftools
 IMAGE="apptainer run /lustre09/project/6019267/shared/tools/repeat_expansions/TRGT/trgt.sif"
-WORKDIR="/lustre10/scratch/$USER/{2}/results/TRGT/{0}"
-STEPS_DONE="{3}/scripts/steps_done.txt"
-GENOME={4}
+
+STEPS_DONE="{1}/scripts/steps_done.txt"
+GENOME={2}
 REPEATS="/lustre09/project/6019267/shared/tools/repeat_expansions/reference_regions/trgt_STRchive_pathogenic.hg38.bed"
 
-# Optional for visualization and python script
-# Gene of Interest
-GOI={5}
-MOTIF={6}
-
 ### Repeat quantification with TRGT/TRVZ
+for sample in {3}
+do
+    echo -e "\n===== Running $sample =====\n"
 
-mkdir -p $WORKDIR
+    WORKDIR="/lustre10/scratch/$USER/{4}/results/TRGT/$sample"
+    mkdir -p $WORKDIR
 
-# Main TRGT Command
-$IMAGE trgt genotype --genome $GENOME \
-            --repeats $REPEATS \
-           	--reads /lustre10/scratch/$USER/{2}/alignments/{0}_sorted.bam  \
-         	--output-prefix $WORKDIR/{0}
-
-# Sort and index VCF
-bcftools sort -Ob -o $WORKDIR/{0}.sorted.vcf.gz $WORKDIR/{0}.vcf.gz
-bcftools index $WORKDIR/{0}.sorted.vcf.gz
-
-# Sort and index BAM
-samtools sort -o $WORKDIR/{0}.spanning.sorted.bam $WORKDIR/{0}.spanning.bam
-samtools index $WORKDIR/{0}.spanning.sorted.bam
-
-if [ -z "$GOI" ]; then
-    if [ $? -eq 0 ]; then
-        echo "trgt_{0}" >> "$STEPS_DONE"
-    fi
-else
-    # Visualizer
-    $IMAGE trgt plot --genome $GENOME \
+    # Main TRGT Command
+    $IMAGE trgt genotype --genome $GENOME \
                 --repeats $REPEATS \
-                --vcf $WORKDIR/{0}.sorted.vcf.gz \
-                --spanning-reads $WORKDIR/{0}.spanning.sorted.bam \
-                --repeat-id $GOI \
-                --image $WORKDIR/{0}_$GOI.svg
+                --reads /lustre10/scratch/$USER/{4}/alignments/$sample\_sorted.bam  \
+                --output-prefix $WORKDIR/$sample
 
-    rm $WORKDIR/{0}.spanning.bam
-    rm $WORKDIR/{0}.vcf.gz
+    # Sort and index VCF
+    bcftools sort -Ob -o $WORKDIR/$sample.sorted.vcf.gz $WORKDIR/$sample.vcf.gz
+    bcftools index $WORKDIR/$sample.sorted.vcf.gz
 
-    # Optional
-    python3 /lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/tools_specific_scripts/TRGT/countTRGT.py $WORKDIR/ $GENE $MOTIF $WORKDIR/summaryTRGT_$GOI_$MOTIF.txt
+    # Sort and index BAM
+    samtools sort -o $WORKDIR/$sample.spanning.sorted.bam $WORKDIR/$sample.spanning.bam
+    samtools index $WORKDIR/$sample.spanning.sorted.bam
 
-    if [ $? -eq 0 ]; then
-        echo "trgt_{0}" >> "$STEPS_DONE"
-    fi
+done
+
+if [ $? -eq 0 ]; then
+    echo "trgt" >> "$STEPS_DONE"
 fi
