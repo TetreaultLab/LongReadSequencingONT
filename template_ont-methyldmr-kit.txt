@@ -2,7 +2,7 @@
 #SBATCH -N 1 #Number of nodes
 #SBATCH -n 24 # number of cores
 #SBATCH --mem 48G # memory pool for all cores
-#SBATCH -t 0-06:00 # time (D-HH:MM)
+#SBATCH -t 0-02:00 # time (D-HH:MM)
 #SBATCH -o ont_methyldmr_kit_{0}.%N.%j.log
 #SBATCH -e ont_methyldmr_kit_{0}.%N.%j.log
 #SBATCH --mail-type=FAIL
@@ -12,6 +12,9 @@
 ml apptainer/1.4.5 nextflow/25.10.2
 
 export NXF_DEFAULT_CPUS=1
+export NXF_OVERRIDE_AVAILABLE_CPUS=24
+export _JAVA_OPTIONS="-XX:ActiveProcessorCount=24"
+export NXF_DEFAULT_MEMORY=2GB
 export NXF_DISABLE_UPDATE_CHECK=true
 export NXF_OFFLINE=true
 export NXF_SINGULARITY_CACHEDIR="/lustre09/project/6019267/shared/tools/methylation/ont-methylDMR-kit/ont-methylDMR-kit_cache"
@@ -31,7 +34,8 @@ nextflow run $tool_dir -profile offline \
         --input_file1 $pileups_dir/{0}.wf_mods.1.bedmethyl \
         --input_file2 $pileups_dir/{0}.wf_mods.2.bedmethyl \
         --phased_mC \
-        --output_dir $output_dir/
+        --output_dir $output_dir/ \
+        --threads 1
 
 
 if [ $? -eq 0 ]; then
