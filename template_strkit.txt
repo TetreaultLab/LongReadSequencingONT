@@ -27,10 +27,13 @@ do
     $IMAGE strkit call /lustre10/scratch/$USER/{4}/alignments/$sample\_sorted.bam \
     --hq \
     --realign \
+    --use-hp \
+    --sample-id $sample \
     --ref $GENOME \
     --loci $REPEATS \
     --seed 342 \
     --json $WORKDIR/$sample\_last.json \
+    --indent-json \
     --vcf $WORKDIR/$sample\_last.vcf \
     --no-tsv \
     --count-kmers both
