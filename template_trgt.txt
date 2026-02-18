@@ -10,18 +10,11 @@
 #SBATCH --mail-user={1}
 
 ml apptainer samtools bcftools                                                                                                                                                                             # Tool                                                                                      
-IMAGE="apptainer run /lustre09/project/6019267/shared/tools/repeat_expansions/TRGT/trgt.sif"                                                                                            
 
-# Project Directory
+IMAGE="apptainer run /lustre09/project/6019267/shared/tools/repeat_expansions/TRGT/trgt.sif"
 WORKDIR="/lustre10/scratch/$USER/{2}/results/TRGT/{0}"
-
-# Steps done
 STEPS_DONE="{3}/scripts/steps_done.txt"
-
-# Reference Genome Path
 GENOME={4}
-
-# Repeat Definition File Path
 REPEATS="/lustre09/project/6019267/shared/tools/repeat_expansions/reference_regions/trgt_STRchive_pathogenic.hg38.bed"
 
 # Optional for visualization and python script

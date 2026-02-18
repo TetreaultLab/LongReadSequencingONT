@@ -1193,7 +1193,7 @@ def ont_methyldmr_kit(toml_config, done):
             "r",
         ) as f:
             slurm = f.read()
-            slurm_filled = slurm.format(sample, email, name, bedmethyl)
+            slurm_filled = slurm.format(sample, email, name, bedmethyl, output)
 
             with open(job, "w") as o:
                 o.write(slurm_filled)
@@ -1238,7 +1238,7 @@ def flair(toml_config, done):
             "r",
         ) as f:
             slurm = f.read()
-            slurm_filled = slurm.format(sample, email, name, genome, bam, gtf)
+            slurm_filled = slurm.format(sample, email, name, output, genome, bam, gtf)
 
             with open(job, "w") as o:
                 o.write(slurm_filled)
@@ -1282,7 +1282,7 @@ def deepvariant(toml_config, done):
             "r",
         ) as f:
             slurm = f.read()
-            slurm_filled = slurm.format(sample, email, name, bam, genome)
+            slurm_filled = slurm.format(sample, email, name, output, bam, genome)
 
             with open(job, "w") as o:
                 o.write(slurm_filled)
@@ -1326,7 +1326,7 @@ def cutesv(toml_config, done):
             "r",
         ) as f:
             slurm = f.read()
-            slurm_filled = slurm.format(sample, email, name, bam, genome)
+            slurm_filled = slurm.format(sample, email, name, output, bam, genome)
 
             with open(job, "w") as o:
                 o.write(slurm_filled)
