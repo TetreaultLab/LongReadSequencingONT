@@ -1,42 +1,45 @@
 #!/bin/bash
 #SBATCH -N 1 #Number of nodes
-#SBATCH -n 1 # number of cores
-#SBATCH --mem 3G # memory pool for all cores
+#SBATCH -n 2 # number of cores
+#SBATCH --mem 8G # memory pool for all cores
 #SBATCH -t 0-01:00 # time (D-HH:MM)
-#SBATCH -o strkit_{0}.%N.%j.log
-#SBATCH -e strkit_{0}.%N.%j.log
+#SBATCH -o strkit.%N.%j.log
+#SBATCH -e strkit.%N.%j.log
 #SBATCH --mail-type=FAIL
 #SBATCH --account=rrg-tetreaum
-#SBATCH --mail-user={1}
+#SBATCH --mail-user={0}
 
 ml apptainer
 
 IMAGE="apptainer run /lustre09/project/6019267/shared/tools/repeat_expansions/STRkit/strkit.sif"
-WORKDIR="/lustre10/scratch/$USER/{2}/results/STRkit/{0}"
-STEPS_DONE="{3}/scripts/steps_done.txt"
-GENOME={4}
+STEPS_DONE="{1}/scripts/steps_done.txt"
+GENOME={2}
 REPEATS="/lustre09/project/6019267/shared/tools/repeat_expansions/reference_regions/strkit_pathogenic_converted.hg38.bed"
 
-mkdir -p $WORKDIR
+for sample in {3}
+do
+    WORKDIR="/lustre10/scratch/$USER/{4}/results/STRkit/$sample"
+    mkdir -p $WORKDIR
 
-# Main STRkit Command
-$IMAGE strkit call /lustre10/scratch/$USER/{2}/alignments/{0}_sorted.bam \
---hq \
---realign \
---ref $GENOME \
---loci $REPEATS \
---seed 342 \
---json $WORKDIR/{0}_last.json \
---vcf $WORKDIR/{0}_last.vcf \
---no-tsv \
---count-kmers both
+    # Main STRkit Command
+    $IMAGE strkit call /lustre10/scratch/$USER/{4}/alignments/$sample_sorted.bam \
+    --hq \
+    --realign \
+    --ref $GENOME \
+    --loci $REPEATS \
+    --seed 342 \
+    --json $WORKDIR/$sample_last.json \
+    --vcf $WORKDIR/$sample_last.vcf \
+    --no-tsv \
+    --count-kmers both
 
-# STRkit Visualizer
-# $IMAGE strkit visualize /lustre10/scratch/$USER/{2}/alignments/{0}_sorted.bam \
-# --ref hg38 \
-# --json $WORKDIR/{0}_last.json \
-# -i 1
+    # STRkit Visualizer
+    # $IMAGE strkit visualize /lustre10/scratch/$USER/{4}/alignments/$sample_sorted.bam \
+    # --ref hg38 \
+    # --json $WORKDIR/$sample_last.json \
+    # -i 1
+done
 
 if [ $? -eq 0 ]; then
-    echo "strkit_{0}" >> "$STEPS_DONE"
+    echo "strkit" >> "$STEPS_DONE"
 fi
