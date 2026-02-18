@@ -18,6 +18,7 @@ REPEATS="/lustre09/project/6019267/shared/tools/repeat_expansions/reference_regi
 
 for sample in {3}
 do
+    echo -e "\n===== Running $sample =====\n"
     WORKDIR="/lustre10/scratch/$USER/{4}/results/STRkit/$sample"
     mkdir -p $WORKDIR
 
