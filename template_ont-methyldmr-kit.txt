@@ -2,7 +2,7 @@
 #SBATCH -N 1 #Number of nodes
 #SBATCH -n 24 # number of cores
 #SBATCH --mem 48G # memory pool for all cores
-#SBATCH -t 0-02:30 # time (D-HH:MM)
+#SBATCH -t 0-06:00 # time (D-HH:MM)
 #SBATCH -o ont_methyldmr_kit_{0}.%N.%j.log
 #SBATCH -e ont_methyldmr_kit_{0}.%N.%j.log
 #SBATCH --mail-type=FAIL
@@ -22,11 +22,14 @@ output_dir="/lustre10/scratch/$USER/{2}/results/ont-methylDMR-kit/{0}"
 pileups_dir={3}
 STEPS_DONE="{4}/scripts/steps_done.txt"
 
+gunzip -k $pileups_dir/{0}.wf_mods.1.bedmethyl.gz
+gunzip -k $pileups_dir/{0}.wf_mods.2.bedmethyl.gz
+
 nextflow run $tool_dir -profile offline \
         -c $tool_dir/nextflow.config \
         -w $output_dir/tmp \
-        --input_file1 $pileups_dir/{0}.wf_mods.1.bedmethyl.gz \
-        --input_file2 $pileups_dir/{0}.wf_mods.2.bedmethyl.gz \
+        --input_file1 $pileups_dir/{0}.wf_mods.1.bedmethyl \
+        --input_file2 $pileups_dir/{0}.wf_mods.2.bedmethyl \
         --phased_mC \
         --output_dir $output_dir/
 
