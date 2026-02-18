@@ -25,10 +25,12 @@ do
     mkdir -p $WORKDIR
 
     # Main TRGT Command
-    $IMAGE trgt genotype --genome $GENOME \
-                --repeats $REPEATS \
-                --reads /lustre10/scratch/$USER/{4}/alignments/$sample\_sorted.bam  \
-                --output-prefix $WORKDIR/$sample
+    $IMAGE trgt genotype \
+            --genome $GENOME \
+            --repeats $REPEATS \
+            --sample-name $sample \
+            --reads /lustre10/scratch/$USER/{4}/alignments/$sample\_sorted.bam  \
+            --output-prefix $WORKDIR/$sample
 
     # Sort and index VCF
     bcftools sort -Ob -o $WORKDIR/$sample.sorted.vcf.gz $WORKDIR/$sample.vcf.gz
