@@ -22,21 +22,21 @@ do
     mkdir -p $WORKDIR
 
     # Main STRkit Command
-    $IMAGE strkit call /lustre10/scratch/$USER/{4}/alignments/${sample}_sorted.bam \
+    $IMAGE strkit call /lustre10/scratch/$USER/{4}/alignments/$sample\_sorted.bam \
     --hq \
     --realign \
     --ref $GENOME \
     --loci $REPEATS \
     --seed 342 \
-    --json $WORKDIR/${sample}_last.json \
-    --vcf $WORKDIR/${sample}_last.vcf \
+    --json $WORKDIR/$sample\_last.json \
+    --vcf $WORKDIR/$sample\_last.vcf \
     --no-tsv \
     --count-kmers both
 
     # STRkit Visualizer
-    # $IMAGE strkit visualize /lustre10/scratch/$USER/{4}/alignments/${sample}_sorted.bam \
+    # $IMAGE strkit visualize /lustre10/scratch/$USER/{4}/alignments/$sample\_sorted.bam \
     # --ref hg38 \
-    # --json $WORKDIR/${sample}_last.json \
+    # --json $WORKDIR/$sample\_last.json \
     # -i 1
 done
 
