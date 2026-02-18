@@ -31,7 +31,7 @@ $CUTESV_IMAGE cuteSV \
         --diff_ratio_merging_INS 0.3 \
         --max_cluster_bias_DEL 100 \
         --diff_ratio_merging_DEL 0.3 \
-        --threads 8
+        --threads 4
 
 
 if [ $? -eq 0 ]; then
