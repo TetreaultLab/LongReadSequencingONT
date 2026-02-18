@@ -1321,40 +1321,42 @@ def cutesv(toml_config, done):
     genome = get_reference(toml_config["general"]["reference"])["fasta"]
     name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
     username = os.environ.get("USER")
+    samples = toml_config["general"]["samples"]
+    str_samples = " ".join(samples)
 
-    for sample in toml_config["general"]["samples"]:
-        bam = f"/lustre10/scratch/{username}/{name}/alignments/{sample}_sorted.bam"
+    job = output + "/scripts/" + tool + ".slurm"
+    with open(
+        TOOL_PATH
+        + "main_pipelines/long-read/LongReadSequencingONT/template_cutesv.txt",
+        "r",
+    ) as f:
+        slurm = f.read()
+        slurm_filled = slurm.format(email, output, str_samples, username, name, genome)
 
-        job = output + "/scripts/" + tool + "_" + sample + ".slurm"
-        with open(
-            TOOL_PATH
-            + "main_pipelines/long-read/LongReadSequencingONT/template_cutesv.txt",
-            "r",
-        ) as f:
-            slurm = f.read()
-            slurm_filled = slurm.format(sample, email, name, output, bam, genome)
+        with open(job, "w") as o:
+            o.write(slurm_filled)
 
-            with open(job, "w") as o:
-                o.write(slurm_filled)
+    all_fc = [f"samtools_{s}" for s in samples]
+    done_fc = [x for x in done if x.startswith("samtools")]
+    to_dos = [x for x in all_fc if x not in done_fc]
 
-        samtools_name = f"samtools_{sample}"
-        cutesv_name = f"cutesv_{sample}"
+    dependencies = ":".join([f"${code}" for code in to_dos])
 
-        if samtools_name not in done:
-            print("To-Do: " + cutesv_name)
+    if len(to_dos) > 0:
+        print("To-Do: " + tool)
+        with open(output + "/scripts/main.sh", "a") as f:
+            f.write("\n# cuteSV")
+            f.write(
+                f"\ncutesv=$(sbatch --parsable --dependency=afterok:${dependencies} {job})\n"
+            )
+    else:
+        if tool not in done:
+            print("To-Do: " + tool)
             with open(output + "/scripts/main.sh", "a") as f:
-                f.write(f"\n# cuteSV for {sample}")
-                f.write(
-                    f"\n{cutesv_name}=$(sbatch --parsable --dependency=afterok:${samtools_name} {job})\n"
-                )
+                f.write("\n# cuteSV")
+                f.write(f"\ncutesv=$(sbatch --parsable {job})\n")
         else:
-            if cutesv_name not in done:
-                print("To-Do: " + cutesv_name)
-                with open(output + "/scripts/main.sh", "a") as f:
-                    f.write(f"\n# cuteSV for {sample}")
-                    f.write(f"\n{cutesv_name}=$(sbatch --parsable {job})\n")
-            else:
-                print("Done: " + cutesv_name)
+            print("Done: " + tool)
 
 
 def cleanup(toml_config, done):

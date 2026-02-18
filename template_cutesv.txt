@@ -3,37 +3,41 @@
 #SBATCH -n 1 # number of cores
 #SBATCH --mem 4G # memory pool for all cores
 #SBATCH -t 0-01:00 # time (D-HH:MM)
-#SBATCH -o cutesv_{0}.%N.%j.log
-#SBATCH -e cutesv_{0}.%N.%j.log
+#SBATCH -o cutesv.%N.%j.log
+#SBATCH -e cutesv.%N.%j.log
 #SBATCH --mail-type=FAIL
 #SBATCH --account=rrg-tetreaum
-#SBATCH --mail-user={1}
+#SBATCH --mail-user={0}
 
 ml apptainer/1.4.5
 
 CUTESV_IMAGE="apptainer run /lustre09/project/6019267/shared/tools/variants/SVs/cutesv/cutesv.sif"
-WORKDIR="/lustre10/scratch/$USER/{2}/results/cutesv/{0}"
-STEPS_DONE="{3}/scripts/steps_done.txt"
 
-mkdir -p $WORKDIR
-mkdir -p $WORKDIR/tmp
-rm -r $WORKDIR/tmp/*
+STEPS_DONE="{1}/scripts/steps_done.txt"
 
-$CUTESV_IMAGE cuteSV \
-        {4} \
-        {5} \
-        $WORKDIR/{0}_cutesv.vcf \
-        $WORKDIR/tmp \
-        --max_size 1000000 \
-        --min_support 3 \
-        --genotype \
-        --max_cluster_bias_INS 100 \
-        --diff_ratio_merging_INS 0.3 \
-        --max_cluster_bias_DEL 100 \
-        --diff_ratio_merging_DEL 0.3 \
-        --threads 1
+for sample in {2}
+do
+    WORKDIR="/lustre10/scratch/{3}/{4}/results/cutesv/$sample"
 
+    mkdir -p $WORKDIR
+    mkdir -p $WORKDIR/tmp
+    rm -r $WORKDIR/tmp/*
+
+    $CUTESV_IMAGE cuteSV \
+            /lustre10/scratch/{3}/{4}/alignments/$sample\_sorted.bam\
+            {5} \
+            $WORKDIR/$sample\_cutesv.vcf \
+            $WORKDIR/tmp \
+            --max_size 1000000 \
+            --min_support 3 \
+            --genotype \
+            --max_cluster_bias_INS 100 \
+            --diff_ratio_merging_INS 0.3 \
+            --max_cluster_bias_DEL 100 \
+            --diff_ratio_merging_DEL 0.3 \
+            --threads 1
+done
 
 if [ $? -eq 0 ]; then
-    echo "cutesv_{0}" >> "$STEPS_DONE"
+    echo "cutesv" >> "$STEPS_DONE"
 fi
