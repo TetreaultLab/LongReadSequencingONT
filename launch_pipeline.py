@@ -1160,8 +1160,6 @@ def strkit(toml_config, done):
 
     dependencies = ":".join([f"${code}" for code in to_dos])
 
-    # Add slurm job to main.sh
-    # If at least one dorado_demux job is not done, run samtools for that/these flowcell(s)
     if len(to_dos) > 0:
         print("To-Do: " + tool)
         with open(output + "/scripts/main.sh", "a") as f:
@@ -1186,40 +1184,43 @@ def ont_methyldmr_kit(toml_config, done):
     email = toml_config["general"]["email"]
     name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
     username = os.environ.get("USER")
+    res = f"/lustre10/scratch/{username}/{name}/results/"
+    samples = toml_config["general"]["samples"]
+    str_samples = " ".join(samples)
 
-    for sample in toml_config["general"]["samples"]:
-        bedmethyl = f"/lustre10/scratch/{username}/{name}/results/epi2me/{sample}"
+    job = output + "/scripts/" + tool + ".slurm"
+    with open(
+        TOOL_PATH
+        + "main_pipelines/long-read/LongReadSequencingONT/template_ont-methyldmr-kit.txt",
+        "r",
+    ) as f:
+        slurm = f.read()
+        slurm_filled = slurm.format(email, output, str_samples, res)
 
-        job = output + "/scripts/" + tool + "_" + sample + ".slurm"
-        with open(
-            TOOL_PATH
-            + "main_pipelines/long-read/LongReadSequencingONT/template_ont-methyldmr-kit.txt",
-            "r",
-        ) as f:
-            slurm = f.read()
-            slurm_filled = slurm.format(sample, email, name, bedmethyl, output)
+        with open(job, "w") as o:
+            o.write(slurm_filled)
 
-            with open(job, "w") as o:
-                o.write(slurm_filled)
+    all_fc = [f"epi2me_{s}" for s in samples]
+    done_fc = [x for x in done if x.startswith("epi2me_")]
+    to_dos = [x for x in all_fc if x not in done_fc]
 
-        epi_name = f"epi2me_{sample}"
-        ont_methyldmr_kit_name = f"ont_methyldmr_kit_{sample}"
+    dependencies = ":".join([f"${code}" for code in to_dos])
 
-        if epi_name not in done:
-            print("To-Do: " + ont_methyldmr_kit_name)
+    if len(to_dos) > 0:
+        print("To-Do: " + tool)
+        with open(output + "/scripts/main.sh", "a") as f:
+            f.write("\n# ont-methylDMR-kit")
+            f.write(
+                f"\nont_methyldmr_kit=$(sbatch --parsable --dependency=afterok:${dependencies} {job})\n"
+            )
+    else:
+        if tool not in done:
+            print("To-Do: " + tool)
             with open(output + "/scripts/main.sh", "a") as f:
-                f.write(f"\n# ont-methylDMR-kit for {sample}")
-                f.write(
-                    f"\n{ont_methyldmr_kit_name}=$(sbatch --parsable --dependency=afterok:${epi_name} {job})\n"
-                )
+                f.write("\n# ont-methylDMR-kit")
+                f.write(f"\nont_methyldmr_kit=$(sbatch --parsable {job})\n")
         else:
-            if ont_methyldmr_kit_name not in done:
-                print("To-Do: " + ont_methyldmr_kit_name)
-                with open(output + "/scripts/main.sh", "a") as f:
-                    f.write(f"\n# ont-methylDMR-kit for {sample}")
-                    f.write(f"\n{ont_methyldmr_kit_name}=$(sbatch --parsable {job})\n")
-            else:
-                print("Done: " + ont_methyldmr_kit_name)
+            print("Done: " + tool)
 
 
 def flair(toml_config, done):
