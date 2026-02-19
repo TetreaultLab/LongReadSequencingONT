@@ -1184,7 +1184,7 @@ def ont_methyldmr_kit(toml_config, done):
     email = toml_config["general"]["email"]
     name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
     username = os.environ.get("USER")
-    res = f"/lustre10/scratch/{username}/{name}/results/"
+    res = f"/lustre10/scratch/{username}/{name}/results"
     samples = toml_config["general"]["samples"]
     str_samples = " ".join(samples)
 
