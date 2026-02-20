@@ -21,7 +21,7 @@ mkdir -p $workdir
 # Find splice junctions with intronProspector
 apptainer run $flair_img $intron_prospector_tool/intronProspector \
     -c $workdir/{0}_intron_calls.tsv \
-    -j $workdir/{0}_junctions.bed \
+    -b $workdir/{0}_junctions.bed \
     -g {4} \
     -C 0.0 \
     {5}
