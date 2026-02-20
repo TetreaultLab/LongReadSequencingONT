@@ -166,7 +166,17 @@ def create_config_final(filename):
             fc_dir_names.append(entry)
     toml_config["general"]["fc_dir_names"] = fc_dir_names
 
-    # Making directory structure in project (Within each sample library)
+    # Making directory structure in scratch
+    name = path.split("/")[-2].split("_", 1)[1]
+    username = os.environ.get("USER")
+    scratch = f"/lustre10/scratch/{username}/{name}/"
+
+    directories = ["alignments", "results"]
+    for d in directories:
+        if not os.path.exists(scratch + "/" + d):
+            os.makedirs(scratch + "/" + d)
+
+    # Making directory structure in project
     directories = ["scripts/logs", "alignments", "results", "qc"]
     for d in directories:
         if not os.path.exists(path + "/" + d):
