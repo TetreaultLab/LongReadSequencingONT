@@ -95,7 +95,7 @@ try:
     subprocess.run(cmd, check=True)
 
     # transfer bam
-    transfer1 = ["cp", str(output_file), output_path / f"{s}.bam"]
+    transfer1 = ["cp", str(output_file), str(output_path / f"{s}.bam")]
     subprocess.run(transfer1, check=True)
     rm1 = ["rm", str(output_file)]
     subprocess.run(rm1, check=True)
