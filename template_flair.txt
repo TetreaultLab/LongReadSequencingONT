@@ -18,8 +18,6 @@ STEPS_DONE="{3}/scripts/steps_done.txt"
 
 mkdir -p $workdir
 
-apptainer run $flair_img flair transcriptome --help
-
 # Find splice junctions with intronProspector
 apptainer run $flair_img $intron_prospector_tool/intronProspector \
     -c $workdir/{0}_intron_calls.tsv \
