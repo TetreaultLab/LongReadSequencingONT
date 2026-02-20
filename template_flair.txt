@@ -29,7 +29,7 @@ apptainer run $flair_img $intron_prospector_tool/intronProspector \
 apptainer run $flair_img flair \
     transcriptome \
     -b {5} \
-    -g {3} \
+    -g {4} \
     -f {6} \
     -t 8 \
     --parallelmode bychrom \
