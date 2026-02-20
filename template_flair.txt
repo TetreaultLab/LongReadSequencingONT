@@ -9,7 +9,7 @@
 #SBATCH --account=rrg-tetreaum
 #SBATCH --mail-user={1}
 
-ml apptainer/1.4.5
+ml apptainer/1.4.5 bedtools/2.31.0
 
 flair_img="/lustre09/project/6019267/shared/tools/splicing/flair/flair.sif"
 intron_prospector_tool="/lustre09/project/6019267/shared/tools/splicing/flair/intronProspector/bin"
@@ -19,6 +19,7 @@ STEPS_DONE="{3}/scripts/steps_done.txt"
 mkdir -p $workdir
 
 # Find splice junctions with intronProspector
+echo -e "\n=== Running IntronProspector ===\n"
 apptainer run $flair_img $intron_prospector_tool/intronProspector \
     -c $workdir/{0}_intron_calls.tsv \
     -b $workdir/{0}_junctions.bed \
@@ -26,6 +27,7 @@ apptainer run $flair_img $intron_prospector_tool/intronProspector \
     -C 0.0 \
     {5}
 
+echo -e "\n=== Running Flair transcriptome ===\n"
 apptainer run $flair_img flair \
     transcriptome \
     -b {5} \
@@ -36,9 +38,13 @@ apptainer run $flair_img flair \
     --junction_bed $workdir/{0}_junctions.bed \
     -o $workdir/{0}
 
+echo -e "\n=== Running Bedtools bamtofastq ===\n"
+bedtools bamtofastq -i {5} -fq $workdir/{0}.fastq
+
+echo -e "\n=== Running Flair quantify ===\n"
 apptainer run $flair_img flair \
     quantify \
-    -r $workdir/{0}_manifest.txt \
+    -r {7} \
     -i $workdir/{0}.isoforms.fa \
     --output $workdir/{0} \
     -t 8 \

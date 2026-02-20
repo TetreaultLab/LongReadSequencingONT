@@ -1246,6 +1246,11 @@ def flair(toml_config, done):
     for sample in toml_config["general"]["samples"]:
         # Make manifest (f"{sample}_manifest.txt"). Tab delimited file containing sample id, condition, batch,reads.fq, where reads.fq is the path to the sample fastq file.
         # TO-DO
+        manifest = output + "/scripts/manifest_" + tool + "_" + sample + ".txt"
+        with open(manifest, "w") as m:
+            m.write(
+                f"{sample}\tflair\t{name}\t/lustre10/scratch/{username}/{name}/results/flair/{sample}/{sample}.fastq"
+            )
 
         bam = f"/lustre10/scratch/{username}/{name}/alignments/{sample}_sorted.bam"
 
@@ -1256,7 +1261,9 @@ def flair(toml_config, done):
             "r",
         ) as f:
             slurm = f.read()
-            slurm_filled = slurm.format(sample, email, name, output, genome, bam, gtf)
+            slurm_filled = slurm.format(
+                sample, email, name, output, genome, bam, gtf, manifest
+            )
 
             with open(job, "w") as o:
                 o.write(slurm_filled)
