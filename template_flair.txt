@@ -36,6 +36,15 @@ apptainer run $flair_img flair \
     --junction_bed $workdir/{0}_junctions.bed \
     -o $workdir/{0}
 
+apptainer run $flair_img flair \
+    quantify \
+    -r $workdir/{0}_manifest.txt \
+    -i $workdir/{0}.isoforms.fa \
+    --output $workdir/{0} \
+    -t 8 \
+    --temp_dir $workdir/tmp \
+    --sample_id_only {0}
+
 if [ $? -eq 0 ]; then
     echo "flair_{0}" >> "$STEPS_DONE"
 fi

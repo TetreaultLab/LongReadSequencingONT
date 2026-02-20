@@ -1244,6 +1244,9 @@ def flair(toml_config, done):
     username = os.environ.get("USER")
 
     for sample in toml_config["general"]["samples"]:
+        # Make manifest (f"{sample}_manifest.txt"). Tab delimited file containing sample id, condition, batch,reads.fq, where reads.fq is the path to the sample fastq file.
+        # TO-DO
+
         bam = f"/lustre10/scratch/{username}/{name}/alignments/{sample}_sorted.bam"
 
         job = output + "/scripts/" + tool + "_" + sample + ".slurm"
