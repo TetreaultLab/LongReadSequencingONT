@@ -49,7 +49,11 @@ apptainer run $flair_img flair \
     --output $workdir/{0} \
     -t 6 \
     --temp_dir $workdir/tmp \
-    --sample_id_only
+    --sample_id_only \
+    --isoform_bed $workdir/{0}.isoforms.bed \
+    --check_splice \
+    --stringent
+
 
 if [ $? -eq 0 ]; then
     echo "flair_{0}" >> "$STEPS_DONE"
