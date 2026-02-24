@@ -1,0 +1,95 @@
+#!/bin/bash
+#SBATCH -N 1 #Number of nodes
+#SBATCH -n 8 # number of cores
+#SBATCH --mem 32G # memory pool for all cores
+#SBATCH -t 0-11:00 # time (D-HH:MM)
+#SBATCH -o flair_{0}.%N.%j.log
+#SBATCH -e flair_{0}.%N.%j.log
+#SBATCH --mail-type=FAIL
+#SBATCH --account=rrg-tetreaum
+#SBATCH --mail-user={1}
+
+# 0=project, 1=email, 2=genome fasta, 3=gtf, 4=manifestcombine, 5=manifestquantify, 6=samples string, 7=conditionA, 8=conditionB
+# How to get bam files?
+
+ml apptainer/1.4.5 bedtools/2.31.0
+
+flair_img="/lustre09/project/6019267/shared/tools/splicing/flair/flair.sif"
+intron_prospector_tool="/lustre09/project/6019267/shared/tools/splicing/flair/intronProspector/bin"
+project_path="/lustre10/scratch/$USER/{0}/results/flair_diff"
+genome_fa="{2}"
+annotation_gtf="{3}"
+manifest_combine="{4}"
+manifest_quantify="{5}
+
+# Clear list
+rm $project_path/IPjunctions_{0}_list.txt
+
+# Find junctions for each samples
+for sample in {6}
+do
+    bam_file=""
+    apptainer run $flair_img $intron_prospector_tool/intronProspector -g $genome_fa \
+        -b $$project_path/$sample.IPjunctions.bed \
+        -C 0.0 \
+        -c ${project_path}/results/flair/intronProspectorJunctions/$sample\_intron_calls.tsv \
+        $bam_file
+
+    echo -e "$project_path/$sample\_intron_calls.tsv" \
+        >> $project_path/IPjunctions_{0}_list.txt
+done
+
+# Merge junctions into one junctions flie
+apptainer run $flair_img $intron_prospector_tool/intronProspectorMerge \
+    -i $project_path/IPjunctions_{0}_list.txt \
+    -b $project_path/IPjunctions_{0}_list_merged.bed
+
+# Generate transcriptomes with FLAIR
+for sample in {6}
+do
+    bam_file=""
+    apptainer run $flair_img flair transcriptome \
+        -g $genome_fa \
+        -f $annotation_gtf \
+        -t 8 \
+        --parallelmode bychrom \
+        --junction_bed $project_path/IPjunctions_{0}_list_merged.bed \
+        -b $bam_file \
+        -o $project_path/$sample
+done
+
+# Combine transcriptomes
+apptainer run $flair_img flair combine \
+    -m $manifest_combine \
+    -o $project_path/{0}_combined
+
+# Quantify splicing
+apptainer run $flair_img flair quantify \
+    -r $manifest_quantify \
+    -i $project_path/{0}_combined.isoforms.fa \
+    -o $project_path/{0}_quantify \
+    --isoform_bed $project_path/{0}_combined.isoforms.bed \
+    --stringent \
+    --check_splice
+
+# Run differential expression
+apptainer run ${flair_img} flair diffexp \
+    -q $project_path/{0}_quantify.counts.tsv \
+    --threads 8 \
+    --out_dir $project_path/diffexp \
+    --out_dir_force
+
+# Run differential splicing
+apptainer run ${flair_img} flair diffsplice \
+    -i $project_path/{0}_combined.isoforms.bed \
+    -q $project_path/{0}_quantify.counts.tsv \
+    --threads 8 \
+    --test \
+    --drim1 3 \
+    --drim2 3 \
+    --drim3 3 \
+    --drim4 3 \
+    --conditionA {7} \
+    --conditionB {8} \
+    --out_dir $project_path/diffsplice \
+    --out_dir_force

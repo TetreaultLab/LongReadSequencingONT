@@ -49,7 +49,7 @@ apptainer run $flair_img flair \
     --output $workdir/{0} \
     -t 8 \
     --temp_dir $workdir/tmp \
-    --sample_id_only {0}
+    --sample_id_only
 
 if [ $? -eq 0 ]; then
     echo "flair_{0}" >> "$STEPS_DONE"
