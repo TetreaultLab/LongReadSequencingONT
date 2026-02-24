@@ -5,12 +5,9 @@
     analyses = [] # What analyses to run. Possible choices : ["degs", "as", "apa", "dmrs"].
     email = "" # Your e-mail address to receive notification.
 
-[flair_diffexp]
-    counts_matrix = "" # Tab-delimited isoform count matrix from flair quantify.
-
-[flair_diffsplice]
-    isoforms_bed = "" # Isoforms in bed format from flair collapse.
-    counts_matrix = "" # Tab-delimited isoform count matrix from flair quantify.
+[flair]
+    conditionA = ""
+    conditionB = ""
 
 [apa_tool] # to change
 
