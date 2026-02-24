@@ -1130,7 +1130,7 @@ def trgt(toml_config, done):
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("\n# TRGT")
             f.write(
-                f"\ntrgt=$(sbatch --parsable --dependency=afterok:${dependencies} {job})\n"
+                f"\ntrgt=$(sbatch --parsable --dependency=afterok:{dependencies} {job})\n"
             )
     else:
         if tool not in done:
@@ -1221,7 +1221,7 @@ def ont_methyldmr_kit(toml_config, done):
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("\n# ont-methylDMR-kit")
             f.write(
-                f"\nont_methyldmr_kit=$(sbatch --parsable --dependency=afterok:${dependencies} {job})\n"
+                f"\nont_methyldmr_kit=$(sbatch --parsable --dependency=afterok:{dependencies} {job})\n"
             )
     else:
         if tool not in done:
@@ -1366,7 +1366,7 @@ def cutesv(toml_config, done):
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("\n# cuteSV")
             f.write(
-                f"\ncutesv=$(sbatch --parsable --dependency=afterok:${dependencies} {job})\n"
+                f"\ncutesv=$(sbatch --parsable --dependency=afterok:{dependencies} {job})\n"
             )
     else:
         if tool not in done:
@@ -1429,7 +1429,7 @@ def cleanup(toml_config, done):
 
     # with open(output + "/scripts/main.sh", "a") as f:
     #     f.write("\n# Cleanup temporary files and logs\n")
-    #     f.write(f"\nsbatch --dependency=afterok:${dependencies} {job}\n")
+    #     f.write(f"\nsbatch --dependency=afterok:{dependencies} {job}\n")
 
 
 # Launches main function
