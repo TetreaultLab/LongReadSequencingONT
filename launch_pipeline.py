@@ -63,14 +63,19 @@ def main():
 
     function_queue = []
     # Setting up list of steps
-    # Dorado Basecalling
-    function_queue.append(dorado_basecaller)
+    if toml_config["general"]["kit"] == "SQK-LSK114":
+        # Dorado Basecalling
+        function_queue.append(dorado_samtools)
 
-    # Dorado Basecalling
-    function_queue.append(dorado_demux)
+    else:
+        # Dorado Basecalling
+        function_queue.append(dorado_basecaller)
 
-    # Renaming bams and running samtools merge, sort and index
-    function_queue.append(samtools)
+        # Dorado Basecalling
+        function_queue.append(dorado_demux)
+
+        # Renaming bams and running samtools merge, sort and index
+        function_queue.append(samtools)
 
     # Call all other functions for downstream analysis
     # QC
@@ -730,6 +735,133 @@ def dorado_demux(toml_config, done):
                     )
             else:  # demux done and basecall done, sucess
                 print("Done: " + var_name)
+
+
+def dorado_samtools(toml_config, done):
+    tool = "dorado_basecaller"
+
+    output = toml_config["general"]["project_path"]
+    email = toml_config["general"]["email"]
+    genome = get_reference(toml_config["general"]["reference"])["fasta"]
+    flowcell = toml_config["general"]["fc_dir_names"][0]
+    sample = toml_config["general"]["samples"][0]
+    name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
+    username = os.environ.get("USER")
+    tmpdir = os.environ.get("SLURM_TMPDIR")
+    sorted_bam = f"{tmpdir}/{sample}_sorted.bam"
+
+    print(flowcell)
+    print(sample)
+
+    reads = output + "/" + flowcell + "/reads/pod5"
+    final = f"/lustre10/scratch/{username}/{name}/alignments/"
+    bam_dorado = f"{final}{sample}.bam"
+
+    cores = "8"
+    memory = "64"
+
+    # Get reads files size
+    cmd = ["du", "-sh", "--apparent-size", "--block-size", "G", reads]
+    result = subprocess.run(cmd, capture_output=True, text=True)
+
+    size_str = result.stdout.split()[0].rstrip("G")
+
+    # Scale required job time based on amount of data
+    hours = int(size_str) * 0.06
+    formatted_time = format_time(hours)
+
+    command = [
+        TOOL_PATH + DORADO,
+        "basecaller",
+        "-v",
+        "--device",
+        "cuda:0",
+        "--min-qscore",
+        str(toml_config["dorado"]["min_q_score"]),
+        "--reference",
+        genome,
+        "--no-trim",
+        "--kit-name",
+        toml_config["general"]["kit"],
+        "--mm2-opts",
+        toml_config["dorado"]["mm2_opts"],
+    ]
+
+    # Increases stringency if user defines it
+    if toml_config["dorado"]["barcode_both_ends"] in ["true", "True", "yes", "Yes"]:
+        command.extend(["--barcode-both-ends"])
+    # Different model that includes base modification
+    if "methylation" in toml_config["general"]["analysis"]:
+        command.extend(
+            [
+                "--modified-bases-models",
+                TOOL_PATH
+                + "main_pipelines/long-read/dorado_models/"
+                + toml_config["dorado"]["modified_bases"],
+                "--modified-bases-threshold",
+                str(toml_config["dorado"]["modified_bases_threshold"]),
+            ]
+        )
+    # For transcriptomic data, when activated
+    if "polya" in toml_config["general"]["analysis"]:
+        command.extend(["--estimate-poly-a"])
+
+    model = (
+        TOOL_PATH
+        + "main_pipelines/long-read/dorado_models/"
+        + toml_config["dorado"]["model"]
+    )
+    command.extend([model, reads, ">", bam_dorado])
+
+    # Add samtools sort and index to command
+    command.extend(
+        [
+            "\n\n#Sort\n",
+            "samtools",
+            "sort",
+            "--threads",
+            "3",
+            "-m",
+            "4G",
+            "-o",
+            sorted_bam,
+            bam_dorado,
+        ]
+    )
+
+    # transfer
+    command.extend(["\n\n#Transfer\n", "cp", sorted_bam, f"{final}{sample}_sorted.bam"])
+
+    # index
+    print("Index")
+    command.extend(
+        [
+            "\n\n#Index\n",
+            "samtools",
+            "index",
+            "--threads",
+            "3",
+            f"{final}{sample}_sorted.bam",
+        ]
+    )
+
+    command_str = " ".join(command)
+
+    job = create_script(
+        tool, cores, memory, formatted_time, output, email, command_str, flowcell
+    )
+
+    # Creates a variable job name for each flowcell (used for dependencies)
+    var_name_bc = f"samtools_{sample}"
+
+    # Add slurm job to main.sh
+    if var_name_bc not in done:
+        print("To-Do: " + var_name_bc)
+        with open(output + "/scripts/main.sh", "a") as f:
+            f.write(f"\n# Dorado Basecall and Samtools for sample : {sample}")
+            f.write(f"\n{var_name_bc}=$(sbatch --parsable {job})\n")
+    else:
+        print("Done: " + var_name_bc)
 
 
 def samtools(toml_config, done):
