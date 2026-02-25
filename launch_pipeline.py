@@ -183,7 +183,7 @@ def create_config_final(filename):
             os.makedirs(scratch + "/" + d)
 
     # Making directory structure in project
-    directories = ["scripts/logs", "alignments", "results", "qc"]
+    directories = ["scripts", "scripts/logs", "alignments", "results", "qc"]
     for d in directories:
         if not os.path.exists(path + "/" + d):
             os.makedirs(path + "/" + d)
