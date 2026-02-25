@@ -172,6 +172,8 @@ def create_config_final(filename):
             fc_dir_names.append(entry)
     toml_config["general"]["fc_dir_names"] = fc_dir_names
 
+    print(fc_dir_names)
+
     # Making directory structure in scratch
     name = path.split("/")[-2].split("_", 1)[1]
     username = os.environ.get("USER")
