@@ -1510,12 +1510,22 @@ def cutesv(toml_config, done):
 def transfer(toml_config, done):
     tool = "transfer"
 
+    threads = "1"
+    memory = "1"
+    time = "00-01:00"
+
     output = toml_config["general"]["project_path"]
     email = toml_config["general"]["email"]
-    genome = get_reference(toml_config["general"]["reference"])["fasta"]
     name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
     username = os.environ.get("USER")
-    samples = toml_config["general"]["samples"]
+    scratch = f"/lustre10/scratch/{username}/{name}"
+
+    cmd = ["rsync", "-avxH", "--no-g", "--no-p", "--partial", scratch, output]
+
+    command_str = "\n".join(cmd)
+
+    # Make script but do not launch automatically
+    create_script(tool, threads, memory, time, output, email, command_str, "")
 
 
 def cleanup(toml_config, done):
