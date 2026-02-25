@@ -40,7 +40,7 @@ def main():
         toml_config = create_config_final(args.config)
 
         # Create sample_sheet.csv
-        if toml_config["general"]["kit"] != "SQK-LSK114":
+        if toml_config["general"]["kit"] != "SQK-LSK114-24":
             create_sample_sheet(toml_config)
 
         if not args.test:
@@ -64,7 +64,7 @@ def main():
 
     function_queue = []
     # Setting up list of steps
-    if toml_config["general"]["kit"] == "SQK-LSK114":
+    if toml_config["general"]["kit"] == "SQK-LSK114-24":
         # Dorado Basecalling
         function_queue.append(dorado_samtools)
 
@@ -240,9 +240,9 @@ def create_config_final(filename):
     ## parameters depending on sequencing type
     if seq_type == "WGS":
         toml_config["dorado"]["mm2_opts"] = '"-x lr:hq"'
-        if kit not in ["SQK-RBK114-24", "SQK-NBD114-24", "SQK-LSK114"]:
+        if kit not in ["SQK-RBK114-24", "SQK-NBD114-24", "SQK-LSK114-24"]:
             raise Exception(
-                "Error: Wrong Kit for WGS. Options are SQK-RBK114-24, SQK-NBD114-24, SQK-LSK114"
+                "Error: Wrong Kit for WGS. Options are SQK-RBK114-24, SQK-NBD114-24, SQK-LSK114-24"
             )
 
     if seq_type == "RNA":
