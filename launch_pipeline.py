@@ -749,7 +749,7 @@ def dorado_samtools(toml_config, done):
     name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
     username = os.environ.get("USER")
     tmpdir = os.environ.get("SLURM_TMPDIR")
-    sorted_bam = f"{tmpdir}/{sample}_sorted.bam"
+    sorted_bam = f"{str(tmpdir)}/{sample}_sorted.bam"
 
     reads = output + "/" + flowcell + "/reads/pod5"
     final = f"/lustre10/scratch/{username}/{name}/alignments/"
@@ -814,6 +814,7 @@ def dorado_samtools(toml_config, done):
     # Add samtools sort and index to command
     command.extend(
         [
+            "\nml samtools",
             "\n\n#Sort\n",
             "samtools",
             "sort",
@@ -853,12 +854,12 @@ def dorado_samtools(toml_config, done):
 
     # Add slurm job to main.sh
     if var_name_bc not in done:
-        print("To-Do: " + var_name_bc)
+        print("To-Do: dorado_samtools")
         with open(output + "/scripts/main.sh", "a") as f:
             f.write(f"\n# Dorado Basecall and Samtools for sample : {sample}")
             f.write(f"\n{var_name_bc}=$(sbatch --parsable {job})\n")
     else:
-        print("Done: " + var_name_bc)
+        print("Done: dorado_samtools")
 
 
 def samtools(toml_config, done):
