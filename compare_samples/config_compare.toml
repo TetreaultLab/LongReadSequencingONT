@@ -1,13 +1,12 @@
 [general]
-    group1 = [] # sample names for controls ["ctrl1", "ctrl2", "ctrl3"].
-    group2 = [] # sample names for disease/case group ["case1", "case2", "case3"].
+    metadata = "" # path to metadata file, containing sample names, group informations and path to results folder.
     comparison_name = "" # comparison name for output folder.
     analyses = [] # What analyses to run. Possible choices : ["degs", "as", "apa", "dmrs"].
     email = "" # Your e-mail address to receive notification.
 
 [flair]
-    conditionA = ""
-    conditionB = ""
+    conditionA = "" # case
+    conditionB = "" # ctrl
 
 [apa_tool] # to change
 
