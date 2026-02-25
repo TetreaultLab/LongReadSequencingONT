@@ -121,10 +121,11 @@ def main():
     # if "phasing" in toml_config["general"]["analysis"]:
     #     function_queue.append()
 
+    # Transfer back to projects
+    function_queue.append(transfer)
+
     # Clean up
     function_queue.append(cleanup)
-
-    name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
 
     # Create main.sh
     with open(output + "/scripts/main.sh", "w") as f:
@@ -1504,6 +1505,17 @@ def cutesv(toml_config, done):
                 f.write(f"\ncutesv=$(sbatch --parsable {job})\n")
         else:
             print("Done: " + tool)
+
+
+def transfer(toml_config, done):
+    tool = "transfer"
+
+    output = toml_config["general"]["project_path"]
+    email = toml_config["general"]["email"]
+    genome = get_reference(toml_config["general"]["reference"])["fasta"]
+    name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
+    username = os.environ.get("USER")
+    samples = toml_config["general"]["samples"]
 
 
 def cleanup(toml_config, done):
