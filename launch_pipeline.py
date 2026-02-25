@@ -204,6 +204,7 @@ def create_config_final(filename):
             "sample_sheet",
             "sequencing_summary",
             "throughput",
+            "output",
         ]
         for r in reports:
             f = glob(os.path.join(path + "/" + flow + "/", r + "*"))
