@@ -660,8 +660,8 @@ def dorado_demux(toml_config, done):
     name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
     username = os.environ.get("USER")
 
-    cores = "6"
-    memory = "24"
+    cores = "2"
+    memory = "8"
 
     # Iterate through each flowcell for demultiplexing
     for flowcell in flowcells:
@@ -1027,9 +1027,9 @@ def toulligqc(toml_config, done):
 
 def epi2me(toml_config, done):
     tool = "epi2me"
-    cores = "32"
-    memory = "128"
-    time = "00-11:00"
+    cores = "24"
+    memory = "96"
+    time = "00-01:00"
 
     output = toml_config["general"]["project_path"]
     email = toml_config["general"]["email"]
