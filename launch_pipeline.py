@@ -40,7 +40,8 @@ def main():
         toml_config = create_config_final(args.config)
 
         # Create sample_sheet.csv
-        create_sample_sheet(toml_config)
+        if toml_config["general"]["kit"] != "SQK-LSK114":
+            create_sample_sheet(toml_config)
 
         if not args.test:
             print(
