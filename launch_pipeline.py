@@ -749,7 +749,7 @@ def dorado_samtools(toml_config, done):
     name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
     username = os.environ.get("USER")
     tmpdir = os.environ.get("SLURM_TMPDIR")
-    sorted_bam = f"{str(tmpdir)}/{sample}_sorted.bam"
+    sorted_bam = f"$SLURM_TMPDIR/{sample}_sorted.bam"
 
     reads = output + "/" + flowcell + "/reads/pod5"
     final = f"/lustre10/scratch/{username}/{name}/alignments/"
@@ -814,7 +814,7 @@ def dorado_samtools(toml_config, done):
     # Add samtools sort and index to command
     command.extend(
         [
-            "\nml samtools",
+            "\n\nml samtools",
             "\n\n#Sort\n",
             "samtools",
             "sort",
