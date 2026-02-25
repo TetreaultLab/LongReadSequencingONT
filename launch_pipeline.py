@@ -820,7 +820,7 @@ def dorado_samtools(toml_config, done):
             "samtools",
             "sort",
             "--threads",
-            "3",
+            "7",
             "-m",
             "4G",
             "-o",
@@ -839,8 +839,9 @@ def dorado_samtools(toml_config, done):
             "samtools",
             "index",
             "--threads",
-            "3",
+            "7",
             f"{final}{sample}_sorted.bam",
+            "\n",
         ]
     )
 
