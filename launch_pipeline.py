@@ -766,7 +766,7 @@ def dorado_samtools(toml_config, done):
     size_str = result.stdout.split()[0].rstrip("G")
 
     # Scale required job time based on amount of data
-    hours = int(size_str) * 0.06
+    hours = int(size_str) * 0.04
     formatted_time = format_time(hours)
 
     command = [
