@@ -745,6 +745,7 @@ def dorado_samtools(toml_config, done):
     email = toml_config["general"]["email"]
     genome = get_reference(toml_config["general"]["reference"])["fasta"]
     flowcell = toml_config["general"]["fc_dir_names"][0]
+    code = flowcell.split("_")[-1]
     sample = toml_config["general"]["samples"][0]
     name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
     username = os.environ.get("USER")
@@ -849,15 +850,12 @@ def dorado_samtools(toml_config, done):
         tool, cores, memory, formatted_time, output, email, command_str, flowcell
     )
 
-    # Creates a variable job name for each flowcell (used for dependencies)
-    var_name_bc = f"samtools_{sample}"
-
     # Add slurm job to main.sh
-    if var_name_bc not in done:
+    if f"{tool}_{code}" not in done:
         print("To-Do: dorado_samtools")
         with open(output + "/scripts/main.sh", "a") as f:
             f.write(f"\n# Dorado Basecall and Samtools for sample : {sample}")
-            f.write(f"\n{var_name_bc}=$(sbatch --parsable {job})\n")
+            f.write(f"\nsamtools_{sample}=$(sbatch --parsable {job})\n")
     else:
         print("Done: dorado_samtools")
 
