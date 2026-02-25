@@ -172,8 +172,6 @@ def create_config_final(filename):
             fc_dir_names.append(entry)
     toml_config["general"]["fc_dir_names"] = fc_dir_names
 
-    print(fc_dir_names)
-
     # Making directory structure in scratch
     name = path.split("/")[-2].split("_", 1)[1]
     username = os.environ.get("USER")
@@ -753,9 +751,6 @@ def dorado_samtools(toml_config, done):
     tmpdir = os.environ.get("SLURM_TMPDIR")
     sorted_bam = f"{tmpdir}/{sample}_sorted.bam"
 
-    print(flowcell)
-    print(sample)
-
     reads = output + "/" + flowcell + "/reads/pod5"
     final = f"/lustre10/scratch/{username}/{name}/alignments/"
     bam_dorado = f"{final}{sample}.bam"
@@ -836,7 +831,6 @@ def dorado_samtools(toml_config, done):
     command.extend(["\n\n#Transfer\n", "cp", sorted_bam, f"{final}{sample}_sorted.bam"])
 
     # index
-    print("Index")
     command.extend(
         [
             "\n\n#Index\n",
