@@ -171,7 +171,8 @@ def create_config_final(filename):
     username = os.environ.get("USER")
     scratch = f"/lustre10/scratch/{username}/{name}/"
 
-    directories = ["alignments", "results"]
+    directories = ["alignments", "results"] + fc_dir_names
+    print(directories)
     for d in directories:
         if not os.path.exists(scratch + "/" + d):
             os.makedirs(scratch + "/" + d)
