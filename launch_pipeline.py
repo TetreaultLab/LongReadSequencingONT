@@ -369,7 +369,6 @@ def get_versions(output):
         capture_output=True,
         text=True,
     )
-    print(cutesv)
 
     deepvariant = subprocess.run(
         [
@@ -452,16 +451,16 @@ def get_versions(output):
 
     with open(f"{output}/scripts/logs/versions_{today}.txt", "w") as f:
         f.write(f"LRS pipeline tool versions {today}")
-        f.write(cutesv)
-        f.write(deepvariant)
-        f.write(dorado)
-        f.write(epi2me)
-        f.write(flair)
-        f.write(intron_prospector)
-        f.write(ont_methyldmr_kit)
-        f.write(samtools)
-        f.write(strkit)
-        f.write(trgt)
+        f.write(cutesv.stdout)
+        f.write(deepvariant.stdout)
+        f.write(dorado.stdout)
+        f.write(epi2me.stdout)
+        f.write(flair.stdout)
+        f.write(intron_prospector.stdout)
+        f.write(ont_methyldmr_kit.stdout)
+        f.write(samtools.stdout)
+        f.write(strkit.stdout)
+        f.write(trgt.stdout)
 
 
 def get_reference(ref):
