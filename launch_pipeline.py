@@ -1644,15 +1644,15 @@ def transfer(toml_config, done):
     memory = "1"
     time = "00-01:00"
 
-    output = toml_config["general"]["project_path"]
+    output = toml_config["general"]["project_path"] + "/"
     email = toml_config["general"]["email"]
     name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
     username = os.environ.get("USER")
-    scratch = f"/lustre10/scratch/{username}/{name}"
+    scratch = f"/lustre10/scratch/{username}/{name}/*"
 
-    cmd = ["rsync", "-avxH", "--no-g", "--no-p", "--partial", scratch, output]
+    cmd = ["rsync", "-avxH", "--no-g", "--no-p", "--partial", scratch, output, "\n"]
 
-    command_str = "\n".join(cmd)
+    command_str = " ".join(cmd)
 
     # Make script but do not launch automatically
     create_script(tool, threads, memory, time, output, email, command_str, "")
