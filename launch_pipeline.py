@@ -359,9 +359,9 @@ def get_versions(output):
 
     command.extend(
         [
-            "\n\necho",
+            "\necho",
             "-e",
-            '"=== cuteSV ==="',
+            '"\n=== cuteSV ==="',
             "\napptainer",
             "run",
             TOOL_PATH + "variants/SVs/cutesv/cutesv.sif",
@@ -372,9 +372,9 @@ def get_versions(output):
 
     command.extend(
         [
-            "\n\necho",
+            "\necho",
             "-e",
-            '"=== DeepVariant ==="',
+            '"\n=== DeepVariant ==="',
             "\napptainer",
             "run",
             TOOL_PATH + "variants/SNPs/deepvariant/deepvariant.sif",
@@ -384,14 +384,14 @@ def get_versions(output):
     )
 
     command.extend(
-        ["\n\necho", "-e", '"=== Dorado ==="', "\n", TOOL_PATH + DORADO, "--version"]
+        ["\necho", "-e", '"\n=== Dorado ==="', "\n", TOOL_PATH + DORADO, "--version"]
     )
 
     command.extend(
         [
-            "\n\necho",
+            "\necho",
             "-e",
-            '"=== epi2me ==="',
+            '"\n=== epi2me ==="',
             "\nnextflow",
             "run",
             "epi2me-labs/wf-human-variation",
@@ -401,9 +401,9 @@ def get_versions(output):
 
     command.extend(
         [
-            "\n\necho",
+            "\necho",
             "-e",
-            '"=== FLAIR ==="',
+            '"\n=== FLAIR ==="',
             "\napptainer",
             "run",
             TOOL_PATH + "splicing/flair/flair.sif",
@@ -414,9 +414,9 @@ def get_versions(output):
 
     command.extend(
         [
-            "\n\necho",
+            "\necho",
             "-e",
-            '"=== IntronProspector ==="',
+            '"\n=== IntronProspector ==="',
             "\napptainer",
             "run",
             TOOL_PATH + "splicing/flair/flair.sif",
@@ -427,21 +427,21 @@ def get_versions(output):
 
     command.extend(
         [
-            "\n\necho",
+            "\necho",
             "-e",
-            '"=== ont-methylDMR-kit ==="',
+            '"\n=== ont-methylDMR-kit ==="',
             "\necho",
             '"ont-methylDMR-kit version 3.2\n"',
         ]
     )
 
-    command.extend(["\n\necho", '"=== Samtools ==="', "\nsamtools", "--version"])
+    command.extend(["\necho", '"=== Samtools ==="', "\nsamtools", "--version"])
 
     command.extend(
         [
-            "\n\necho",
+            "\necho",
             "-e",
-            '"=== STRkit ==="',
+            '"\n=== STRkit ==="',
             "\napptainer",
             "run",
             TOOL_PATH + "repeat_expansions/STRkit/strkit.sif",
@@ -452,9 +452,9 @@ def get_versions(output):
 
     command.extend(
         [
-            "\n\necho",
+            "\necho",
             "-e",
-            '"=== TRGT ==="',
+            '"\n=== TRGT ==="',
             "\napptainer",
             "run",
             TOOL_PATH + "repeat_expansions/TRGT/trgt.sif",
