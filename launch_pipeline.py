@@ -359,10 +359,10 @@ def get_versions(output):
 
     command.extend(
         [
-            "echo",
+            "\necho",
             "-e",
-            '"\n=== cuteSV ===\n"',
-            "apptainer",
+            '"=== cuteSV ==="',
+            "\napptainer",
             "run",
             TOOL_PATH + "variants/SVs/cutesv/cutesv.sif",
             "cuteSV",
@@ -372,10 +372,10 @@ def get_versions(output):
 
     command.extend(
         [
-            "echo",
+            "\necho",
             "-e",
-            '"\n=== DeepVariant ===\n"',
-            "apptainer",
+            '"=== DeepVariant ==="',
+            "\napptainer",
             "run",
             TOOL_PATH + "variants/SNPs/deepvariant/deepvariant.sif",
             "/opt/deepvariant/bin/run_deepvariant",
@@ -384,15 +384,15 @@ def get_versions(output):
     )
 
     command.extend(
-        ["echo", "-e", '"\n=== Dorado ===\n"', TOOL_PATH + DORADO, "--version"]
+        ["\necho", "-e", '"=== Dorado ==="', "\n", TOOL_PATH + DORADO, "--version"]
     )
 
     command.extend(
         [
-            "echo",
+            "\necho",
             "-e",
-            '"\n=== epi2me ===\n"',
-            "nextflow",
+            '"=== epi2me ==="',
+            "\nnextflow",
             "run",
             "epi2me-labs/wf-human-variation",
             "--version",
@@ -401,10 +401,10 @@ def get_versions(output):
 
     command.extend(
         [
-            "echo",
+            "\necho",
             "-e",
-            '"\n=== FLAIR ===\n"',
-            "apptainer",
+            '"=== FLAIR ==="',
+            "\napptainer",
             "run",
             TOOL_PATH + "splicing/flair/flair.sif",
             "flair",
@@ -414,10 +414,10 @@ def get_versions(output):
 
     command.extend(
         [
-            "echo",
+            "\necho",
             "-e",
-            '"\n=== IntronProspector ===\n"',
-            "apptainer",
+            '"=== IntronProspector ==="',
+            "\napptainer",
             "run",
             TOOL_PATH + "splicing/flair/flair.sif",
             TOOL_PATH + "splicing/flair/intronProspector/bin/intronProspector",
@@ -427,22 +427,22 @@ def get_versions(output):
 
     command.extend(
         [
-            "echo",
+            "\necho",
             "-e",
-            '"\n=== ont-methylDMR-kit ===\n"',
-            "echo",
+            '"=== ont-methylDMR-kit ==="',
+            "\necho",
             '"ont-methylDMR-kit version 3.2\n"',
         ]
     )
 
-    command.extend(["echo", '"\n=== Samtools ===\n"', "samtools", "--version"])
+    command.extend(["\necho", '"=== Samtools ==="', "\nsamtools", "--version"])
 
     command.extend(
         [
-            "echo",
+            "\necho",
             "-e",
-            '"\n=== STRkit ===\n"',
-            "apptainer",
+            '"=== STRkit ==="',
+            "\napptainer",
             "run",
             TOOL_PATH + "repeat_expansions/STRkit/strkit.sif",
             "strkit",
@@ -452,10 +452,10 @@ def get_versions(output):
 
     command.extend(
         [
-            "echo",
+            "\necho",
             "-e",
-            '"\n=== TRGT ===\n"',
-            "apptainer",
+            '"=== TRGT ==="',
+            "\napptainer",
             "run",
             TOOL_PATH + "repeat_expansions/TRGT/trgt.sif",
             "trgt",
