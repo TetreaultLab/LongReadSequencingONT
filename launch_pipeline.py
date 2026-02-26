@@ -354,123 +354,115 @@ def create_sample_sheet(toml_config):
 
 def get_versions(output):
     today = date.today()
-    # subprocess.run(
-    #     ["module", "load", "samtools", "apptainer/1.4.5", "nextflow/25.04.6"]
-    # )
 
-    cutesv = subprocess.run(
+    command = ["\nmodule", "load", "samtools", "apptainer/1.4.5", "nextflow/25.04.6"]
+
+    command.extend(
         [
+            "echo",
+            "\n'=== cuteSV ==='\n",
             "apptainer",
             "run",
             TOOL_PATH + "variants/SVs/cutesv/cutesv.sif",
             "cuteSV",
             "--version",
-        ],
-        capture_output=True,
-        text=True,
+        ]
     )
 
-    deepvariant = subprocess.run(
+    command.extend(
         [
+            "echo",
+            "\n'=== DeepVariant ==='\n",
             "apptainer",
             "run",
             TOOL_PATH + "variants/SNPs/deepvariant/deepvariant.sif",
             "/opt/deepvariant/bin/run_deepvariant",
             "--version",
-        ],
-        capture_output=True,
-        text=True,
+        ]
     )
 
-    dorado = subprocess.run(
-        [TOOL_PATH + DORADO, "--version"], capture_output=True, text=True
-    )
+    command.extend(["echo", "\n'=== Dorado ==='\n", TOOL_PATH + DORADO, "--version"])
 
-    epi2me = subprocess.run(
+    command.extend(
         [
+            "echo",
+            "\n'=== epi2me ==='\n",
             "nextflow",
             "run",
             "epi2me-labs/wf-human-variation",
             "--version",
-        ],
-        capture_output=True,
-        text=True,
+        ]
     )
 
-    flair = subprocess.run(
+    command.extend(
         [
+            "echo",
+            "\n'=== FLAIR ==='\n",
             "apptainer",
             "run",
             TOOL_PATH + "splicing/flair/flair.sif",
             "flair",
             "--version",
-        ],
-        capture_output=True,
-        text=True,
+        ]
     )
 
-    intron_prospector = subprocess.run(
+    command.extend(
         [
+            "echo",
+            "\n'=== IntronProspector ==='\n",
             "apptainer",
             "run",
             TOOL_PATH + "splicing/flair/flair.sif",
             TOOL_PATH + "splicing/flair/intronProspector/bin/intronProspector",
             "--version",
-        ],
-        capture_output=True,
-        text=True,
+        ]
     )
 
-    ont_methyldmr_kit = "ont-methylDMR-kit version 3.2\n"
+    command.extend(["\necho", '"ont-methylDMR-kit version 3.2\n"'])
 
-    samtools = subprocess.run(["samtools", "--version"], capture_output=True, text=True)
+    command.extend(["echo", "\n'=== Samtools ==='\n", "\nsamtools", "--version"])
 
-    strkit = subprocess.run(
+    command.extend(
         [
+            "echo",
+            "\n'=== STRkit ==='\n",
             "apptainer",
             "run",
             TOOL_PATH + "repeat_expansions/STRkit/strkit.sif",
             "strkit",
             "--version",
-        ],
-        capture_output=True,
-        text=True,
+        ]
     )
 
-    trgt = subprocess.run(
+    command.extend(
         [
+            "echo",
+            "\n'=== TRGT ==='\n",
             "apptainer",
             "run",
             TOOL_PATH + "repeat_expansions/TRGT/trgt.sif",
             "trgt",
             "--version",
-        ],
-        capture_output=True,
-        text=True,
+        ]
     )
 
-    with open(f"{output}/scripts/logs/versions_{today}.txt", "w") as f:
-        f.write(f"LRS pipeline tool versions {today}")
-        f.write("\n=== cuteSV ===\n")
-        f.write(cutesv.stdout)
-        f.write("\n=== DeepVariant ===\n")
-        f.write(deepvariant.stdout)
-        f.write("\n=== Dorado ===\n")
-        f.write(dorado.stderr)
-        f.write("\n=== Epi2Me wf-human-variation ===\n")
-        f.write(epi2me.stdout)
-        f.write("\n=== FLAIR===\n")
-        f.write(flair.stdout)
-        f.write("\n=== IntronProspector ===\n")
-        f.write(intron_prospector.stderr)
-        f.write("\n=== ont-methyDMR-kit ===\n")
-        f.write(ont_methyldmr_kit)
-        f.write("\n=== Samtools ===\n")
-        f.write(samtools.stdout)
-        f.write("\n=== STRkit ===\n")
-        f.write(strkit.stdout)
-        f.write("\n=== TRGT ===\n")
-        f.write(trgt.stdout)
+    command_str = " ".join(command)
+
+    with open(f"{output}/scripts/versions.sh", "w") as f:
+        f.write("#!/bin/sh\n")
+        f.write(
+            f"# LRS pipeline tool versions. See output : {output}/scripts/logs/versions_{today}.txt"
+        )
+        f.write(command_str)
+
+    subprocess.run(
+        [
+            "bash",
+            f"{output}/scripts/main.sh",
+            ">",
+            f"{output}/scripts/logs/versions_{today}.txt",
+        ]
+    )
 
 
 def get_reference(ref):
