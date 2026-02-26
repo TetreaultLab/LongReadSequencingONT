@@ -449,9 +449,6 @@ def get_versions(output):
         text=True,
     )
 
-    print(dorado)
-    print(intron_prospector)
-
     with open(f"{output}/scripts/logs/versions_{today}.txt", "w") as f:
         f.write(f"LRS pipeline tool versions {today}")
         f.write("\n=== cuteSV ===\n")
@@ -459,13 +456,13 @@ def get_versions(output):
         f.write("\n=== DeepVariant ===\n")
         f.write(deepvariant.stdout)
         f.write("\n=== Dorado ===\n")
-        f.write(dorado.stdout)
+        f.write(dorado.stderr)
         f.write("\n=== Epi2Me wf-human-variation ===\n")
         f.write(epi2me.stdout)
         f.write("\n=== FLAIR===\n")
         f.write(flair.stdout)
         f.write("\n=== IntronProspector ===\n")
-        f.write(intron_prospector.stdout)
+        f.write(intron_prospector.stderr)
         f.write("\n=== ont-methyDMR-kit ===\n")
         f.write(ont_methyldmr_kit)
         f.write("\n=== Samtools ===\n")
