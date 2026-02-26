@@ -355,12 +355,12 @@ def create_sample_sheet(toml_config):
 def get_versions(output):
     today = date.today()
 
-    command = ["\nmodule", "load", "samtools", "apptainer/1.4.5", "nextflow/25.04.6"]
+    command = ["\nmodule", "load", "samtools", "apptainer/1.4.5", "nextflow/25.04.6\n"]
 
     command.extend(
         [
             "echo",
-            "'\n=== cuteSV ===\n'",
+            '"\n=== cuteSV ===\n"',
             "apptainer",
             "run",
             TOOL_PATH + "variants/SVs/cutesv/cutesv.sif",
@@ -372,7 +372,7 @@ def get_versions(output):
     command.extend(
         [
             "echo",
-            "'\n=== DeepVariant ===\n'",
+            '"\n=== DeepVariant ===\n"',
             "apptainer",
             "run",
             TOOL_PATH + "variants/SNPs/deepvariant/deepvariant.sif",
@@ -381,12 +381,12 @@ def get_versions(output):
         ]
     )
 
-    command.extend(["echo", "'\n=== Dorado ===\n'", TOOL_PATH + DORADO, "--version"])
+    command.extend(["echo", '"\n=== Dorado ===\n"', TOOL_PATH + DORADO, "--version"])
 
     command.extend(
         [
             "echo",
-            "'\n=== epi2me ===\n'",
+            '"\n=== epi2me ===\n"',
             "nextflow",
             "run",
             "epi2me-labs/wf-human-variation",
@@ -397,7 +397,7 @@ def get_versions(output):
     command.extend(
         [
             "echo",
-            "'\n=== FLAIR ===\n'",
+            '"\n=== FLAIR ===\n"',
             "apptainer",
             "run",
             TOOL_PATH + "splicing/flair/flair.sif",
@@ -409,7 +409,7 @@ def get_versions(output):
     command.extend(
         [
             "echo",
-            "'\n=== IntronProspector ===\n'",
+            '"\n=== IntronProspector ===\n"',
             "apptainer",
             "run",
             TOOL_PATH + "splicing/flair/flair.sif",
@@ -421,18 +421,18 @@ def get_versions(output):
     command.extend(
         [
             "echo",
-            "'\n=== ont-methylDMR-kit ===\n'",
+            '"\n=== ont-methylDMR-kit ===\n"',
             "echo",
             '"ont-methylDMR-kit version 3.2\n"',
         ]
     )
 
-    command.extend(["echo", "'\n=== Samtools ===\n'", "samtools", "--version"])
+    command.extend(["echo", '"\n=== Samtools ===\n"', "samtools", "--version"])
 
     command.extend(
         [
             "echo",
-            "'\n=== STRkit ===\n'",
+            '"\n=== STRkit ===\n"',
             "apptainer",
             "run",
             TOOL_PATH + "repeat_expansions/STRkit/strkit.sif",
@@ -444,7 +444,7 @@ def get_versions(output):
     command.extend(
         [
             "echo",
-            "'\n=== TRGT ===\n'",
+            '"\n=== TRGT ===\n"',
             "apptainer",
             "run",
             TOOL_PATH + "repeat_expansions/TRGT/trgt.sif",
