@@ -359,7 +359,7 @@ def get_versions(output):
 
     command.extend(
         [
-            "\necho",
+            "\n\necho",
             "-e",
             '"=== cuteSV ==="',
             "\napptainer",
@@ -372,7 +372,7 @@ def get_versions(output):
 
     command.extend(
         [
-            "\necho",
+            "\n\necho",
             "-e",
             '"=== DeepVariant ==="',
             "\napptainer",
@@ -384,12 +384,12 @@ def get_versions(output):
     )
 
     command.extend(
-        ["\necho", "-e", '"=== Dorado ==="', "\n", TOOL_PATH + DORADO, "--version"]
+        ["\n\necho", "-e", '"=== Dorado ==="', "\n", TOOL_PATH + DORADO, "--version"]
     )
 
     command.extend(
         [
-            "\necho",
+            "\n\necho",
             "-e",
             '"=== epi2me ==="',
             "\nnextflow",
@@ -401,7 +401,7 @@ def get_versions(output):
 
     command.extend(
         [
-            "\necho",
+            "\n\necho",
             "-e",
             '"=== FLAIR ==="',
             "\napptainer",
@@ -414,7 +414,7 @@ def get_versions(output):
 
     command.extend(
         [
-            "\necho",
+            "\n\necho",
             "-e",
             '"=== IntronProspector ==="',
             "\napptainer",
@@ -427,7 +427,7 @@ def get_versions(output):
 
     command.extend(
         [
-            "\necho",
+            "\n\necho",
             "-e",
             '"=== ont-methylDMR-kit ==="',
             "\necho",
@@ -435,11 +435,11 @@ def get_versions(output):
         ]
     )
 
-    command.extend(["\necho", '"=== Samtools ==="', "\nsamtools", "--version"])
+    command.extend(["\n\necho", '"=== Samtools ==="', "\nsamtools", "--version"])
 
     command.extend(
         [
-            "\necho",
+            "\n\necho",
             "-e",
             '"=== STRkit ==="',
             "\napptainer",
@@ -452,7 +452,7 @@ def get_versions(output):
 
     command.extend(
         [
-            "\necho",
+            "\n\necho",
             "-e",
             '"=== TRGT ==="',
             "\napptainer",
@@ -474,8 +474,7 @@ def get_versions(output):
 
     with open(f"{output}/scripts/logs/versions_{today}.txt", "w") as outfile:
         subprocess.run(
-            ["bash", f"{output}/scripts/versions.sh"],
-            stdout=outfile,
+            ["bash", f"{output}/scripts/versions.sh"], stdout=outfile, stderr=outfile
         )
 
 
