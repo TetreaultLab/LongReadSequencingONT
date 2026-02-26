@@ -421,7 +421,7 @@ def get_versions(output):
         text=True,
     )
 
-    ont_methyldmr_kit = "ont-methylDMR-kit version 3.2"
+    ont_methyldmr_kit = "ont-methylDMR-kit version 3.2\n"
 
     samtools = subprocess.run(["samtools", "--version"], capture_output=True, text=True)
 
@@ -448,6 +448,9 @@ def get_versions(output):
         capture_output=True,
         text=True,
     )
+
+    print(dorado)
+    print(intron_prospector)
 
     with open(f"{output}/scripts/logs/versions_{today}.txt", "w") as f:
         f.write(f"LRS pipeline tool versions {today}")
