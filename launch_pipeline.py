@@ -354,7 +354,9 @@ def create_sample_sheet(toml_config):
 
 def get_versions(output):
     today = date.today()
-    subprocess.run(["ml", "samtools", "apptainer/1.4.5", "nextflow/25.04.6"])
+    subprocess.run(
+        ["module", "load", "samtools", "apptainer/1.4.5", "nextflow/25.04.6"]
+    )
 
     cutesv = subprocess.run(
         [
