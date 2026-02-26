@@ -451,15 +451,25 @@ def get_versions(output):
 
     with open(f"{output}/scripts/logs/versions_{today}.txt", "w") as f:
         f.write(f"LRS pipeline tool versions {today}")
+        f.write("\ncuteSV\n")
         f.write(cutesv.stdout)
+        f.write("\nDeepVariant\n")
         f.write(deepvariant.stdout)
+        f.write("\Dorado\n")
         f.write(dorado.stdout)
+        f.write("\Epi2Me wf-human-variation\n")
         f.write(epi2me.stdout)
+        f.write("\FLAIR\n")
         f.write(flair.stdout)
+        f.write("\IntronProspector\n")
         f.write(intron_prospector.stdout)
+        f.write("\ont-methyDMR-kit\n")
         f.write(ont_methyldmr_kit)
+        f.write("\Samtools\n")
         f.write(samtools.stdout)
+        f.write("\STRkit\n")
         f.write(strkit.stdout)
+        f.write("\TRGT\n")
         f.write(trgt.stdout)
 
 
