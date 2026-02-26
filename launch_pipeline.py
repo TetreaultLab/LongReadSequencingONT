@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 import os
 from glob import glob
+from datetime import date
 
 # Global variables
 TOOL_PATH = "/lustre09/project/6019267/shared/tools/"
@@ -51,6 +52,9 @@ def main():
 
     else:
         toml_config = toml_config_initial
+
+    # Get tool versions
+    get_versions(output)
 
     # Get steps done
     f = open(output + "/scripts/steps_done.txt", "a")
@@ -346,6 +350,115 @@ def create_sample_sheet(toml_config):
         df["barcode"] = "barcode" + df["barcode"].astype(int).astype(str).str.zfill(2)
 
         df.to_csv(path + "/scripts/" + flowcell + ".csv", sep=",", index=False)
+
+
+def get_versions(output):
+    today = date.today()
+    subprocess.run(["ml", "samtools", "apptainer/1.4.5", "nextflow/25.04.6"])
+
+    cutesv = subprocess.run(
+        [
+            "apptainer",
+            "run",
+            TOOL_PATH + "variants/SVs/cutesv/cutesv.sif",
+            "cuteSV",
+            "--version",
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    deepvariant = subprocess.run(
+        [
+            "apptainer",
+            "run",
+            TOOL_PATH + "variants/SNPs/deepvariant/deepvariant.sif",
+            "/opt/deepvariant/bin/run_deepvariant",
+            "--version",
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    dorado = subprocess.run(
+        [TOOL_PATH + DORADO, "--version"], capture_output=True, text=True
+    )
+
+    epi2me = subprocess.run(
+        [
+            "nextflow",
+            "run",
+            "epi2me-labs/wf-human-variation",
+            "--version",
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    flair = subprocess.run(
+        [
+            "apptainer",
+            "run",
+            TOOL_PATH + "splicing/flair/flair.sif",
+            "flair",
+            "--version",
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    intron_prospector = subprocess.run(
+        [
+            "apptainer",
+            "run",
+            TOOL_PATH + "splicing/flair/flair.sif",
+            TOOL_PATH + "splicing/flair/intronProspector/bin/intronProspector",
+            "--version",
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    ont_methyldmr_kit = "ont-methylDMR-kit version 3.2"
+
+    samtools = subprocess.run(["samtools", "--version"], capture_output=True, text=True)
+
+    strkit = subprocess.run(
+        [
+            "apptainer",
+            "run",
+            TOOL_PATH + "repeat_expansions/STRkit/strkit.sif",
+            "strkit",
+            "--version",
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    trgt = subprocess.run(
+        [
+            "apptainer",
+            "run",
+            TOOL_PATH + "repeat_expansions/TRGT/trgt.sif",
+            "trgt",
+            "--version",
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    with open(f"{output}/scripts/logs/versions_{today}.txt", "w") as f:
+        f.write(f"LRS pipeline tool versions {today}")
+        f.write(cutesv)
+        f.write(deepvariant)
+        f.write(dorado)
+        f.write(epi2me)
+        f.write(flair)
+        f.write(intron_prospector)
+        f.write(ont_methyldmr_kit)
+        f.write(samtools)
+        f.write(strkit)
+        f.write(trgt)
 
 
 def get_reference(ref):
