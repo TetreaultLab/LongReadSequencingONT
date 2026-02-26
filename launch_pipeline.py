@@ -465,7 +465,7 @@ def get_versions(output):
     subprocess.run(
         [
             "bash",
-            f"{output}/scripts/main.sh",
+            f"{output}/scripts/versions.sh",
             ">",
             f"{output}/scripts/logs/versions_{today}.txt",
         ]
