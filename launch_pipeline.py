@@ -472,14 +472,11 @@ def get_versions(output):
         )
         f.write(command_str)
 
-    subprocess.run(
-        [
-            "bash",
-            f"{output}/scripts/versions.sh",
-            ">",
-            f"{output}/scripts/logs/versions_{today}.txt",
-        ]
-    )
+    with open(f"{output}/scripts/logs/versions_{today}.txt", "w") as outfile:
+        subprocess.run(
+            ["bash", f"{output}/scripts/versions.sh"],
+            stdout=outfile,
+        )
 
 
 def get_reference(ref):
