@@ -369,6 +369,7 @@ def get_versions(output):
         capture_output=True,
         text=True,
     )
+    print(cutesv)
 
     deepvariant = subprocess.run(
         [
