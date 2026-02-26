@@ -457,7 +457,7 @@ def get_versions(output):
         f.write(epi2me.stdout)
         f.write(flair.stdout)
         f.write(intron_prospector.stdout)
-        f.write(ont_methyldmr_kit.stdout)
+        f.write(ont_methyldmr_kit)
         f.write(samtools.stdout)
         f.write(strkit.stdout)
         f.write(trgt.stdout)
