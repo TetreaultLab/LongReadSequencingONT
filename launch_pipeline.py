@@ -360,6 +360,7 @@ def get_versions(output):
     command.extend(
         [
             "echo",
+            "-e",
             '"\n=== cuteSV ===\n"',
             "apptainer",
             "run",
@@ -372,6 +373,7 @@ def get_versions(output):
     command.extend(
         [
             "echo",
+            "-e",
             '"\n=== DeepVariant ===\n"',
             "apptainer",
             "run",
@@ -381,11 +383,14 @@ def get_versions(output):
         ]
     )
 
-    command.extend(["echo", '"\n=== Dorado ===\n"', TOOL_PATH + DORADO, "--version"])
+    command.extend(
+        ["echo", "-e", '"\n=== Dorado ===\n"', TOOL_PATH + DORADO, "--version"]
+    )
 
     command.extend(
         [
             "echo",
+            "-e",
             '"\n=== epi2me ===\n"',
             "nextflow",
             "run",
@@ -397,6 +402,7 @@ def get_versions(output):
     command.extend(
         [
             "echo",
+            "-e",
             '"\n=== FLAIR ===\n"',
             "apptainer",
             "run",
@@ -409,6 +415,7 @@ def get_versions(output):
     command.extend(
         [
             "echo",
+            "-e",
             '"\n=== IntronProspector ===\n"',
             "apptainer",
             "run",
@@ -421,6 +428,7 @@ def get_versions(output):
     command.extend(
         [
             "echo",
+            "-e",
             '"\n=== ont-methylDMR-kit ===\n"',
             "echo",
             '"ont-methylDMR-kit version 3.2\n"',
@@ -432,6 +440,7 @@ def get_versions(output):
     command.extend(
         [
             "echo",
+            "-e",
             '"\n=== STRkit ===\n"',
             "apptainer",
             "run",
@@ -444,6 +453,7 @@ def get_versions(output):
     command.extend(
         [
             "echo",
+            "-e",
             '"\n=== TRGT ===\n"',
             "apptainer",
             "run",
