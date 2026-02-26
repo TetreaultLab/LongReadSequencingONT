@@ -9,6 +9,8 @@
 #SBATCH --account=rrg-tetreaum
 #SBATCH --mail-user={1}
 
+set -euo pipefail
+
 ml apptainer/1.4.5
 
 DEEPVARIANT_IMAGE="apptainer run /lustre09/project/6019267/shared/tools/variants/SNPs/deepvariant/deepvariant.sif"

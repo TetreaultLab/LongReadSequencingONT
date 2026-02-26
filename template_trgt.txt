@@ -9,9 +9,11 @@
 #SBATCH --account=rrg-tetreaum
 #SBATCH --mail-user={0}
 
-ml apptainer samtools bcftools
-IMAGE="apptainer run /lustre09/project/6019267/shared/tools/repeat_expansions/TRGT/trgt.sif"
+set -euo pipefail
 
+ml apptainer samtools bcftools
+
+IMAGE="apptainer run /lustre09/project/6019267/shared/tools/repeat_expansions/TRGT/trgt.sif"
 STEPS_DONE="{1}/scripts/steps_done.txt"
 GENOME={2}
 REPEATS="/lustre09/project/6019267/shared/tools/repeat_expansions/reference_regions/trgt_STRchive_pathogenic.hg38.bed"

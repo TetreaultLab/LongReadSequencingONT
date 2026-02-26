@@ -10,8 +10,12 @@
 #SBATCH --account=rrg-tetreaum
 #SBATCH --mail-user={1}
 
+set -euo pipefail
+
 ml samtools
+
 source /lustre09/project/6019267/shared/tools/main_pipelines/long-read/launch_pipeline_env/bin/activate
+
 STEPS_DONE="{2}/scripts/steps_done.txt"
 
 python -u \

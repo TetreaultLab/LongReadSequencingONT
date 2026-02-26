@@ -9,6 +9,5 @@
 #SBATCH --mail-type=FAIL
 #SBATCH --account={8}-tetreaum
 #SBATCH --mail-user={9}
-#
-### Load environment
-#
+
+set -euo pipefail

@@ -9,6 +9,8 @@
 #SBATCH --account=rrg-tetreaum
 #SBATCH --mail-user={0}
 
+set -euo pipefail
+
 ml apptainer/1.4.5 nextflow/25.10.2
 
 export NXF_DEFAULT_CPUS=1

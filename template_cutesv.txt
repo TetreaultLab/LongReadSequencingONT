@@ -9,6 +9,8 @@
 #SBATCH --account=rrg-tetreaum
 #SBATCH --mail-user={0}
 
+set -euo pipefail
+
 ml apptainer/1.4.5
 
 CUTESV_IMAGE="apptainer run /lustre09/project/6019267/shared/tools/variants/SVs/cutesv/cutesv.sif"
