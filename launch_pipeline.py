@@ -798,8 +798,8 @@ def dorado_demux(toml_config, done):
     name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
     username = os.environ.get("USER")
 
-    cores = "2"
-    memory = "8"
+    cores = "6"
+    memory = "24"
 
     # Iterate through each flowcell for demultiplexing
     for flowcell in flowcells:
