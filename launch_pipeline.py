@@ -125,9 +125,6 @@ def main():
     # if "phasing" in toml_config["general"]["analysis"]:
     #     function_queue.append()
 
-    # Transfer back to projects
-    function_queue.append(transfer)
-
     # Clean up
     function_queue.append(cleanup)
 
@@ -1637,40 +1634,30 @@ def cutesv(toml_config, done):
             print("Done: " + tool)
 
 
-def transfer(toml_config, done):
-    tool = "transfer"
-
-    threads = "1"
-    memory = "1"
-    time = "00-01:00"
-
-    output = toml_config["general"]["project_path"] + "/"
-    email = toml_config["general"]["email"]
-    name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
-    username = os.environ.get("USER")
-    scratch = f"/lustre10/scratch/{username}/{name}/*"
-
-    cmd = ["rsync", "-avxH", "--no-g", "--no-p", "--partial", scratch, output, "\n"]
-
-    command_str = " ".join(cmd)
-
-    # Make script but do not launch automatically
-    create_script(tool, threads, memory, time, output, email, command_str, "")
-
-
 def cleanup(toml_config, done):
     # Simple function to remove redundant files and cleanup structure
     tool = "cleanup"
     output = toml_config["general"]["project_path"]
-    threads = "1"
-    memory = "1"
-    time = "00-01:00"
+    name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
+    username = os.environ.get("USER")
+    scratch = f"/lustre10/scratch/{username}/{name}"
     email = toml_config["general"]["email"]
     flowcells = toml_config["general"]["fc_dir_names"]
     samples = toml_config["general"]["samples"]
 
+    threads = "1"
+    memory = "1"
+    time = "00-01:00"
     # Build cleanup commands
     commands = []
+
+    # Transfer bam and results in scratch to projects directory
+    commands.append(
+        f"rsync -avxH --no-g --no-p --partial {scratch}/alignments/*sorted* {output}/alignments/"
+    )
+    commands.append(
+        f"rsync -avxH --no-g --no-p --partial {scratch}/results/* {output}/results/"
+    )
 
     # Move all logs to scripts/logs
     commands.append(f"mv {output}/*.log {output}/scripts/logs/")
@@ -1681,23 +1668,18 @@ def cleanup(toml_config, done):
     )
 
     # Remove longreadsum useless output directory
-    commands.append(f"rm -r {output}/output_LongReadSum")
-    commands.append(f"rm -r {output}/log_output.log")
+    # commands.append(f"rm -r {output}/output_LongReadSum")
+    # commands.append(f"rm -r {output}/log_output.log")
 
     # Remove empty dorado_demux.out
     commands.append(f"rm {output}/dorado_demux_run*.out")
 
-    # Remove tmp from epi2me
-    commands.append(f"rm -r {output}/work")
-    commands.append(f"rm -r {output}/output")
-
     # Remove temp directories/files for each flowcell (MinKNOW-related OR redundant from merge)
     for flow in flowcells:
-        commands.append(f"rm -r {output}/{flow}/fastq_*")
+        # commands.append(f"rm -r {output}/{flow}/fastq_*")
         commands.append(f"rm -r {output}/{flow}/bam_*")
-        commands.append(f"rm -r {output}/{flow}/alignments/*.bam")
-        commands.append(f"rm -r {output}/{flow}/alignments/*.bam.bai")
-        commands.append(f"rm {output}/{flow}/main_reports/sequencing_summary*.txt")
+        commands.append(f"rm -r {output}/{flow}/alignments/")
+        # commands.append(f"rm {output}/{flow}/main_reports/sequencing_summary*.txt")
 
     # Join all commands into a single string
     command_str = "\n".join(commands)
