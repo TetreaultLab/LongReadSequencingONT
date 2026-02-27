@@ -191,7 +191,7 @@ def create_config_final(filename):
             os.makedirs(path + "/" + d)
 
     # Making directory structure in flowcells subdirectories
-    directories = ["main_reports", "reads", "alignments"]
+    directories = ["main_reports", "reads"]
     for flow in fc_dir_names:
         for d in directories:
             if not os.path.exists(path + "/" + flow + "/" + d):
@@ -1647,9 +1647,48 @@ def cleanup(toml_config, done):
 
     threads = "1"
     memory = "1"
-    time = "00-01:00"
+    time = "00-02:00"
+
     # Build cleanup commands
     commands = []
+
+    # Move all logs to scripts/logs
+    commands.append(f"mv {output}/*.log {output}/scripts/logs/")
+
+    # Remove empty dorado_demux.out
+    commands.append(f"rm {output}/dorado_demux*.out")
+
+    # Move all files in the main directory to scripts
+    commands.append(
+        f"mv -t {output}/scripts/ {output}/*.txt {output}/*.sh {output}/*.py {output}/*.slurm"
+    )
+
+    # Remove temp directories/files for each flowcell (MinKNOW-related OR redundant from merge)
+    for flow in flowcells:
+        # commands.append(f"rm -r {output}/{flow}/fastq_*")
+        commands.append(f"rm -r {output}/{flow}/bam_*")
+        # commands.append(f"rm {output}/{flow}/main_reports/sequencing_summary*.txt")
+
+    # Tool specific cleamup
+    for sample in samples:
+        # cutesv
+        commands.append(f"rm -r {scratch}/results/cuteSV/{sample}/tmp")
+
+        # deepvariant
+        commands.append(f"rm -r {scratch}/results/deepvariant/{sample}/logs")
+
+        # epi2me
+        commands.append(f"rm -r {scratch}/results/epi2me/{sample}/tmp")
+        commands.append(f"rm -r {scratch}/results/epi2me/{sample}/execution")
+
+        # flair
+        commands.append(f"rm -r {scratch}/results/flair/{sample}/tmp")
+
+        # ont-methylDMR-kit
+
+        # strkit
+
+        # trgt
 
     # Transfer bam and results in scratch to projects directory
     commands.append(
@@ -1658,29 +1697,6 @@ def cleanup(toml_config, done):
     commands.append(
         f"rsync -avxH --no-g --no-p --partial {scratch}/results/* {output}/results/"
     )
-
-    # Move all logs to scripts/logs
-    commands.append(f"mv {output}/*.log {output}/scripts/logs/")
-
-    # Move all files in the main directory to scripts
-    commands.append(
-        f"mv -t {output}/scripts/ {output}/*.txt {output}/*.sh {output}/*.py {output}/*.slurm"
-    )
-
-    # Remove longreadsum useless output directory
-    # commands.append(f"rm -r {output}/output_LongReadSum")
-    # commands.append(f"rm -r {output}/log_output.log")
-
-    # Remove empty dorado_demux.out
-    commands.append(f"rm {output}/dorado_demux_run*.out")
-
-    # Remove temp directories/files for each flowcell (MinKNOW-related OR redundant from merge)
-    for flow in flowcells:
-        # commands.append(f"rm -r {output}/{flow}/fastq_*")
-        commands.append(f"rm -r {output}/{flow}/bam_*")
-        commands.append(f"rm -r {output}/{flow}/alignments/")
-        # commands.append(f"rm {output}/{flow}/main_reports/sequencing_summary*.txt")
-
     # Join all commands into a single string
     command_str = "\n".join(commands)
 
