@@ -25,21 +25,21 @@ do
 
     mkdir -p $WORKDIR
     mkdir -p $WORKDIR/tmp
-    rm -r $WORKDIR/tmp/*
 
     $CUTESV_IMAGE cuteSV \
-            /lustre10/scratch/{3}/{4}/alignments/$sample\_sorted.bam\
-            {5} \
-            $WORKDIR/$sample\_cutesv.vcf \
-            $WORKDIR/tmp \
-            --max_size 1000000 \
-            --min_support 3 \
-            --genotype \
-            --max_cluster_bias_INS 100 \
-            --diff_ratio_merging_INS 0.3 \
-            --max_cluster_bias_DEL 100 \
-            --diff_ratio_merging_DEL 0.3 \
-            --threads 16
+        /lustre10/scratch/{3}/{4}/alignments/$sample\_sorted.bam\
+        {5} \
+        $WORKDIR/$sample\_cutesv.vcf \
+        $WORKDIR/tmp \
+        --sample $sample \
+        --max_size 1000000 \
+        --min_support 3 \
+        --genotype \
+        --max_cluster_bias_INS 100 \
+        --diff_ratio_merging_INS 0.3 \
+        --max_cluster_bias_DEL 100 \
+        --diff_ratio_merging_DEL 0.3 \
+        --threads 16
 done
 
 if [ $? -eq 0 ]; then
