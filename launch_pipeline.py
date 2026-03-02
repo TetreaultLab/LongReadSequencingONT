@@ -70,7 +70,10 @@ def main():
     # Setting up list of steps
     if toml_config["general"]["kit"] == "SQK-LSK114":
         # Dorado Basecalling
-        function_queue.append(dorado_samtools)
+        function_queue.append(dorado)
+
+        # Samtools sort and index
+        function_queue.append(samtools)
 
     else:
         # Dorado Basecalling
@@ -79,8 +82,8 @@ def main():
         # Dorado Basecalling
         function_queue.append(dorado_demux)
 
-        # Renaming bams and running samtools merge, sort and index
-        function_queue.append(samtools)
+        # Renaming bams and running Samtools merge, sort and index
+        function_queue.append(samtools_py)
 
     # Call all other functions for downstream analysis
     # QC
@@ -867,7 +870,7 @@ def dorado_demux(toml_config, done):
                 print("Done: " + var_name)
 
 
-def dorado_samtools(toml_config, done):
+def dorado(toml_config, done):
     tool = "dorado_basecaller"
 
     output = toml_config["general"]["project_path"]
@@ -878,8 +881,6 @@ def dorado_samtools(toml_config, done):
     sample = toml_config["general"]["samples"][0]
     name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
     username = os.environ.get("USER")
-    tmpdir = os.environ.get("SLURM_TMPDIR")
-    sorted_bam = f"$SLURM_TMPDIR/{sample}_sorted.bam"
 
     reads = output + "/" + flowcell + "/reads/pod5"
     final = f"/lustre10/scratch/{username}/{name}/alignments/"
@@ -939,56 +940,54 @@ def dorado_samtools(toml_config, done):
     )
     command.extend([model, reads, ">", bam_dorado])
 
-    # Add samtools sort and index to command
-    command.extend(
-        [
-            "\n\nml samtools",
-            "\n\n#Sort\n",
-            "samtools",
-            "sort",
-            "--threads",
-            "7",
-            "-m",
-            "4G",
-            "-o",
-            sorted_bam,
-            bam_dorado,
-        ]
-    )
-
-    # transfer
-    command.extend(["\n\n#Transfer\n", "cp", sorted_bam, f"{final}{sample}_sorted.bam"])
-
-    # index
-    command.extend(
-        [
-            "\n\n#Index\n",
-            "samtools",
-            "index",
-            "--threads",
-            "7",
-            f"{final}{sample}_sorted.bam",
-            "\n",
-        ]
-    )
-
     command_str = " ".join(command)
 
     job = create_script(
         tool, cores, memory, formatted_time, output, email, command_str, flowcell
     )
 
+    var_name_bc = f"dorado_basecaller_{code}"
+
     # Add slurm job to main.sh
-    if f"{tool}_{code}" not in done:
-        print("To-Do: dorado_samtools")
+    if var_name_bc not in done:
+        print(f"To-Do: {var_name_bc}")
         with open(output + "/scripts/main.sh", "a") as f:
-            f.write(f"\n# Dorado Basecall and Samtools for sample : {sample}")
-            f.write(f"\nsamtools_{sample}=$(sbatch --parsable {job})\n")
+            f.write(f"\n# Dorado Basecall for sample : {sample}")
+            f.write(f"\n{var_name_bc}=$(sbatch --parsable {job})\n")
     else:
-        print("Done: dorado_samtools")
+        print(f"Done: {var_name_bc}")
 
 
 def samtools(toml_config, done):
+    tool = "samtools"
+
+    output = toml_config["general"]["project_path"]
+    email = toml_config["general"]["email"]
+    flowcell = toml_config["general"]["fc_dir_names"][0]
+    code = flowcell.split("_")[-1]
+    sample = toml_config["general"]["samples"][0]
+    name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
+    username = os.environ.get("USER")
+    path = ""
+    
+
+    
+    job = output + "/scripts/" + tool + "_" + sample + ".slurm"
+    with open(
+        TOOL_PATH
+        + "main_pipelines/long-read/LongReadSequencingONT/template_samtools.txt",
+        "r",
+    ) as f:
+        slurm = f.read()
+        slurm_filled = slurm.format(sample, email, output, path)
+
+        with open(job, "w") as o:
+            o.write(slurm_filled)
+
+    samtools_name = f"samtools_{sample}"
+    var_name_bc = f"dorado_basecaller_{code}"
+
+def samtools_py(toml_config, done):
     tool = "samtools"
 
     output = toml_config["general"]["project_path"]
@@ -1010,11 +1009,11 @@ def samtools(toml_config, done):
         job = output + "/scripts/" + tool + "_" + sample + ".slurm"
         with open(
             TOOL_PATH
-            + "main_pipelines/long-read/LongReadSequencingONT/template_samtools.txt",
+            + "main_pipelines/long-read/LongReadSequencingONT/template_samtools_py.txt",
             "r",
         ) as f:
             slurm = f.read()
-            slurm_filled = slurm.format(sample, email, output, config, sample)
+            slurm_filled = slurm.format(sample, email, output, config)
 
             with open(job, "w") as o:
                 o.write(slurm_filled)
