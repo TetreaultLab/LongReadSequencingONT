@@ -49,7 +49,7 @@ def main():
     if "as" in toml_config["general"]["analyses"]:
         df = pd.read_csv(metadata, sep="\t", header=0)
         make_manifest_combine(df)
-        make_manifest_quantify(df)
+        make_manifest_quantify(df, toml_config)
 
         function_queue.append(flair_diffsplice)
 
@@ -92,14 +92,28 @@ def make_manifest_combine(df):
 
     df["isoform"] = "isoform"
     df["bed"] = (
-        df["project_path"] + "/results/flair/" + df["samples"] + "/.isoforms.bed"
+        df["project_path"]
+        + "/results/flair/"
+        + df["samples"]
+        + "/"
+        + df["samples"]
+        + ".isoforms.bed"
     )
-    df["fa"] = df["project_path"] + "/results/flair/" + df["samples"] + "/.isoforms.fa"
+    df["fa"] = (
+        df["project_path"]
+        + "/results/flair/"
+        + df["samples"]
+        + "/"
+        + df["samples"]
+        + ".isoforms.fa"
+    )
     df["readmap"] = (
         df["project_path"]
         + "/results/flair/"
         + df["samples"]
-        + "/.isoform.read.map.txt"
+        + "/"
+        + df["samples"]
+        + ".isoform.read.map.txt"
     )
 
     df = df[["samples", "isoform", "bed", "fa", "readmap"]]
@@ -108,10 +122,13 @@ def make_manifest_combine(df):
     )
 
 
-def make_manifest_quantify(df):
+def make_manifest_quantify(df, toml_config):
     current_directory = os.getcwd()
+    name = toml_config["general"]["comparison_name"]
+    username = os.environ.get("USER")
+    scratch = f"/lustre10/scratch/{username}/{name}/flair_diff"
 
-    df["fastq"] = current_directory + "/fastq/" + df["samples"] + ".fastq"
+    df["fastq"] = scratch + "/fastq/" + df["samples"] + ".fastq"
 
     df = df[["samples", "phenotype", "fastq"]]
     df.to_csv(

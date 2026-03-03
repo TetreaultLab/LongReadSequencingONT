@@ -28,7 +28,7 @@ if [[ -f "$project_path/IPjunctions_{0}_list.txt" ]]; then
 fi
 
 mkdir -p $project_path
-mkdir -p $work_dir/fastq
+mkdir -p $project_path/fastq
 
 # Find junctions for each samples
 for sample in {5}
@@ -47,7 +47,7 @@ do
 
     # Make fastq files
     echo -e "\nBam to Fastq for $sample"
-    bedtools bamtofastq -i $bam_file -fq $work_dir/fastq/$sample.fastq
+    bedtools bamtofastq -i $bam_file -fq $project_path/fastq/$sample.fastq
 done
 
 # Merge junctions into one junctions file
