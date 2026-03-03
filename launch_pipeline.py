@@ -54,7 +54,7 @@ def main():
         toml_config = toml_config_initial
 
     # Get tool versions
-    matches = glob.glob(f"{output}/scripts/logs/versions*")
+    matches = glob(f"{output}/scripts/logs/versions*")
     if not matches:
         get_versions(output)
 
