@@ -54,7 +54,9 @@ def main():
         toml_config = toml_config_initial
 
     # Get tool versions
-    get_versions(output)
+    matches = glob.glob(f"{output}/scripts/logs/versions*")
+    if not matches:
+        get_versions(output)
 
     # Get steps done
     f = open(output + "/scripts/steps_done.txt", "a")
