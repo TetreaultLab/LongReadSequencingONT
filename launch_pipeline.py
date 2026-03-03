@@ -1709,6 +1709,7 @@ def cleanup(toml_config, done):
 
         # flair
         commands.append(f"rm -r {scratch}/results/flair/{sample}/tmp")
+        commands.append(f"rm {scratch}/results/flair/{sample}/{sample}.fastq")
 
         # ont-methylDMR-kit
 
