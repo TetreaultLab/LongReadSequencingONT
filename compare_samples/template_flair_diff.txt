@@ -33,8 +33,7 @@ mkdir -p $work_dir/fastq
 # Find junctions for each samples
 for sample in {5}
 do
-    base_path=$(awk -F'\t' -v id="$sample" '$1 == id print $3' {6})
-    bam_file="$base_path/alignments/{0}_sorted.bam"
+    bam_file=$(grep -P "^$sample\t" file.tsv | cut -f3)_sorted.bam
     echo "$bam_file"
 
     apptainer run $flair_img $intron_prospector_tool/intronProspector \

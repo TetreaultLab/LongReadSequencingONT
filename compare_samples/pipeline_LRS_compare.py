@@ -144,6 +144,7 @@ def flair_diffsplice(toml_config):
     # Get samples
     df = read_metadata(toml_config)
     samples = df["samples"].tolist()
+    str_samples = " ".join(samples)
 
     job = current_directory + "/scripts/" + tool + ".slurm"
     with open(
@@ -158,7 +159,7 @@ def flair_diffsplice(toml_config):
             genome,
             gtf,
             current_directory,
-            samples,
+            str_samples,
             toml_config["general"]["metadata"],
             conditionA,
             conditionB,
