@@ -34,7 +34,7 @@ mkdir -p $work_dir/fastq
 for sample in {5}
 do
     bam_file=$(grep -P "^$sample\t" {6} | cut -f3)/alignments/$sample\_sorted.bam
-    echo "$bam_file"
+    echo -e "\nProcessing $bam_file for junctions"
 
     apptainer run $flair_img $intron_prospector_tool/intronProspector \
         -g $genome_fa \
@@ -46,10 +46,12 @@ do
     echo -e "$project_path/$sample\_intron_calls.tsv" >> $project_path/IPjunctions_{0}_list.txt
 
     # Make fastq files
+    echo -e "\nBam to Fastq for $sample"
     bedtools bamtofastq -i $bam_file -fq $work_dir/fastq/$sample.fastq
 done
 
-# Merge junctions into one junctions flie
+# Merge junctions into one junctions file
+echo -e "\nMerging junction files"
 apptainer run $flair_img $intron_prospector_tool/intronProspectorMerge \
     -i $project_path/IPjunctions_{0}_list.txt \
     -b $project_path/IPjunctions_{0}_list_merged.bed
@@ -57,7 +59,9 @@ apptainer run $flair_img $intron_prospector_tool/intronProspectorMerge \
 # Generate transcriptomes with FLAIR
 for sample in {5}
 do
-    bam_file=""
+    bam_file=$(grep -P "^$sample\t" {6} | cut -f3)/alignments/$sample\_sorted.bam
+    echo -e "\nProcessing $bam_file for FLAIR transcriptomes"
+
     apptainer run $flair_img flair transcriptome \
         -g $genome_fa \
         -f $annotation_gtf \
@@ -69,11 +73,13 @@ do
 done
 
 # Combine transcriptomes
+echo -e "\nMerging transcriptomes"
 apptainer run $flair_img flair combine \
     -m $manifest_combine \
     -o $project_path/{0}_combined
 
 # Quantify splicing
+echo -e "\nRunning FLAIR quantify"
 apptainer run $flair_img flair quantify \
     -r $manifest_quantify \
     -i $project_path/{0}_combined.isoforms.fa \
@@ -83,6 +89,7 @@ apptainer run $flair_img flair quantify \
     --check_splice
 
 # Run differential expression
+echo -e "\nRunning FLAIR diff expression"
 apptainer run $flair_img flair diffexp \
     -q $project_path/{0}_quantify.counts.tsv \
     --threads 8 \
@@ -90,6 +97,7 @@ apptainer run $flair_img flair diffexp \
     --out_dir_force
 
 # Run differential splicing
+echo -e "\nRunning FLAIR diff splicing"
 apptainer run $flair_img flair diffsplice \
     -i $project_path/{0}_combined.isoforms.bed \
     -q $project_path/{0}_quantify.counts.tsv \
@@ -103,3 +111,5 @@ apptainer run $flair_img flair diffsplice \
     --conditionB {8} \
     --out_dir $project_path/diffsplice \
     --out_dir_force
+
+echo -e "\nFLAIR done!"
