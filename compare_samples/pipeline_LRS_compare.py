@@ -29,11 +29,12 @@ def main():
     current_directory = os.getcwd()
     username = os.environ.get("USER")
     name = toml_config["general"]["comparison_name"]
+    metadata = toml_config["general"]["metadata"]
 
     # Make output directory
-    folder_name = f"{current_directory}/{name}"
-    if not os.path.exists(folder_name):
-        os.makedirs(folder_name)
+    scripts = f"{current_directory}/scripts"
+    if not os.path.exists(scripts):
+        os.makedirs(scripts)
 
     scratch = f"/lustre10/scratch/{username}/{name}/"
     if not os.path.exists(scratch):
@@ -46,6 +47,10 @@ def main():
         function_queue.append(flair_diffexp)
 
     if "as" in toml_config["general"]["analyses"]:
+        df = pd.read_csv(metadata, sep="\t", header=0)
+        make_manifest_combine(df)
+        make_manifest_quantify(df)
+
         function_queue.append(flair_diffsplice)
 
     if "apa" in toml_config["general"]["analyses"]:
@@ -78,9 +83,43 @@ def get_reference(ref):
 def read_metadata(toml_config):
     metadata = toml_config["general"]["metadata"]
     df = pd.read_csv(metadata, sep="\t", header=0)
-    print(df)
 
     return df
+
+
+def make_manifest_combine(df):
+    current_directory = os.getcwd()
+
+    df["isoform"] = "isoform"
+    df["bed"] = (
+        df["project_path"] + "/results/flair/" + df["samples"] + "/.isoforms.bed"
+    )
+    df["fa"] = df["project_path"] + "/results/flair/" + df["samples"] + "/.isoforms.fa"
+    df["readmap"] = (
+        df["project_path"]
+        + "/results/flair/"
+        + df["samples"]
+        + "/.isoform.read.map.txt"
+    )
+
+    df = df[["samples", "isoform", "bed", "fa", "readmap"]]
+    df.to_csv(
+        f"{current_directory}/manifest_combine.txt", header=False, sep="\t", index=False
+    )
+
+
+def make_manifest_quantify(df):
+    current_directory = os.getcwd()
+
+    df["fastq"] = current_directory + "/fastq/" + df["samples"] + ".fastq"
+
+    df = df[["samples", "phenotype", "fastq"]]
+    df.to_csv(
+        f"{current_directory}/manifest_quantify.txt",
+        header=False,
+        sep="\t",
+        index=False,
+    )
 
 
 def flair_diffexp(toml_config):
@@ -107,11 +146,6 @@ def flair_diffsplice(toml_config):
     df = read_metadata(toml_config)
     samples = df["samples"].tolist()
 
-    print(samples)
-    # Make manifest combine
-
-    # Make manifest quantify
-
     job = output + "/scripts/" + tool + ".slurm"
     with open(
         TOOL_PATH
@@ -124,9 +158,9 @@ def flair_diffsplice(toml_config):
             email,
             genome,
             gtf,
-            manifest_combine,
-            manifest_quantify,
+            current_directory,
             samples,
+            toml_config["general"]["metadata"],
             conditionA,
             conditionB,
         )

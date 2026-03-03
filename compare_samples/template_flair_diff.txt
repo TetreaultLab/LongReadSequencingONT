@@ -18,16 +18,25 @@ intron_prospector_tool="/lustre09/project/6019267/shared/tools/splicing/flair/in
 project_path="/lustre10/scratch/$USER/{0}/flair_diff"
 genome_fa="{2}"
 annotation_gtf="{3}"
-manifest_combine="{4}"
-manifest_quantify="{5}
+work_dir="{4}"
+manifest_combine="manifest_combine.txt"
+manifest_quantify="manifest_quantify.txt"
 
 # Clear list
-rm $project_path/IPjunctions_{0}_list.txt
+if [[ -f "$project_path/IPjunctions_{0}_list.txt" ]]; then
+    rm $project_path/IPjunctions_{0}_list.txt
+fi
+
+mkdir -p $project_path
+mkdir -p $work_dir/fastq
 
 # Find junctions for each samples
-for sample in {6}
+for sample in {5}
 do
-    bam_file=""
+    base_path=$(awk -F'\t' -v id="$sample" '$1 == id print $3' {6})
+    bam_file="$base_path/alignments/{0}_sorted.bam"
+    echo "$bam_file"
+
     apptainer run $flair_img $intron_prospector_tool/intronProspector \
         -g $genome_fa \
         -b $project_path/$sample.IPjunctions.bed \
@@ -36,6 +45,9 @@ do
         $bam_file
 
     echo -e "$project_path/$sample\_intron_calls.tsv" >> $project_path/IPjunctions_{0}_list.txt
+
+    # Make fastq files
+    bedtools bamtofastq -i $bam_file -fq $work_dir/fastq/$sample.fastq
 done
 
 # Merge junctions into one junctions flie
@@ -44,7 +56,7 @@ apptainer run $flair_img $intron_prospector_tool/intronProspectorMerge \
     -b $project_path/IPjunctions_{0}_list_merged.bed
 
 # Generate transcriptomes with FLAIR
-for sample in {6}
+for sample in {5}
 do
     bam_file=""
     apptainer run $flair_img flair transcriptome \
