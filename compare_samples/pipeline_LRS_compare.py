@@ -152,7 +152,6 @@ def flair_diffsplice(toml_config):
         "r",
     ) as f:
         slurm = f.read()
-        print(slurm)
         slurm_filled = slurm.format(
             name,
             email,
