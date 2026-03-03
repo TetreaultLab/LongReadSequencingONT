@@ -130,7 +130,6 @@ def flair_diffsplice(toml_config):
     tool = "flair_diffsplice"
     current_directory = os.getcwd()
     name = toml_config["general"]["comparison_name"]
-    output = f"{current_directory}/{name}"
     email = toml_config["general"]["email"]
     genome = (
         TOOL_PATH + "references/gencode/GRCh38_p14/GRCh38.primary_assembly.genome.fa"
@@ -146,13 +145,14 @@ def flair_diffsplice(toml_config):
     df = read_metadata(toml_config)
     samples = df["samples"].tolist()
 
-    job = output + "/scripts/" + tool + ".slurm"
+    job = current_directory + "/scripts/" + tool + ".slurm"
     with open(
         TOOL_PATH
         + "main_pipelines/long-read/LongReadSequencingONT/compare_samples/template_flair_diff.txt",
         "r",
     ) as f:
         slurm = f.read()
+        print(slurm)
         slurm_filled = slurm.format(
             name,
             email,
