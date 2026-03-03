@@ -18,13 +18,13 @@ source /lustre09/project/6019267/shared/tools/main_pipelines/long-read/launch_pi
 
 STEPS_DONE="{2}/scripts/steps_done.txt"
 
-#Sort
+# Sort
 samtools sort --threads 3 -m 4G -o $SLURM_TMPDIR/{0}_sorted.bam {3}/{0}.bam 
 
-#Transfer
+# Transfer
 cp $SLURM_TMPDIR/{0}_sorted.bam {3}/{0}_sorted.bam
 
-#Index
+# Index
 samtools index --threads 3 {3}/{0}_sorted.bam
 
 if [ $? -eq 0 ]; then

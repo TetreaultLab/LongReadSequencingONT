@@ -91,11 +91,11 @@ def main():
     # QC
     # function_queue.append(mosdepth)
 
-    # EPI2ME
-    function_queue.append(epi2me)
-
     # DNA specific
     if toml_config["general"]["seq_type"] == "WGS":
+        # EPI2ME
+        function_queue.append(epi2me)
+
         # Repeat expansions
         if "repeats" in toml_config["general"]["analysis"]:
             function_queue.append(trgt)
@@ -107,6 +107,15 @@ def main():
 
     # RNA specific
     if toml_config["general"]["seq_type"] == "RNA":
+        # EPI2ME
+        if (
+            "SNP" in toml_config["general"]["analysis"]
+            or "SV" in toml_config["general"]["analysis"]
+            or "CNV" in toml_config["general"]["analysis"]
+            or "phasing" in toml_config["general"]["analysis"]
+        ):
+            function_queue.append(epi2me)
+
         # Splicing
         if "splicing" in toml_config["general"]["analysis"]:
             function_queue.append(flair)

@@ -30,7 +30,9 @@ APPTAINER_CONFIG="/lustre09/project/6019267/shared/tools/main_pipelines/long-rea
 STEPS_DONE="{7}/scripts/steps_done.txt"
 
 mkdir -p $OUT
-rm -r $WORKDIR
+if [ -d "$WORKDIR" ]; then
+    rm -r $WORKDIR
+fi
 
 nextflow run epi2me-labs/wf-human-variation \
     {8} \
