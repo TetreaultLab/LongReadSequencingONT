@@ -986,21 +986,21 @@ def samtools(toml_config, done):
     var_name_bc = f"dorado_basecaller_{code}"
 
     if var_name_bc not in done:
-        print("To-Do: " + tool)
+        print(f"To-Do: {samtools_name}")
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("\n# Samtools sort and index")
             f.write(
-                f"\n{samtools_name}=$(sbatch --parsable --dependency=afterok:$samtools {job})\n"
+                f"\n{samtools_name}=$(sbatch --parsable --dependency=afterok:${var_name_bc} {job})\n"
             )
 
     else:
         if tool not in done:
-            print("To-Do: " + tool)
+            print(f"To-Do: {samtools_name}")
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write("\n# Samtools sort and index")
                 f.write(f"\{samtools_name}=$(sbatch --parsable {job})\n")
         else:
-            print("Done: " + tool)
+            print(f"Done: {samtools_name}")
 
 
 def samtools_py(toml_config, done):
