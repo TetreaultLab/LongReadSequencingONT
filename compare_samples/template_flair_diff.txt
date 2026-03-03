@@ -19,8 +19,8 @@ project_path="/lustre10/scratch/$USER/{0}/flair_diff"
 genome_fa="{2}"
 annotation_gtf="{3}"
 work_dir="{4}"
-manifest_combine="manifest_combine.txt"
-manifest_quantify="manifest_quantify.txt"
+manifest_combine="$work_dir/manifest_combine.txt"
+manifest_quantify="$work_dir/manifest_quantify.txt"
 
 # Clear list
 if [[ -f "$project_path/IPjunctions_{0}_list.txt" ]]; then
@@ -84,14 +84,14 @@ apptainer run $flair_img flair quantify \
     --check_splice
 
 # Run differential expression
-apptainer run ${flair_img} flair diffexp \
+apptainer run $flair_img flair diffexp \
     -q $project_path/{0}_quantify.counts.tsv \
     --threads 8 \
     --out_dir $project_path/diffexp \
     --out_dir_force
 
 # Run differential splicing
-apptainer run ${flair_img} flair diffsplice \
+apptainer run $flair_img flair diffsplice \
     -i $project_path/{0}_combined.isoforms.bed \
     -q $project_path/{0}_quantify.counts.tsv \
     --threads 8 \
