@@ -93,8 +93,13 @@ def flair_diffsplice(toml_config):
     name = toml_config["general"]["comparison_name"]
     output = f"{current_directory}/{name}"
     email = toml_config["general"]["email"]
-    genome = get_reference(toml_config["general"]["reference"])["fasta"]
-    gtf = get_reference(toml_config["general"]["reference"])["gtf"]
+    genome = (
+        TOOL_PATH + "references/gencode/GRCh38_p14/GRCh38.primary_assembly.genome.fa"
+    )
+    gtf = (
+        TOOL_PATH
+        + "references/gencode/GRCh38_p14/gencode.v48.primary_assembly.annotation.gtf"
+    )
     conditionA = toml_config["general"]["conditionA"]
     conditionB = toml_config["general"]["conditionB"]
 
