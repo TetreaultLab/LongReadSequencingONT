@@ -3,14 +3,5 @@
     comparison_name = "" # comparison name for output folder.
     analyses = [] # What analyses to run. Possible choices : ["degs", "as", "apa", "dmrs"].
     email = "" # Your e-mail address to receive notification.
-
-[flair]
     conditionA = "" # case
     conditionB = "" # ctrl
-
-[apa_tool] # to change
-
-
-[modkit]
-    ctrl_bed = ""
-    treatment_bed = ""

@@ -10,7 +10,6 @@ from glob import glob
 
 # Global variables
 TOOL_PATH = "/lustre09/project/6019267/shared/tools/"
-OUTPUT = "/lustre09/project/6019267/shared/projects/GenomeCanada_CPHI_NRGI/results/LRS/comparisons/"
 
 
 def main():
@@ -27,24 +26,18 @@ def main():
     with open(args.config, "r") as f:
         toml_config = toml.load(f)
 
-    # check if comparison directory alredy exists
-    folder_name = OUTPUT + toml_config["general"]["comparison_name"]
+    current_directory = os.getcwd()
+    username = os.environ.get("USER")
+    name = toml_config["general"]["comparison_name"]
 
-    if os.path.exists(folder_name):
-        print(
-            f"The path '{folder_name}' exists. \nExiting. \nPlease choose a new 'comparison_name' and relaunch."
-        )
-        sys.exit(1)
+    # Make output directory
+    folder_name = f"{current_directory}/{name}"
+    if not os.path.exists(folder_name):
+        os.makedirs(folder_name)
 
-    else:
-        print(f"Making the folder '{folder_name}'.")
-        try:
-            os.makedirs(folder_name)
-            print(f"Success! The folder '{folder_name}' was created.")
-
-        except OSError as e:
-            print(f"Error creating directory '{folder_name}': {e}")
-            sys.exit(1)
+    scratch = f"/lustre10/scratch/{username}/{name}/"
+    if not os.path.exists(scratch):
+        os.makedirs(scratch)
 
     # Get functions to run
     function_queue = []
@@ -66,12 +59,75 @@ def main():
         func(toml_config)
 
 
+def get_reference(ref):
+    # Reference files location
+    path = TOOL_PATH + "references/gencode/"
+    reference: {}  # type: ignore
+    match ref:
+        case "grch38":
+            reference = {
+                "fasta": path + "GRCh38_p14/GRCh38.primary_assembly.genome.fa",
+                "gtf": path + "GRCh38_p14/gencode.v48.primary_assembly.annotation.gtf",
+                "chrom_size": path
+                + "GRCh38_p14/GRCh38.primary_assembly.genome.chromSizes.txt",
+                # Other genomes can be added later
+            }
+    return reference
+
+
+def read_metadata(toml_config):
+    metadata = toml_config["general"]["metadata"]
+    df = pd.read_csv(metadata, sep="\t", header=0)
+    print(df)
+
+    return df
+
+
 def flair_diffexp(toml_config):
     print()
 
 
 def flair_diffsplice(toml_config):
-    print()
+    tool = "flair_diffsplice"
+    current_directory = os.getcwd()
+    name = toml_config["general"]["comparison_name"]
+    output = f"{current_directory}/{name}"
+    email = toml_config["general"]["email"]
+    genome = get_reference(toml_config["general"]["reference"])["fasta"]
+    gtf = get_reference(toml_config["general"]["reference"])["gtf"]
+    conditionA = toml_config["general"]["conditionA"]
+    conditionB = toml_config["general"]["conditionB"]
+
+    # Get samples
+    df = read_metadata(toml_config)
+    samples=list(df$samples)
+                 
+    print(samples)
+    # Make manifest combine
+
+    # Make manifest quantify
+
+    job = output + "/scripts/" + tool + ".slurm"
+    with open(
+        TOOL_PATH
+        + "main_pipelines/long-read/LongReadSequencingONT/compare_samples/template_flair_diff.txt",
+        "r",
+    ) as f:
+        slurm = f.read()
+        slurm_filled = slurm.format(
+            name,
+            email,
+            genome,
+            gtf,
+            manifest_combine,
+            manifest_quantify,
+            samples,
+            conditionA,
+            conditionB,
+        )
+
+        with open(job, "w") as o:
+            o.write(slurm_filled)
 
 
 def apa_tool(toml_config):
