@@ -968,10 +968,8 @@ def samtools(toml_config, done):
     sample = toml_config["general"]["samples"][0]
     name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
     username = os.environ.get("USER")
-    path = ""
-    
+    path = f"/lustre10/scratch/{username}/{name}"
 
-    
     job = output + "/scripts/" + tool + "_" + sample + ".slurm"
     with open(
         TOOL_PATH
@@ -986,6 +984,24 @@ def samtools(toml_config, done):
 
     samtools_name = f"samtools_{sample}"
     var_name_bc = f"dorado_basecaller_{code}"
+
+    if var_name_bc not in done:
+        print("To-Do: " + tool)
+        with open(output + "/scripts/main.sh", "a") as f:
+            f.write("\n# Samtools sort and index")
+            f.write(
+                f"\n{samtools_name}=$(sbatch --parsable --dependency=afterok:$samtools {job})\n"
+            )
+
+    else:
+        if tool not in done:
+            print("To-Do: " + tool)
+            with open(output + "/scripts/main.sh", "a") as f:
+                f.write("\n# Samtools sort and index")
+                f.write(f"\{samtools_name}=$(sbatch --parsable {job})\n")
+        else:
+            print("Done: " + tool)
+
 
 def samtools_py(toml_config, done):
     tool = "samtools"
