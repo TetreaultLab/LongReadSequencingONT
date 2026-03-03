@@ -970,7 +970,7 @@ def samtools(toml_config, done):
     sample = toml_config["general"]["samples"][0]
     name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
     username = os.environ.get("USER")
-    path = f"/lustre10/scratch/{username}/{name}"
+    path = f"/lustre10/scratch/{username}/{name}/alignments"
 
     job = output + "/scripts/" + tool + "_" + sample + ".slurm"
     with open(
