@@ -100,8 +100,8 @@ def flair_diffsplice(toml_config):
 
     # Get samples
     df = read_metadata(toml_config)
-    samples=list(df$samples)
-                 
+    samples = df["samples"].tolist()
+
     print(samples)
     # Make manifest combine
 
