@@ -19,7 +19,7 @@ def main():
         description="LongReadSequencing pipeline.",
     )
 
-    parser.add_argument("config", type=str, help="Project config file, including path.")
+    parser.add_argument("config", type=str, help="Project config file.")
 
     parser.add_argument(
         "--test",
@@ -998,7 +998,7 @@ def samtools(toml_config, done):
             print(f"To-Do: {samtools_name}")
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write("\n# Samtools sort and index")
-                f.write(f"\{samtools_name}=$(sbatch --parsable {job})\n")
+                f.write(f"\n{samtools_name}=$(sbatch --parsable {job})\n")
         else:
             print(f"Done: {samtools_name}")
 
