@@ -164,9 +164,15 @@ def create_config_final(filename):
     with open(filename, "r") as f:
         toml_config = toml.load(f)
 
+    # Replace - and . in sample names to _
     samples = toml_config["general"]["samples"]
     new_samples = [item.replace("-", "_").replace(".", "_") for item in samples]
-    print(new_samples)
+    toml_config["general"]["samples"] = new_samples
+
+    # Replace - and . in conditions to _
+    conditions = toml_config["general"]["conditions"]
+    new_conditions = [item.replace("-", "_").replace(".", "_") for item in conditions]
+    toml_config["general"]["conditions"] = new_conditions
 
     # Set kit to variable
     kit = toml_config["general"]["kit"]
