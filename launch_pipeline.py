@@ -1704,7 +1704,7 @@ def cleanup(toml_config, done):
 
     with open(output + "/scripts/main.sh", "a") as f:
         f.write("\n# Cleanup temporary files and logs\n")
-        f.write('\nDEPENDENCY_LIST=$(IFS=:; echo "${DEPS[*]}")')
+        f.write('\nDEPENDENCY_LIST=$(IFS=:; echo "${DEPS[*]}")\n')
         f.write(f"\nsbatch --dependency=afterok:$DEPENDENCY_LIST {job}\n")
 
 
