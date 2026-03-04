@@ -585,86 +585,45 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
 
     # This is for tools running on all the data at once
     else:
-        if tool == "samtools":
-            job = output + "/scripts/" + tool + ".slurm"
+        job = output + "/scripts/" + tool + ".slurm"
 
-            with open(
-                TOOL_PATH
-                + "main_pipelines/long-read/LongReadSequencingONT/template_sbatch.txt",
-                "r",
-            ) as f:
-                slurm = f.read()
-                # For all other tools
-                slurm_filled = slurm.format(
-                    cores,
-                    "#SBATCH --ntasks=5",
-                    memory,
-                    time,
-                    tool,
-                    "run",
-                    "log",
-                    "log",
-                    "rrg",
-                    email,
-                    name,
-                )
+        with open(
+            TOOL_PATH
+            + "main_pipelines/long-read/LongReadSequencingONT/template_sbatch.txt",
+            "r",
+        ) as f:
+            slurm = f.read()
+            # For all other tools
+            slurm_filled = slurm.format(
+                cores,
+                "",
+                memory,
+                time,
+                tool,
+                "run",
+                "log",
+                "log",
+                "rrg",
+                email,
+                name,
+            )
 
-                # Add enviroment loading commands
-                slurm_filled += "module load StdEnv/2023 apptainer samtools\n"
-                slurm_filled += (
-                    "source "
-                    + TOOL_PATH
-                    + "main_pipelines/long-read/launch_pipeline_env/bin/activate\n"
-                )
+            # Add enviroment loading commands
+            slurm_filled += "module load StdEnv/2023 apptainer samtools\n"
+            slurm_filled += (
+                "source "
+                + TOOL_PATH
+                + "main_pipelines/long-read/launch_pipeline_env/bin/activate\n"
+            )
 
-                slurm_filled += "\n#\n### Calling " + tool + "\n#\n"
-                slurm_filled += command
-                slurm_filled += "\n"
+            slurm_filled += "\n#\n### Calling " + tool + "\n#\n"
+            slurm_filled += command
+            slurm_filled += "\n"
 
-                # Keep track of completed steps
-                slurm_filled += (
-                    f'if [ $? -eq 0 ]; then echo "{tool}" >> "{steps_done}"; fi\n\n'
-                )
-        else:
-            job = output + "/scripts/" + tool + ".slurm"
-
-            with open(
-                TOOL_PATH
-                + "main_pipelines/long-read/LongReadSequencingONT/template_sbatch.txt",
-                "r",
-            ) as f:
-                slurm = f.read()
-                # For all other tools
-                slurm_filled = slurm.format(
-                    cores,
-                    "",
-                    memory,
-                    time,
-                    tool,
-                    "run",
-                    "log",
-                    "log",
-                    "rrg",
-                    email,
-                    name,
-                )
-
-                # Add enviroment loading commands
-                slurm_filled += "module load StdEnv/2023 apptainer samtools\n"
-                slurm_filled += (
-                    "source "
-                    + TOOL_PATH
-                    + "main_pipelines/long-read/launch_pipeline_env/bin/activate\n"
-                )
-
-                slurm_filled += "\n#\n### Calling " + tool + "\n#\n"
-                slurm_filled += command
-                slurm_filled += "\n"
-
-                # Keep track of completed steps
-                slurm_filled += (
-                    f'if [ $? -eq 0 ]; then echo "{tool}" >> "{steps_done}"; fi\n\n'
-                )
+            # Keep track of completed steps
+            slurm_filled += (
+                f'if [ $? -eq 0 ]; then echo "{tool}" >> "{steps_done}"; fi\n\n'
+            )
 
     with open(job, "w") as o:
         o.write(slurm_filled)
@@ -796,7 +755,9 @@ def dorado_basecaller(toml_config, done):
             print("To-Do: " + var_name_bc)
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write(f"\n# Dorado Basecall for flowcell : {flowcell}")
-                f.write(f"\n{var_name_bc}=$(sbatch --parsable {job})\n")
+                f.write(
+                    f"\n{var_name_bc}=$(sbatch --job-name={name} --parsable {job})\n"
+                )
         else:
             print("Done: " + var_name_bc)
 
@@ -861,12 +822,14 @@ def dorado_demux(toml_config, done):
                 with open(output + "/scripts/main.sh", "a") as f:
                     f.write(f"\n# Dorado Demux for flowcell : {flowcell}")
                     f.write(
-                        f"\n{var_name}=$(sbatch --parsable --dependency=afterok:${var_name_bc} {job})\n"
+                        f"\n{var_name}=$(sbatch --job-name={name} --parsable --dependency=afterok:${var_name_bc} {job})\n"
                     )
             else:  # demux not done but basecall done
                 with open(output + "/scripts/main.sh", "a") as f:
                     f.write(f"\n# Dorado Demux for flowcell : {flowcell}")
-                    f.write(f"\n{var_name}=$(sbatch --parsable {job})\n")
+                    f.write(
+                        f"\n{var_name}=$(sbatch --job-name={name} --parsable {job})\n"
+                    )
         else:  # demux done
             if (
                 var_name_bc not in done
@@ -875,7 +838,7 @@ def dorado_demux(toml_config, done):
                 with open(output + "/scripts/main.sh", "a") as f:
                     f.write(f"\n# Dorado Demux for flowcell : {flowcell}")
                     f.write(
-                        f"\n{var_name}=$(sbatch --parsable --dependency=afterok:${var_name_bc} {job})\n"
+                        f"\n{var_name}=$(sbatch --job-name={name} --parsable --dependency=afterok:${var_name_bc} {job})\n"
                     )
             else:  # demux done and basecall done, sucess
                 print("Done: " + var_name)
@@ -964,7 +927,7 @@ def dorado(toml_config, done):
         print(f"To-Do: {var_name_bc}")
         with open(output + "/scripts/main.sh", "a") as f:
             f.write(f"\n# Dorado Basecall for sample : {sample}")
-            f.write(f"\n{var_name_bc}=$(sbatch --parsable {job})\n")
+            f.write(f"\n{var_name_bc}=$(sbatch --job-name={name} --parsable {job})\n")
     else:
         print(f"Done: {var_name_bc}")
 
@@ -1001,7 +964,7 @@ def samtools(toml_config, done):
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("\n# Samtools sort and index")
             f.write(
-                f"\n{samtools_name}=$(sbatch --parsable --dependency=afterok:${var_name_bc} {job})\n"
+                f"\n{samtools_name}=$(sbatch --job-name={name} --parsable --dependency=afterok:${var_name_bc} {job})\n"
             )
 
     else:
@@ -1009,7 +972,9 @@ def samtools(toml_config, done):
             print(f"To-Do: {samtools_name}")
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write("\n# Samtools sort and index")
-                f.write(f"\n{samtools_name}=$(sbatch --parsable {job})\n")
+                f.write(
+                    f"\n{samtools_name}=$(sbatch --job-name={name} --parsable {job})\n"
+                )
         else:
             print(f"Done: {samtools_name}")
 
@@ -1018,6 +983,7 @@ def samtools_py(toml_config, done):
     tool = "samtools"
 
     output = toml_config["general"]["project_path"]
+    name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
     email = toml_config["general"]["email"]
     flowcells = toml_config["general"]["fc_dir_names"]
     samples = toml_config["general"]["samples"]
@@ -1053,7 +1019,7 @@ def samtools_py(toml_config, done):
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write("\n# Rename, merge, sort and index bams")
                 f.write(
-                    f"\n{samtools_name}=$(sbatch --parsable --dependency=afterok:{dependencies} {job})\n"
+                    f"\n{samtools_name}=$(sbatch --job-name={name} --parsable --dependency=afterok:{dependencies} {job})\n"
                 )
 
             # remove samtools from done so all subsequent jobs run after samtools
@@ -1065,7 +1031,9 @@ def samtools_py(toml_config, done):
                 print("To-Do: " + samtools_name)
                 with open(output + "/scripts/main.sh", "a") as f:
                     f.write("\n# Rename, merge, sort and index bams for {sample}")
-                    f.write(f"\n{samtools_name}=$(sbatch --parsable {job})\n")
+                    f.write(
+                        f"\n{samtools_name}=$(sbatch --job-name={name} --parsable {job})\n"
+                    )
             else:
                 # All dorado_demux are done and samtools is done
                 print("Done: " + samtools_name)
@@ -1078,11 +1046,12 @@ def longReadSum(toml_config, done):
     time = "00-23:00"
 
     output = toml_config["general"]["project_path"]
+    name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
     email = toml_config["general"]["email"]
     genome = get_reference(toml_config["general"]["reference"])["fasta"]
 
     command_str = ""
-    for name in toml_config["general"]["samples"]:
+    for sample in toml_config["general"]["samples"]:
         command = [
             "apptainer",
             "run",
@@ -1093,9 +1062,9 @@ def longReadSum(toml_config, done):
             "--ref",
             genome,
             "-Q",
-            '"' + name + '_"',
+            '"' + sample + '_"',
             "-i",
-            output + "/alignments/" + name + "_sorted.bam",
+            output + "/alignments/" + sample + "_sorted.bam",
             "-o",
             output + "/qc",
         ]
@@ -1108,7 +1077,7 @@ def longReadSum(toml_config, done):
             [
                 "mv",
                 output + "/qc/bam_summary.txt",
-                output + "/qc/" + name + "_bam_summary.txt",
+                output + "/qc/" + sample + "_bam_summary.txt",
             ]
         )
         command.extend(["\n\n"])
@@ -1123,14 +1092,14 @@ def longReadSum(toml_config, done):
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("\n# QC")
             f.write(
-                f"\nlongreadsum=$(sbatch --parsable --dependency=afterok:$samtools {job})\n"
+                f"\nlongreadsum=$(sbatch --job-name={name} --parsable --dependency=afterok:$samtools {job})\n"
             )
     else:
         if tool not in done:
             print("To-Do: " + tool)
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write("\n# QC")
-                f.write(f"\nlongreadsum=$(sbatch --parsable {job})\n")
+                f.write(f"\nlongreadsum=$(sbatch --job-name={name} --parsable {job})\n")
         else:
             print("Done: " + tool)
 
@@ -1139,6 +1108,7 @@ def mosdepth(toml_config, done):
     # As a module until nextflow is usable
     tool = "mosdepth"
     output = toml_config["general"]["project_path"]
+    name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
     flowcells = toml_config["general"]["fc_dir_names"]
     threads = "4"
     memory = "8"
@@ -1157,8 +1127,8 @@ def mosdepth(toml_config, done):
     formatted_time = format_time(hours)
 
     command_str = ""
-    for name in toml_config["general"]["samples"]:
-        input_file = output + "/alignments/" + name + "_sorted.bam"
+    for sample in toml_config["general"]["samples"]:
+        input_file = output + "/alignments/" + sample + "_sorted.bam"
         # Main mosdepth function
         command = [
             "apptainer",
@@ -1173,7 +1143,7 @@ def mosdepth(toml_config, done):
             str(toml_config["mosdepth"]["bins"]),
             "-T",
             str(toml_config["mosdepth"]["thresholds"]),
-            output + "/qc/" + name,
+            output + "/qc/" + sample,
             input_file,
         ]
         command_str += " ".join(command) + "\n"
@@ -1183,7 +1153,7 @@ def mosdepth(toml_config, done):
             "-u",
             TOOL_PATH + "others/mosdepth/SummarizedMosdepth.py",
             "-p",
-            output + "/qc/" + name,
+            output + "/qc/" + sample,
             "--bins",
             str(toml_config["mosdepth"]["bins"]),
             "--thresholds",
@@ -1211,7 +1181,7 @@ def mosdepth(toml_config, done):
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("\n# Mosdepth")
             f.write(
-                f"\nmosdepth=$(sbatch --parsable --dependency=afterok:$samtools {job})\n"
+                f"\nmosdepth=$(sbatch --job-name={name} --parsable --dependency=afterok:$samtools {job})\n"
             )
 
     else:
@@ -1219,7 +1189,7 @@ def mosdepth(toml_config, done):
             print("To-Do: " + tool)
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write("\n# Mosdepth")
-                f.write(f"\nmosdepth=$(sbatch --parsable {job})\n")
+                f.write(f"\nmosdepth=$(sbatch --job-name={name} --parsable {job})\n")
         else:
             print("Done: " + tool)
 
@@ -1227,6 +1197,7 @@ def mosdepth(toml_config, done):
 def toulligqc(toml_config, done):
     tool = "toulligqc"
     output = toml_config["general"]["project_path"]
+    name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
     flowcells = toml_config["general"]["fc_dir_names"]
     threads = "4"
     memory = "8"
@@ -1259,8 +1230,8 @@ def toulligqc(toml_config, done):
             samplesheets.append(f"-s {f}")
 
     bams = []
-    for name in toml_config["general"]["samples"]:
-        input_file = output + "/alignments/" + name + "_sorted.bam"
+    for sample in toml_config["general"]["samples"]:
+        input_file = output + "/alignments/" + sample + "_sorted.bam"
         bams.append(f"-u {input_file}")
 
     command = (
@@ -1294,7 +1265,7 @@ def toulligqc(toml_config, done):
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("\n# ToulligQC")
             f.write(
-                f"\ntoulligqc=$(sbatch --parsable --dependency=afterok:$samtools {job})\n"
+                f"\ntoulligqc=$(sbatch --job-name={name} --parsable --dependency=afterok:$samtools {job})\n"
             )
 
     else:
@@ -1302,7 +1273,7 @@ def toulligqc(toml_config, done):
             print("To-Do: " + tool)
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write("\n# ToulligQC")
-                f.write(f"\ntoulligqc=$(sbatch --parsable {job})\n")
+                f.write(f"\ntoulligqc=$(sbatch --job-name={name} --parsable {job})\n")
         else:
             print("Done: " + tool)
 
@@ -1368,14 +1339,16 @@ def epi2me(toml_config, done):
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write(f"\n# Epi2me workflow human variation for {sample}")
                 f.write(
-                    f"\n{epi_name}=$(sbatch --parsable --dependency=afterok:${samtools_name} {job})\n"
+                    f"\n{epi_name}=$(sbatch --job-name={name} --parsable --dependency=afterok:${samtools_name} {job})\n"
                 )
         else:
             if epi_name not in done:
                 print("To-Do: " + epi_name)
                 with open(output + "/scripts/main.sh", "a") as f:
                     f.write(f"\n# Epi2me workflow human variation for {sample}")
-                    f.write(f"\n{epi_name}=$(sbatch --parsable {job})\n")
+                    f.write(
+                        f"\n{epi_name}=$(sbatch --job-name={name} --parsable {job})\n"
+                    )
             else:
                 print("Done: " + epi_name)
 
@@ -1412,14 +1385,14 @@ def trgt(toml_config, done):
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("\n# TRGT")
             f.write(
-                f"\ntrgt=$(sbatch --parsable --dependency=afterok:{dependencies} {job})\n"
+                f"\ntrgt=$(sbatch --job-name={name} --parsable --dependency=afterok:{dependencies} {job})\n"
             )
     else:
         if tool not in done:
             print("To-Do: " + tool)
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write("\n# TRGT")
-                f.write(f"\ntrgt=$(sbatch --parsable {job})\n")
+                f.write(f"\ntrgt=$(sbatch --job-name={name} --parsable {job})\n")
         else:
             print("Done: " + tool)
 
@@ -1457,14 +1430,14 @@ def strkit(toml_config, done):
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("\n# STRkit")
             f.write(
-                f"\nstrkit=$(sbatch --parsable --dependency=afterok:{dependencies} {job})\n"
+                f"\nstrkit=$(sbatch --job-name={name} --parsable --dependency=afterok:{dependencies} {job})\n"
             )
     else:
         if tool not in done:
             print("To-Do: " + tool)
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write("\n# STRkit")
-                f.write(f"\nstrkit=$(sbatch --parsable {job})\n")
+                f.write(f"\nstrkit=$(sbatch --job-name={name} --parsable {job})\n")
         else:
             print("Done: " + tool)
 
@@ -1503,14 +1476,16 @@ def ont_methyldmr_kit(toml_config, done):
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("\n# ont-methylDMR-kit")
             f.write(
-                f"\nont_methyldmr_kit=$(sbatch --parsable --dependency=afterok:{dependencies} {job})\n"
+                f"\nont_methyldmr_kit=$(sbatch --job-name={name} --parsable --dependency=afterok:{dependencies} {job})\n"
             )
     else:
         if tool not in done:
             print("To-Do: " + tool)
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write("\n# ont-methylDMR-kit")
-                f.write(f"\nont_methyldmr_kit=$(sbatch --parsable {job})\n")
+                f.write(
+                    f"\nont_methyldmr_kit=$(sbatch --job-name={name} --parsable {job})\n"
+                )
         else:
             print("Done: " + tool)
 
@@ -1558,14 +1533,16 @@ def flair(toml_config, done):
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write(f"\n# FLAIR for {sample}")
                 f.write(
-                    f"\n{flair_name}=$(sbatch --parsable --dependency=afterok:${samtools_name} {job})\n"
+                    f"\n{flair_name}=$(sbatch --job-name={name} --parsable --dependency=afterok:${samtools_name} {job})\n"
                 )
         else:
             if flair_name not in done:
                 print("To-Do: " + flair_name)
                 with open(output + "/scripts/main.sh", "a") as f:
                     f.write(f"\n# FLAIR for {sample}")
-                    f.write(f"\n{flair_name}=$(sbatch --parsable {job})\n")
+                    f.write(
+                        f"\n{flair_name}=$(sbatch --job-name={name} --parsable {job})\n"
+                    )
             else:
                 print("Done: " + flair_name)
 
@@ -1602,14 +1579,16 @@ def deepvariant(toml_config, done):
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write(f"\n# DeepVariant for {sample}")
                 f.write(
-                    f"\n{deepvariant_name}=$(sbatch --parsable --dependency=afterok:${samtools_name} {job})\n"
+                    f"\n{deepvariant_name}=$(sbatch --job-name={name} --parsable --dependency=afterok:${samtools_name} {job})\n"
                 )
         else:
             if deepvariant_name not in done:
                 print("To-Do: " + deepvariant_name)
                 with open(output + "/scripts/main.sh", "a") as f:
                     f.write(f"\n# DeepVariant for {sample}")
-                    f.write(f"\n{deepvariant_name}=$(sbatch --parsable {job})\n")
+                    f.write(
+                        f"\n{deepvariant_name}=$(sbatch --job-name={name} --parsable {job})\n"
+                    )
             else:
                 print("Done: " + deepvariant_name)
 
@@ -1648,14 +1627,14 @@ def cutesv(toml_config, done):
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("\n# cuteSV")
             f.write(
-                f"\ncutesv=$(sbatch --parsable --dependency=afterok:{dependencies} {job})\n"
+                f"\ncutesv=$(sbatch --job-name={name} --parsable --dependency=afterok:{dependencies} {job})\n"
             )
     else:
         if tool not in done:
             print("To-Do: " + tool)
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write("\n# cuteSV")
-                f.write(f"\ncutesv=$(sbatch --parsable {job})\n")
+                f.write(f"\ncutesv=$(sbatch --job-name={name} --parsable {job})\n")
         else:
             print("Done: " + tool)
 
@@ -1734,9 +1713,9 @@ def cleanup(toml_config, done):
 
     # dependencies = ":".join([f"$epi2me_{sample}" for sample in samples])
 
-    # with open(output + "/scripts/main.sh", "a") as f:
-    #     f.write("\n# Cleanup temporary files and logs\n")
-    #     f.write(f"\nsbatch --dependency=afterok:{dependencies} {job}\n")
+    with open(output + "/scripts/main.sh", "a") as f:
+        f.write("\n# Cleanup temporary files and logs\n")
+        f.write(f"\nsbatch --job-name={name} --dependency=singleton {job}\n")
 
 
 # Launches main function
