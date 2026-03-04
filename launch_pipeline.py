@@ -1673,13 +1673,15 @@ def cleanup(toml_config, done):
 
     threads = "1"
     memory = "1"
-    time = "00-02:00"
+    time = "00-23:00"
 
     # Build cleanup commands
     commands = []
 
     # Move all logs to scripts/logs
-    commands.append(f"mv {output}/*.log {output}/scripts/logs/")
+    commands.append(
+        f'find {output} -maxdepth 1 -name "*.log" ! -name "cleanup*" -exec mv -t {output}/scripts/logs/ {{}} +'
+    )
 
     # Remove empty dorado_demux.out
     commands.append(f"rm {output}/dorado_demux*.out")
