@@ -145,7 +145,7 @@ def main():
     # Create main.sh
     with open(output + "/scripts/main.sh", "w") as f:
         f.write("#!/bin/sh\n")
-        f.write("\nDEPS=()")  # Add downstream dependencies
+        f.write("\nDEPS=()\n")  # Add downstream dependencies
 
     # Calling main steps
     for func in function_queue:
@@ -164,6 +164,8 @@ def create_config_final(filename):
     with open(filename, "r") as f:
         toml_config = toml.load(f)
 
+    samples = toml_config["general"]["samples"]
+    print(samples)
     # Set kit to variable
     kit = toml_config["general"]["kit"]
 
