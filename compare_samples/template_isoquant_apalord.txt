@@ -5,7 +5,7 @@
 #SBATCH -t 02-23:59 # time (DD-HH:MM)
 #SBATCH -o isoquant_apalord_{0}.%N.%j.log
 #SBATCH -e isoquant_apalord_{0}.%N.%j.log
-#SBATCH --mail-type=FAIL,END
+#SBATCH --mail-type=FAIL
 #SBATCH --mail-user={1}
 #SBATCH --account=rrg-tetreaum
 
