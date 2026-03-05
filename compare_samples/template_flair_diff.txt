@@ -82,9 +82,9 @@ apptainer run $flair_img flair combine \
 echo -e "\nRunning FLAIR quantify"
 apptainer run $flair_img flair quantify \
     -r $manifest_quantify \
-    -i $project_path/{0}_combined.isoforms.fa \
+    -i $project_path/{0}_combined.fa \
     -o $project_path/{0}_quantify \
-    --isoform_bed $project_path/{0}_combined.isoforms.bed \
+    --isoform_bed $project_path/{0}_combined.bed \
     --stringent \
     --check_splice
 
@@ -99,7 +99,7 @@ apptainer run $flair_img flair diffexp \
 # Run differential splicing
 echo -e "\nRunning FLAIR diff splicing"
 apptainer run $flair_img flair diffsplice \
-    -i $project_path/{0}_combined.isoforms.bed \
+    -i $project_path/{0}_combined.bed \
     -q $project_path/{0}_quantify.counts.tsv \
     --threads 8 \
     --test \
