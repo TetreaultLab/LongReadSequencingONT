@@ -26,6 +26,10 @@ do
     mkdir -p $WORKDIR
     mkdir -p $WORKDIR/tmp
 
+    if [ -f "$WORKDIR/tmp/DEL.pickle" ]; then
+        rm -r $WORKDIR/tmp/*
+    fi
+
     $CUTESV_IMAGE cuteSV \
         /lustre10/scratch/{3}/{4}/alignments/$sample\_sorted.bam\
         {5} \
