@@ -38,9 +38,9 @@ echo -e "\nRunning IsoQuant\n"
 apptainer run $isoquant/isoquant.sif $isoquant/bin/isoquant.py \
         --reference $genome_fa \
         --genedb $isoquant/gencode.v48.primary_assembly.annotation.db \
-        --bam "${bam_list[@]}" \
+        --bam "${{bam_list[@]}}" \
         --data_type nanopore \
-        -o $isoquant_dir/$sample
+        -o $isoquant_dir
 
 # ---- APALORD ----
 echo -e "\nRunning APALORD\n"
