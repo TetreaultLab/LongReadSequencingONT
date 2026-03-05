@@ -33,17 +33,17 @@ mkdir -p $project_path/fastq
 # Find junctions for each samples
 for sample in {5}
 do
-    bam_file=$(grep -P "^$sample\t" {6} | cut -f3)/alignments/$sample\_sorted.bam
+    bam_file=$(grep -P "^$sample\t" {6} | cut -f3)/alignments/${{sample}}_sorted.bam
     echo -e "\nProcessing $bam_file for junctions"
 
     apptainer run $flair_img $intron_prospector_tool/intronProspector \
         -g $genome_fa \
         -b $project_path/$sample.IPjunctions.bed \
         -C 0.0 \
-        -c $project_path/$sample\_intron_calls.tsv \
+        -c $project_path/${{sample}}_intron_calls.tsv \
         $bam_file
 
-    echo -e "$project_path/$sample\_intron_calls.tsv" >> $project_path/IPjunctions_{0}_list.txt
+    echo -e "$project_path/${{sample}}_intron_calls.tsv" >> $project_path/IPjunctions_{0}_list.txt
 
     # Make fastq files
     echo -e "\nBam to Fastq for $sample"
@@ -59,7 +59,7 @@ apptainer run $flair_img $intron_prospector_tool/intronProspectorMerge \
 # Generate transcriptomes with FLAIR
 for sample in {5}
 do
-    bam_file=$(grep -P "^$sample\t" {6} | cut -f3)/alignments/$sample\_sorted.bam
+    bam_file=$(grep -P "^$sample\t" {6} | cut -f3)/alignments/${{sample}}_sorted.bam
     echo -e "\nProcessing $bam_file for FLAIR transcriptomes"
 
     apptainer run $flair_img flair transcriptome \
