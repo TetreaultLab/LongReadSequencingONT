@@ -1711,14 +1711,18 @@ def cleanup(toml_config, done):
     # Create slurm job (Might be wasteful of server resources?)
     job = create_script(tool, threads, memory, time, output, email, command_str, "")
 
-    with open(output + "/scripts/main.sh", "a") as f:
-        f.write("\n# Cleanup temporary files and logs\n")
-        f.write('\nDEPENDENCY_LIST=$(IFS=:; echo "${DEPS[*]}")')
-        f.write("\nif [ ${#DEPS[@]} -gt 0 ]; then")
-        f.write(f"\n\tsbatch --dependency=afterok:$DEPENDENCY_LIST {job}")
-        f.write("\nelse")
-        f.write(f"\n\tsbatch {job}")
-        f.write("\nfi\n")
+    if tool not in done:
+        print("To-Do: " + tool)
+        with open(output + "/scripts/main.sh", "a") as f:
+            f.write("\n# Cleanup temporary files and logs\n")
+            f.write('\nDEPENDENCY_LIST=$(IFS=:; echo "${DEPS[*]}")')
+            f.write("\nif [ ${#DEPS[@]} -gt 0 ]; then")
+            f.write(f"\n\tsbatch --dependency=afterok:$DEPENDENCY_LIST {job}")
+            f.write("\nelse")
+            f.write(f"\n\tsbatch {job}")
+            f.write("\nfi\n")
+    else:
+        print("Done: " + tool)
 
 
 # Launches main function
