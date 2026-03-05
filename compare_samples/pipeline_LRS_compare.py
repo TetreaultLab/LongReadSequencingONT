@@ -54,7 +54,7 @@ def main():
         function_queue.append(flair_diffsplice)
 
     if "apa" in toml_config["general"]["analyses"]:
-        function_queue.append(apa_tool)
+        function_queue.append(isoquant_apalord)
 
     if "dmrs" in toml_config["general"]["analyses"]:
         function_queue.append(modkit)
@@ -194,8 +194,58 @@ def flair_diffsplice(toml_config):
             o.write(slurm_filled)
 
 
-def apa_tool(toml_config):
-    print()
+def isoquant_apalord(toml_config):
+    tool = "isoquant_apalord"
+    current_directory = os.getcwd()
+    name = toml_config["general"]["comparison_name"]
+    email = toml_config["general"]["email"]
+    genome = (
+        TOOL_PATH + "references/gencode/GRCh38_p14/GRCh38.primary_assembly.genome.fa"
+    )
+    gtf = (
+        TOOL_PATH
+        + "references/gencode/GRCh38_p14/gencode.v48.primary_assembly.annotation.gtf"
+    )
+    conditionA = toml_config["general"]["conditionA"]
+    conditionB = toml_config["general"]["conditionB"]
+
+    # Get samples
+    df = read_metadata(toml_config)
+
+    samples = df["samples"].tolist()
+    str_samples = " ".join(samples)
+
+    cases = df[df["phenotype"] == conditionA]
+    cases_list = cases["samples"].tolist()
+    str_cases = ",".join(cases_list)
+
+    ctrls = df[df["phenotype"] == conditionB]
+    ctrls_list = ctrls["samples"].tolist()
+    str_ctrls = ",".join(ctrls_list)
+
+    # Run tool
+    job = current_directory + "/scripts/" + tool + ".slurm"
+    with open(
+        TOOL_PATH
+        + "main_pipelines/long-read/LongReadSequencingONT/compare_samples/template_isoquant_apalord.txt",
+        "r",
+    ) as f:
+        slurm = f.read()
+        slurm_filled = slurm.format(
+            name,
+            email,
+            genome,
+            gtf,
+            str_samples,
+            toml_config["general"]["metadata"],
+            conditionA,
+            conditionB,
+            str_cases,
+            str_ctrls,
+        )
+
+        with open(job, "w") as o:
+            o.write(slurm_filled)
 
 
 def modkit(toml_config):
