@@ -25,19 +25,22 @@ apalord_dir="/lustre10/scratch/$USER/{0}/apalord"
 genome_fa="{2}"
 gtf="{3}"
 
-# ---- IsoQuant ---- 
+# ---- Get bam files ----
+bam_list=() 
 for sample in {4}
 do
-        echo -e "\nRunning IsoQuant for $sample\n"
         bam_file=$(grep -P "^$sample\t" {5} | cut -f3)/alignments/${{sample}}_sorted.bam
-
-        apptainer run $isoquant/isoquant.sif $isoquant/bin/isoquant.py \
-                --reference $genome_fa \
-                --genedb $isoquant/gencode.v48.primary_assembly.annotation.db \
-                --bam $bam_file \
-                --data_type nanopore \
-                -o $isoquant_dir/$sample
+        bam_list+=("$bam_file")
 done
+
+# ---- IsoQuant ----
+echo -e "\nRunning IsoQuant\n"
+apptainer run $isoquant/isoquant.sif $isoquant/bin/isoquant.py \
+        --reference $genome_fa \
+        --genedb $isoquant/gencode.v48.primary_assembly.annotation.db \
+        --bam "${bam_list[@]}" \
+        --data_type nanopore \
+        -o $isoquant_dir/$sample
 
 # ---- APALORD ----
 echo -e "\nRunning APALORD\n"
