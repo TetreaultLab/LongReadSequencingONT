@@ -17,7 +17,7 @@ ml gcc r/4.5.0 apptainer
 isoquant="/lustre09/project/6019267/shared/tools/splicing/isoquant"
 apalord="/lustre09/project/6019267/shared/tools/polyadenylation/apalord"
 
-export R_LIBS=$apalord_dir/custom_r_4.5.0_lib/ # custom R libary
+export R_LIBS=$apalord/custom_r_4.5.0_lib/ # custom R libary
 
 # ---- Variables -----
 isoquant_dir="/lustre10/scratch/$USER/{0}/isoquant"
