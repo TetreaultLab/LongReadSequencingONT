@@ -9,8 +9,7 @@
 #SBATCH --mail-user={1}
 #SBATCH --account=rrg-tetreaum
 
-# Slurm script to execute in-house R APALORD script.
-# All parameters are mandatory.
+set -euo pipefail
 
 # ---- Environment setup ----
 ml gcc r/4.5.0 apptainer
