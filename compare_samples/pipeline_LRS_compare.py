@@ -14,8 +14,8 @@ TOOL_PATH = "/lustre09/project/6019267/shared/tools/"
 
 def main():
     parser = argparse.ArgumentParser(
-        prog="PipelineLong",
-        description="LongReadSequencing pipeline.",
+        prog="LRS compare samples",
+        description="Pipeline to compare LRS samples.",
     )
 
     parser.add_argument("config", type=str, help="Project config file.")
