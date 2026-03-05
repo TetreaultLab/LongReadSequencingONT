@@ -37,6 +37,7 @@ do
                 --bam $bam_file \
                 --data_type nanopore \
                 -o $isoquant_dir/$sample
+done
 
 # ---- APALORD ----
 echo -e "\nRunning APALORD\n"
