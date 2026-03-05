@@ -584,7 +584,7 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
                     + TOOL_PATH
                     + "main_pipelines/long-read/launch_pipeline_env/bin/activate"
                 )
-
+            slurm_filled += "\nset -euo pipefail"
             slurm_filled += "\n#\n### Calling " + tool + " - " + flowcell + "\n#\n"
             slurm_filled += command
             slurm_filled += "\n"
