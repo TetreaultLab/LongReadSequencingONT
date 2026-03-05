@@ -975,7 +975,7 @@ def samtools(toml_config, done):
             )
 
     else:
-        if tool not in done:
+        if samtools_name not in done:
             print(f"To-Do: {samtools_name}")
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write("\n# Samtools sort and index")
