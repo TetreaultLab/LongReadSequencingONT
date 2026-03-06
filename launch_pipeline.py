@@ -1693,6 +1693,15 @@ def cleanup(toml_config, done):
         commands.append(f"rm {scratch}/results/flair/{sample}/{sample}.fastq")
 
         # ont-methylDMR-kit
+        commands.append(
+            f"mv -t {scratch}/results/ont-methylDMR-kit/{sample}/ {scratch}/results/ont-methylDMR-kit/{sample}/annotated_dmrs/annotation_summary.log {scratch}/results/ont-methylDMR-kit/{sample}/annotated_dmrs/dmrs_table_annotated.bed {scratch}/results/ont-methylDMR-kit/{sample}/annotated_dmrs/report/dmr_summary_report.html {scratch}/results/ont-methylDMR-kit/{sample}/dmrs/dmrs_table.bed {scratch}/results/ont-methylDMR-kit/{sample}/dmrs/dmr_summary_stats.tsv {scratch}/results/ont-methylDMR-kit/{sample}/dmrs/dmr_status.log {scratch}/results/ont-methylDMR-kit/{sample}/modified_beds/*"
+            f"rm -r {scratch}/results/ont-methylDMR-kit/{sample}/annotated_dmrs/"
+            f"rm -r {scratch}/results/ont-methylDMR-kit/{sample}/dmrs/"
+            f"rm -r {scratch}/results/ont-methylDMR-kit/{sample}/execution/"
+            f"rm -r {scratch}/results/ont-methylDMR-kit/{sample}/modified_beds/"
+            f"rm -r {scratch}/results/ont-methylDMR-kit/{sample}/tmp"
+            f"rm {scratch}/results/ont-methylDMR-kit/{sample}/empty_gene_list.txt"
+        )
 
         # strkit
 
