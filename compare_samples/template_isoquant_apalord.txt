@@ -12,7 +12,7 @@
 set -euo pipefail
 
 # ---- Environment setup ----
-ml gcc r/4.5.0 apptainer
+ml gcc r/4.5.0 apptainer python/3.10.13
 
 isoquant="/lustre09/project/6019267/shared/tools/splicing/isoquant"
 apalord="/lustre09/project/6019267/shared/tools/polyadenylation/apalord"
@@ -43,6 +43,9 @@ apptainer run $isoquant/isoquant.sif $isoquant/bin/isoquant.py \
         -o $isoquant_dir
 
 # ---- APALORD ----
+if [ -d "$apalord_dir" ]; then
+        rm -r $apalord_dir
+fi
 echo -e "\nRunning APALORD\n"
 Rscript --vanilla $apalord/apalord.R \
         --case_group {6} \
