@@ -1651,7 +1651,7 @@ def cleanup(toml_config, done):
     samples = toml_config["general"]["samples"]
 
     threads = "1"
-    memory = "1"
+    memory = "4"
     time = "00-23:00"
 
     # Build cleanup commands
