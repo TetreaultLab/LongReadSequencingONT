@@ -2,7 +2,7 @@
 #SBATCH -N 1 #Number of nodes
 #SBATCH -n 8 # number of cores
 #SBATCH --mem 32G # memory pool for all cores
-#SBATCH -t 0-23:00 # time (D-HH:MM)
+#SBATCH -t 2-23:00 # time (D-HH:MM)
 #SBATCH -o flair_diff_{0}.%N.%j.log
 #SBATCH -e flair_diff_{0}.%N.%j.log
 #SBATCH --mail-type=FAIL
@@ -64,11 +64,11 @@ do
 
     apptainer run $flair_img flair transcriptome \
         -g $genome_fa \
+        -b $bam_file \
         -f $annotation_gtf \
-        -t 8 \
+        --threads 8 \
         --parallelmode bychrom \
         --junction_bed $project_path/IPjunctions_{0}_list_merged.bed \
-        -b $bam_file \
         -o $project_path/$sample
 done
 
@@ -83,6 +83,7 @@ echo -e "\nRunning FLAIR quantify"
 apptainer run $flair_img flair quantify \
     -r $manifest_quantify \
     -i $project_path/{0}_combined.fa \
+    --threads 8 \
     -o $project_path/{0}_quantify \
     --isoform_bed $project_path/{0}_combined.bed \
     --stringent \
