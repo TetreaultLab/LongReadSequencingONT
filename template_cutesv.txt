@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH -N 1 #Number of nodes
-#SBATCH -n 4 # number of cores
-#SBATCH --mem 32G # memory pool for all cores
-#SBATCH -t 0-23:00 # time (D-HH:MM)
+#SBATCH -n 1 # number of cores
+#SBATCH --mem 8G # memory pool for all cores
+#SBATCH -t 0-11:00 # time (D-HH:MM)
 #SBATCH -o cutesv.%N.%j.log
 #SBATCH -e cutesv.%N.%j.log
 #SBATCH --mail-type=FAIL
@@ -43,7 +43,7 @@ do
         --diff_ratio_merging_INS 0.3 \
         --max_cluster_bias_DEL 100 \
         --diff_ratio_merging_DEL 0.3 \
-        --threads 16
+        --threads 4
 done
 
 if [ $? -eq 0 ]; then
