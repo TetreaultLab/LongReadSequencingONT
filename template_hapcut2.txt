@@ -23,7 +23,9 @@ CALLER="{6}"
 VCF="{7}"
 
 # Decompress GZIP VCF
-gzip -dk $VCF.gz
+if [ ! -f "$VCF" ]; then
+    gzip -dk $VCF.gz
+fi
 
 # Create Output Directory
 mkdir -p $WD
