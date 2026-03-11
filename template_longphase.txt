@@ -21,23 +21,24 @@ STEPS_DONE="{5}/scripts/steps_done.txt"
 mkdir -p $WD
 
 # Extracts per-read methylation tags from the BAM into a VCF for methylation-aware phasing
-$longphase modcall --bam-file $BAM \
-    --reference $REF \
-	--snp-file /lustre10/scratch/$USER/{2}/results/epi2me/{0}/{0}.wf_snp.vcf.gz \
-	--out-prefix $WD/{0}_mod \
-    --threads 8
+$longphase modcall \
+    -b $BAM \
+    -r $REF \
+	-s /lustre10/scratch/$USER/{2}/results/epi2me/{0}/{0}.wf_snp.vcf.gz \
+	-o $WD/{0}_mod \
+    -t 8
 
 # Phases SNP, SV, and methylation VCFs
 $longphase phase \
     --ont \
-	--bam-file $BAM \
-	--reference $REF \
-	--snp-file /lustre10/scratch/$USER/{2}/results/epi2me/{0}/{0}.wf_snp.vcf.gz \
-	--sv-file /lustre10/scratch/$USER/{2}/results/epi2me/{0}/{0}.wf_sv.vcf.gz \
-	--mod-file $WD/{0}_mod \
+	-b $BAM \
+	-r $REF \
+	-s /lustre10/scratch/$USER/{2}/results/epi2me/{0}/{0}.wf_snp.vcf.gz \
+	--sv-file=/lustre10/scratch/$USER/{2}/results/epi2me/{0}/{0}.wf_sv.vcf.gz \
+	--mod-file=$WD/{0}_mod \
 	--indels \
-	--out-prefix $WD/{0}_phased \
-	--threads 8
+	-o $WD/{0}_phased \
+	-t 8
 
 # Haplotagging
 $longphase haplotag \
