@@ -1,0 +1,53 @@
+#!/bin/bash
+#SBATCH -N 1 #Number of nodes
+#SBATCH --cpus-per-task 8 # number of cores
+#SBATCH --mem 128G # memory pool for all cores
+#SBATCH -t 00-01:00 # time (D-HH:MM)
+#SBATCH -o longphase_{0}.%N.%j.log
+#SBATCH -e longphase_{0}.%N.%j.log
+#SBATCH --mail-type=FAIL
+#SBATCH --account=rrg-tetreaum
+#SBATCH --mail-user={1}
+
+longphase="/lustre09/project/6019267/shared/tools/phasing/longphase/longphase_linux-x64"
+
+WD="/lustre10/scratch/$USER/{2}/results/longphase/{0}"
+REF="{3}"
+BAM="{4}"
+STEPS_DONE="{5}/scripts/steps_done.txt"
+
+mkdir -p $WD
+
+# Extracts per-read methylation tags from the BAM into a VCF for methylation-aware phasing
+$longphase modcall --bam-file $BAM \
+    --reference $REF \
+	--snp-file /lustre10/scratch/$USER/{2}/results/epi2me/{0}/{0}.wf_snp.vcf.gz \
+	--out-prefix $WD/{0}_mod \
+    --threads 8
+
+# Phases SNP, SV, and methylation VCFs
+$longphase phase \
+    --ont \
+	--bam-file $BAM \
+	--reference $REF \
+	--snp-file /lustre10/scratch/$USER/{2}/results/epi2me/{0}/{0}.wf_snp.vcf.gz \
+	--sv-file /lustre10/scratch/$USER/{2}/results/epi2me/{0}/{0}.wf_sv.vcf.gz \
+	--mod-file $WD/{0}_mod \
+	--indels \
+	--out-prefix $WD/{0}_phased \
+	--threads 8
+
+# Haplotagging
+$longphase haplotag \
+    --bam-file $BAM \
+	--reference $REF \
+	--snp-file $WD/{0}_phased_SNP.vcf \
+	--sv-file $WD/{0}_phased_SV.vcf \
+	--mod-file $WD/{0}_phased_mod.vcf \
+	--out-prefix $WD/{0}_haplotag \
+	--cram \
+	--threads 8
+
+if [ $? -eq 0 ]; then
+    echo "longphase_{0}" >> "$STEPS_DONE"
+fi

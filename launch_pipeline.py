@@ -1639,6 +1639,50 @@ def cutesv(toml_config, done):
             print("Done: " + tool)
 
 
+def longphase(toml_config, done):
+    tool = "longphase"
+
+    output = toml_config["general"]["project_path"]
+    email = toml_config["general"]["email"]
+    genome = get_reference(toml_config["general"]["reference"])["fasta"]
+    name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
+    username = os.environ.get("USER")
+
+    for sample in toml_config["general"]["samples"]:
+        bam = f"/lustre10/scratch/{username}/{name}/alignments/{sample}_sorted.bam"
+
+        job = output + "/scripts/" + tool + "_" + sample + ".slurm"
+        with open(
+            TOOL_PATH
+            + "main_pipelines/long-read/LongReadSequencingONT/template_longphase.txt",
+            "r",
+        ) as f:
+            slurm = f.read()
+            slurm_filled = slurm.format(sample, email, name, genome, bam, output)
+
+            with open(job, "w") as o:
+                o.write(slurm_filled)
+
+        epi2me_name = f"epi2me_{sample}"
+        longphase_name = f"longphase_{sample}"
+
+        if epi2me_name not in done:
+            print("To-Do: " + longphase_name)
+            with open(output + "/scripts/main.sh", "a") as f:
+                f.write(f"\n# LongPhase for {sample}")
+                f.write(
+                    f"\nDEPS+=($(sbatch --parsable --dependency=afterok:${epi2me_name} {job}))\n"
+                )
+        else:
+            if longphase_name not in done:
+                print("To-Do: " + longphase_name)
+                with open(output + "/scripts/main.sh", "a") as f:
+                    f.write(f"\n# LongPhase for {sample}")
+                    f.write(f"\nDEPS+=($(sbatch --parsable {job}))\n")
+            else:
+                print("Done: " + longphase_name)
+
+
 def cleanup(toml_config, done):
     # Simple function to remove redundant files and cleanup structure
     tool = "cleanup"
