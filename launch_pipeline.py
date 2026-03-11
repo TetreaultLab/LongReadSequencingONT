@@ -1697,7 +1697,7 @@ def hapcut2(toml_config, done):
     for sample in toml_config["general"]["samples"]:
         bam = f"/lustre10/scratch/{username}/{name}/alignments/{sample}_sorted.bam"
         caller = "clair3"
-        vcf = f"/lustre10/scratch/{username}/{name}/results/epi2me/{sample}/{sample}.wf_snp.vcf.gz"
+        vcf = f"/lustre10/scratch/{username}/{name}/results/epi2me/{sample}/{sample}.wf_snp.vcf"
 
         job = output + "/scripts/" + tool + "_" + sample + ".slurm"
         with open(

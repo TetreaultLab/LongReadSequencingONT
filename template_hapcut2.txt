@@ -22,17 +22,21 @@ STEPS_DONE="{5}/scripts/steps_done.txt"
 CALLER="{6}"
 VCF="{7}"
 
+# Decompress GZIP VCF
+gzip -dk $VCF.gz
+
 # Create Output Directory
 mkdir -p $WD
 
 # If using DeepVariant, VCF needs filtering or tool will crash
 # No need if using Clair3/EPI2ME
 if [[ "$CALLER" == "deepvariant" ]]; then
-     # Filtered VCF Name
-     FILTERED_VCF="$WD/{0}.het_filtered.vcf"
+    # Filtered VCF Name
+    FILTERED_VCF="$WD/{0}.het_filtered.vcf"
+
 
      # Filtering out missing genotypes
-     bcftools view \
+    bcftools view \
         -m2 -M2 \
         -g het \
         -f PASS \
