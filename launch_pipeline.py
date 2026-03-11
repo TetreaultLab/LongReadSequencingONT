@@ -1721,14 +1721,14 @@ def hapcut2(toml_config, done):
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write(f"\n# HapCut2 for {sample}")
                 f.write(
-                    f"\nDEPS+=($(sbatch --parsable --dependency=afterok:${epi2me_name} {job}))\n"
+                    f"\n{hapcut2_name}=$(sbatch --parsable --dependency=afterok:${epi2me_name} {job})\n"
                 )
         else:
             if hapcut2_name not in done:
                 print("To-Do: " + hapcut2_name)
                 with open(output + "/scripts/main.sh", "a") as f:
                     f.write(f"\n# HapCut2 for {sample}")
-                    f.write(f"\nDEPS+=($(sbatch --parsable {job}))\n")
+                    f.write(f"\n{hapcut2_name}=$(sbatch --parsable {job})\n")
             else:
                 print("Done: " + hapcut2_name)
 
