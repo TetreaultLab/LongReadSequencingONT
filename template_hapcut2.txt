@@ -1,0 +1,88 @@
+#!/bin/bash
+#SBATCH -N 1 #Number of nodes
+#SBATCH --cpus-per-task=1 # number of cores
+#SBATCH --mem 10G # memory pool for all cores
+#SBATCH -t 00-01:00 # time (D-HH:MM)
+#SBATCH -o hapcut2_{0}.%N.%j.log
+#SBATCH -e hapcut2_{0}.%N.%j.log
+#SBATCH --mail-type=FAIL
+#SBATCH --account=rrg-tetreaum
+#SBATCH --mail-user={1}
+
+ml apptainer/1.4.5 bcftools tabix
+
+IMAGE="apptainer run /lustre09/project/6019267/shared/tools/phasing/hapcut2/hapcut2.sif"                           TOOLDIR="/lustre09/project/6019267/shared/tools/phasing/hapcut2/HapCUT2"
+TOOLDIR="/lustre09/project/6019267/shared/tools/phasing/hapcut2"
+
+WD="/lustre10/scratch/$USER/{2}/results/hapcut2/{0}"
+REF="{3}"
+BAM="{4}"
+STEPS_DONE="{5}/scripts/steps_done.txt"
+CALLER="{6}"
+VCF="{7}"
+
+# Create Output Directory
+mkdir -p $WD
+
+# If using DeepVariant, VCF needs filtering or tool will crash
+# No need if using Clair3/EPI2ME
+if [[ "$CALLER" == "deepvariant" ]]; then
+     # Filtered VCF Name
+     FILTERED_VCF="$WD/{0}.het_filtered.vcf"
+
+     # Filtering out missing genotypes
+     bcftools view \
+        -m2 -M2 \
+        -g het \
+        -f PASS \
+        -e 'GT="./." || GT="0/0"' \
+        "/lustre10/scratch/$USER/{2}/results/deepvariant/{0}_deepvariant.vcf" \
+        -Ov -o "$FILTERED_VCF"
+
+	VCF=$FILTERED_VCF
+fi
+
+# extractHAIRS is run per chromosome with --region to avoid excessive memory usage faults
+# Chromosome fragments are then concatenated into a single file
+CHROMS=$(grep -v '^#' "$VCF" | cut -f1 | sort -u)
+COMBINED_FRAGMENTS="$WD/{0}_fragment_file"
+
+> "$COMBINED_FRAGMENTS"
+
+# Running extractHAIRS on each chrom in the VCF
+for CHR in $CHROMS; do
+    # Define fragment file
+    FRAG="$WD/{0}_fragments_$CHR"
+
+    # Check if extractHAIRS exits successfully
+    if $IMAGE $TOOLDIR/build/extractHAIRS \
+        --ont 1 \
+        --bam $BAM \
+        --VCF $VCF \
+        --out "$FRAG" \
+        --ref $REF \
+        --region $CHR; then
+
+        # If fragment file non-empty, append it to combined fragments file
+        if [[ -s "$FRAG" ]]; then
+            cat "$FRAG" >> "$COMBINED_FRAGMENTS"
+        fi
+
+    # Skips the chromosome if extractHAIRS fails
+    else
+        echo "WARNING: extractHAIRS failed for $CHR, skipping"
+    fi 
+
+   # Delete fragment file since appended to combined fragments
+    rm -f "$FRAG"
+done
+
+# Assemble fragment file into haplotype blocks
+$IMAGE $TOOLDIR/build/HAPCUT2 \
+    --fragments "$COMBINED_FRAGMENTS" \
+    --VCF "$VCF" \
+    --output "$WD/{0}_haplotype"
+
+# Bgzip and tabix the phased vcf if using methphaser or just to save space
+bgzip -c "$WD/{0}_haplotype.phased.VCF" > "$WD/{0}_haplotype.phased.vcf.gz"
+tabix -p vcf "$WD/{0}_haplotype.phased.vcf.gz"
