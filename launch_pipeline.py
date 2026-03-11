@@ -133,11 +133,13 @@ def main():
     if "SV" in toml_config["general"]["analysis"]:
         function_queue.append(cutesv)
 
-    # # Annotation
+    # Phasing
+    if "phasing" in toml_config["general"]["analysis"]:
+        function_queue.append(longphase)
+        function_queue.append(hapcut2)
+        function_queue.append(methphaser)
 
-    # # Phasing
-    # if "phasing" in toml_config["general"]["analysis"]:
-    #     function_queue.append()
+    # Annotation
 
     # Clean up
     function_queue.append(cleanup)
