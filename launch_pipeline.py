@@ -1731,6 +1731,47 @@ def hapcut2(toml_config, done):
                 print("Done: " + hapcut2_name)
 
 
+def methphaser(toml_config, done):
+    tool = "methphaser"
+
+    output = toml_config["general"]["project_path"]
+    email = toml_config["general"]["email"]
+    genome = get_reference(toml_config["general"]["reference"])["fasta"]
+    name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
+
+    for sample in toml_config["general"]["samples"]:
+        job = output + "/scripts/" + tool + "_" + sample + ".slurm"
+        with open(
+            TOOL_PATH
+            + "main_pipelines/long-read/LongReadSequencingONT/template_methphaser.txt",
+            "r",
+        ) as f:
+            slurm = f.read()
+            slurm_filled = slurm.format(sample, email, name, genome, output)
+
+            with open(job, "w") as o:
+                o.write(slurm_filled)
+
+        hapcut2_name = f"hapcut2_{sample}"
+        methphaser_name = f"methphaser_{sample}"
+
+        if hapcut2_name not in done:
+            print("To-Do: " + methphaser_name)
+            with open(output + "/scripts/main.sh", "a") as f:
+                f.write(f"\n# MethPhaser for {sample}")
+                f.write(
+                    f"\nDEPS+=($(sbatch --parsable --dependency=afterok:${hapcut2_name} {job}))\n"
+                )
+        else:
+            if methphaser_name not in done:
+                print("To-Do: " + methphaser_name)
+                with open(output + "/scripts/main.sh", "a") as f:
+                    f.write(f"\n# MethPhaser for {sample}")
+                    f.write(f"\nDEPS+=($(sbatch --parsable {job}))\n")
+            else:
+                print("Done: " + methphaser_name)
+
+
 def cleanup(toml_config, done):
     # Simple function to remove redundant files and cleanup structure
     tool = "cleanup"
