@@ -9,6 +9,8 @@
 #SBATCH --account=rrg-tetreaum
 #SBATCH --mail-user={1} # CHANGE TO YOUR EMAIL
 
+set -euo pipefail
+
 source /lustre09/project/6019267/shared/tools/main_pipelines/long-read/launch_pipeline_env/bin/activate
 export "PATH=/lustre09/project/6019267/shared/tools/phasing/methphaser/methphaser/:$PATH"
 export REF_PATH=/lustre09/project/6019267/annelied/LRS/phasing/HG002/sample

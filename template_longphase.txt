@@ -9,6 +9,8 @@
 #SBATCH --account=rrg-tetreaum
 #SBATCH --mail-user={1}
 
+set -euo pipefail
+
 longphase="/lustre09/project/6019267/shared/tools/phasing/longphase/longphase_linux-x64"
 
 WD="/lustre10/scratch/$USER/{2}/results/longphase/{0}"
