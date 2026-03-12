@@ -28,7 +28,7 @@ $TOOLDIR/meth_phaser_parallel \
     -b $E2M/{0}.haplotagged.cram \
     -r $REF \
     -g $E2M/{0}.wf_snp.haploblocks.gtf \
-    -vc /lustre10/scratch/$USER/{2}/results/hapcut2/{0}_haplotype.phased.vcf.gz \
+    -vc /lustre10/scratch/$USER/{2}/results/hapcut2/{0}/{0}_haplotype.phased.vcf.gz \
     -o $WD \
     -t 8
 
@@ -37,7 +37,7 @@ $TOOLDIR/meth_phaser_post_processing \
     -if $WD/work \
     -ov $WD/{0}_methphaser.vcf \
     -ob $WD \
-    -vc /lustre10/scratch/$USER/{2}/results/hapcut2/{0}_haplotype.phased.vcf.gz \
+    -vc /lustre10/scratch/$USER/{2}/results/hapcut2/{0}/{0}_haplotype.phased.vcf.gz \
     -t 8
 
 if [ $? -eq 0 ]; then
