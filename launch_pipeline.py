@@ -135,7 +135,7 @@ def main():
 
     # Phasing
     if "phasing" in toml_config["general"]["analysis"]:
-        function_queue.append(longphase)
+        # function_queue.append(longphase) # Removed because it takes too much memory
         function_queue.append(hapcut2)
         function_queue.append(methphaser)
 
