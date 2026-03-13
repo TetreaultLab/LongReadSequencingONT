@@ -13,7 +13,7 @@ set -euo pipefail
 
 source /lustre09/project/6019267/shared/tools/main_pipelines/long-read/launch_pipeline_env/bin/activate
 export "PATH=/lustre09/project/6019267/shared/tools/phasing/methphaser/methphaser-0.0.4/:$PATH"
-export REF_PATH="/lustre09/project/6019267/shared/tools/references/gencode/GRCh38_p14/GRCh38.primary_assembly.genome.fa"
+# export REF_PATH="/lustre09/project/6019267/shared/tools/references/gencode/GRCh38_p14/"
 
 TOOLDIR="/lustre09/project/6019267/shared/tools/phasing/methphaser/methphaser-0.0.4"
 WD="/lustre10/scratch/$USER/{2}/results/methphaser/{0}"
@@ -36,7 +36,7 @@ $TOOLDIR/meth_phaser_post_processing \
     -ib $E2M/{0}.haplotagged.cram \
     -if $WD/work \
     -ov $WD/{0}_methphaser.vcf \
-    -ob $WD \
+    -ob $WD/{0}_methphaser.bam \
     -vc /lustre10/scratch/$USER/{2}/results/hapcut2/{0}/{0}_haplotype.phased.vcf.gz \
     -t 8
 
