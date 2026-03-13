@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH -N 1 #Number of nodes
-#SBATCH --cpus-per-task 24 # number of cores
+#SBATCH --cpus-per-task 1 # number of cores
 #SBATCH --mem 256G # memory pool for all cores
 #SBATCH -t 00-11:00 # time (D-HH:MM)
 #SBATCH -o longphase_{0}.%N.%j.log
@@ -26,7 +26,7 @@ $longphase modcall \
     -r $REF \
 	-s /lustre10/scratch/$USER/{2}/results/epi2me/{0}/{0}.wf_snp.vcf.gz \
 	-o $WD/{0}_mod \
-    -t 24
+    -t 1
 
 # Phases SNP, SV, and methylation VCFs
 $longphase phase \
@@ -38,7 +38,7 @@ $longphase phase \
 	--mod-file=$WD/{0}_mod \
 	--indels \
 	-o $WD/{0}_phased \
-	-t 24
+	-t 1
 
 # Haplotagging
 $longphase haplotag \
@@ -49,7 +49,7 @@ $longphase haplotag \
 	--mod-file=$WD/{0}_mod.vcf \
 	-o $WD/{0}_haplotag \
 	--cram \
-	-t 24
+	-t 1
 
 if [ $? -eq 0 ]; then
     echo "longphase_{0}" >> "$STEPS_DONE"

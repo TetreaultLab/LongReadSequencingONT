@@ -29,7 +29,7 @@ $TOOLDIR/meth_phaser_parallel \
     -r $REF \
     -g $E2M/{0}.wf_snp.haploblocks.gtf \
     -vc /lustre10/scratch/$USER/{2}/results/hapcut2/{0}/{0}_haplotype.phased.vcf.gz \
-    -o $WD \
+    -o $WD/work \
     -t 2
 
 $TOOLDIR/meth_phaser_post_processing \
