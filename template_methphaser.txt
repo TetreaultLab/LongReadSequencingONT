@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH -N 1 #Number of nodes
-#SBATCH --cpus-per-task=8 # number of cores
-#SBATCH --mem 64G # memory pool for all cores
-#SBATCH -t 00-23:00 # time (D-HH:MM)
+#SBATCH --cpus-per-task 2 # number of cores
+#SBATCH --mem 8G # memory pool for all cores
+#SBATCH -t 00-11:00 # time (D-HH:MM)
 #SBATCH -o methphaser_{0}.%N.%j.log
 #SBATCH -e methphaser_{0}.%N.%j.log
 #SBATCH --mail-type=FAIL
@@ -30,7 +30,7 @@ $TOOLDIR/meth_phaser_parallel \
     -g $E2M/{0}.wf_snp.haploblocks.gtf \
     -vc /lustre10/scratch/$USER/{2}/results/hapcut2/{0}/{0}_haplotype.phased.vcf.gz \
     -o $WD \
-    -t 8
+    -t 2
 
 $TOOLDIR/meth_phaser_post_processing \
     -ib $E2M/{0}.haplotagged.cram \
@@ -38,7 +38,7 @@ $TOOLDIR/meth_phaser_post_processing \
     -ov $WD/{0}_methphaser.vcf \
     -ob $WD/{0}_methphaser.bam \
     -vc /lustre10/scratch/$USER/{2}/results/hapcut2/{0}/{0}_haplotype.phased.vcf.gz \
-    -t 8
+    -t 2
 
 if [ $? -eq 0 ]; then
     echo "methphaser_{0}" >> "$STEPS_DONE"
