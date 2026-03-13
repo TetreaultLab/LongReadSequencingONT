@@ -12,10 +12,10 @@
 set -euo pipefail
 
 source /lustre09/project/6019267/shared/tools/main_pipelines/long-read/launch_pipeline_env/bin/activate
-export PATH="/lustre09/project/6019267/shared/tools/phasing/methphaser/methphaser/:$PATH"
-export REF_PATH="/lustre09/project/6019267/shared/tools/references/gencode/GRCh38_p14"
+export "PATH=/lustre09/project/6019267/shared/tools/phasing/methphaser-0.0.4/methphaser-0.0.4/:$PATH"
+export REF_PATH="/lustre09/project/6019267/shared/tools/references/gencode/GRCh38_p14/GRCh38.primary_assembly.genome.fa"
 
-TOOLDIR="/lustre09/project/6019267/shared/tools/phasing/methphaser/methphaser"
+TOOLDIR="/lustre09/project/6019267/shared/tools/phasing/methphaser-0.0.4/methphaser-0.0.4"
 WD="/lustre10/scratch/$USER/{2}/results/methphaser/{0}"
 REF="{3}"
 E2M="/lustre10/scratch/$USER/{2}/results/epi2me/{0}"
