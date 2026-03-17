@@ -30,18 +30,18 @@ do
     # If results ar phased
     if [[ -f "$pileup/$sample.wf_mods.1.bedmethyl.gz" ]]; then
         tabix -p bed $pileup/$sample.wf_mods.1.bedmethyl.gz
-        samples="$samples -s $pileup/$sample.wf_mods.1.bedmethyl.gz ${{condition}}_${{sample}}_2"
+        samples+=" -s $pileup/$sample.wf_mods.1.bedmethyl.gz ${{condition}}_${{sample}}_2"
     fi
     
     if [[ -f "$pileup/$sample.wf_mods.2.bedmethyl.gz" ]]; then
         tabix -p bed $pileup/$sample.wf_mods.2.bedmethyl.gz
-        samples="$samples -s $pileup/$sample.wf_mods.2.bedmethyl.gz ${{condition}}_${{sample}}_2"
+        samples+=" -s $pileup/$sample.wf_mods.2.bedmethyl.gz ${{condition}}_${{sample}}_2"
     fi
 
     # If results are not phased
     if [[ -f "$pileup/$sample.wf_mods.bedmethyl.gz" ]]; then
         tabix -p bed $pileup/$sample.wf_mods.bedmethyl.gz
-        samples="$samples -s $pileup/$sample.wf_mods.bedmethyl.gz ${{condition}}_$sample"
+        samples+=" -s $pileup/$sample.wf_mods.bedmethyl.gz ${{condition}}_$sample"
     fi
 done
 
