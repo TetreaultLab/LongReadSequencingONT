@@ -259,6 +259,7 @@ def modkit(toml_config):
 
     # Get samples
     df = read_metadata(toml_config)
+    print(df)
     samples = df["samples"].tolist()
     str_samples = " ".join(samples)
 
