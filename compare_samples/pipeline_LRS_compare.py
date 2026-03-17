@@ -249,7 +249,36 @@ def isoquant_apalord(toml_config):
 
 
 def modkit(toml_config):
-    print()
+    tool = "modkit_dmrs"
+    current_directory = os.getcwd()
+    name = toml_config["general"]["comparison_name"]
+    email = toml_config["general"]["email"]
+    genome = (
+        TOOL_PATH + "references/gencode/GRCh38_p14/GRCh38.primary_assembly.genome.fa"
+    )
+
+    # Get samples
+    df = read_metadata(toml_config)
+    samples = df["samples"].tolist()
+    str_samples = " ".join(samples)
+
+    job = current_directory + "/scripts/" + tool + ".slurm"
+    with open(
+        TOOL_PATH
+        + "main_pipelines/long-read/LongReadSequencingONT/compare_samples/template_flair_diff.txt",
+        "r",
+    ) as f:
+        slurm = f.read()
+        slurm_filled = slurm.format(
+            name,
+            email,
+            genome,
+            toml_config["general"]["metadata"],
+            str_samples,
+        )
+
+        with open(job, "w") as o:
+            o.write(slurm_filled)
 
 
 # Launches main function
