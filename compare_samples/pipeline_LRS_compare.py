@@ -259,10 +259,8 @@ def modkit(toml_config):
 
     # Get samples
     df = read_metadata(toml_config)
-    print(df)
     samples = df["samples"].tolist()
     str_samples = " ".join(samples)
-    print(str_samples)
 
     job = current_directory + "/scripts/" + tool + ".slurm"
     with open(
@@ -272,11 +270,7 @@ def modkit(toml_config):
     ) as f:
         slurm = f.read()
         slurm_filled = slurm.format(
-            name,
-            email,
-            genome,
-            toml_config["general"]["metadata"],
-            str_samples,
+            name, email, genome, toml_config["general"]["metadata"], str_samples
         )
 
         with open(job, "w") as o:
