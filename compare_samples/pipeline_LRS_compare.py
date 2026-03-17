@@ -265,7 +265,7 @@ def modkit(toml_config):
     job = current_directory + "/scripts/" + tool + ".slurm"
     with open(
         TOOL_PATH
-        + "main_pipelines/long-read/LongReadSequencingONT/compare_samples/template_flair_diff.txt",
+        + "main_pipelines/long-read/LongReadSequencingONT/compare_samples/template_modkit_dmrs.txt",
         "r",
     ) as f:
         slurm = f.read()
