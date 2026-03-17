@@ -259,8 +259,10 @@ def modkit(toml_config):
 
     # Get samples
     df = read_metadata(toml_config)
+    print(df)
     samples = df["samples"].tolist()
     str_samples = " ".join(samples)
+    print(str_samples)
 
     job = current_directory + "/scripts/" + tool + ".slurm"
     with open(
