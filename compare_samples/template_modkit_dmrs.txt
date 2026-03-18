@@ -47,12 +47,10 @@ do
     fi
 done
 
-echo "$s"
-
 # Per CpGs
 echo -e "\nRunning modkit DMRs for CpGs"
-$MODKIT dmr multi \
-    $s \
+$MODKIT dmr pair \
+    {5} \
     --out-dir $out_dir \
     --prefix {0}_cpg \
     --regions-bed $cpg_islands \
@@ -63,9 +61,9 @@ $MODKIT dmr multi \
     --force \
 
 # Per base
-echo -e "\nRunning modkit DMRs per base"
-$MODKIT dmr multi \
-    $s \
+echo -e "\nRunning modkit DMRs base"
+$MODKIT dmr pair \
+    {5} \
     --out-dir $out_dir \
     --prefix {0}_base \
     --ref $ref \

@@ -256,11 +256,35 @@ def modkit(toml_config):
     genome = (
         TOOL_PATH + "references/gencode/GRCh38_p14/GRCh38.primary_assembly.genome.fa"
     )
+    conditionA = toml_config["general"]["conditionA"]
+    conditionB = toml_config["general"]["conditionB"]
 
     # Get samples
     df = read_metadata(toml_config)
     samples = df["samples"].tolist()
     str_samples = " ".join(samples)
+
+    result_list = []
+    case = df[df["phenotype"] == conditionA]
+    ctrl = df[df["phenotype"] == conditionB]
+
+    for row in case.itertuples():
+        line = (
+            f"-a {row.project_path}/results/epi2me/{row.sample}/{row.sample}.wf_mods.1.bedmethyl.gz "
+            f"-a {row.project_path}/results/epi2me/{row.sample}/{row.sample}.wf_mods.2.bedmethyl.gz"
+        )
+        result_list.append(line)
+
+    for row in ctrl.itertuples():
+        line = (
+            f"-b {row.project_path}/results/epi2me/{row.sample}/{row.sample}.wf_mods.1.bedmethyl.gz "
+            f"-b {row.project_path}/results/epi2me/{row.sample}/{row.sample}.wf_mods.2.bedmethyl.gz"
+        )
+        result_list.append(line)
+
+    print(result_list)
+    pairs = " ".join(result_list)
+    print(pairs)
 
     job = current_directory + "/scripts/" + tool + ".slurm"
     with open(
@@ -270,7 +294,12 @@ def modkit(toml_config):
     ) as f:
         slurm = f.read()
         slurm_filled = slurm.format(
-            name, email, genome, toml_config["general"]["metadata"], str_samples
+            name,
+            email,
+            genome,
+            toml_config["general"]["metadata"],
+            str_samples,
+            pairs,
         )
 
         with open(job, "w") as o:
