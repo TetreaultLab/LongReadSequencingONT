@@ -268,14 +268,14 @@ def modkit(toml_config):
     case = df[df["phenotype"] == conditionA]
     ctrl = df[df["phenotype"] == conditionB]
 
-    for row in case.itertuples():
+    for row in ctrl.itertuples():
         line = (
             f"-a {row.project_path}/results/epi2me/{row.samples}/{row.samples}.wf_mods.1.bedmethyl.gz "
             f"-a {row.project_path}/results/epi2me/{row.samples}/{row.samples}.wf_mods.2.bedmethyl.gz"
         )
         result_list.append(line)
 
-    for row in ctrl.itertuples():
+    for row in case.itertuples():
         line = (
             f"-b {row.project_path}/results/epi2me/{row.samples}/{row.samples}.wf_mods.1.bedmethyl.gz "
             f"-b {row.project_path}/results/epi2me/{row.samples}/{row.samples}.wf_mods.2.bedmethyl.gz"
