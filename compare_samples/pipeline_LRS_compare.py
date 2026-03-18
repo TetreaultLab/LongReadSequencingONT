@@ -282,9 +282,7 @@ def modkit(toml_config):
         )
         result_list.append(line)
 
-    print(result_list)
     pairs = " ".join(result_list)
-    print(pairs)
 
     job = current_directory + "/scripts/" + tool + ".slurm"
     with open(
