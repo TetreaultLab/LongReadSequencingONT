@@ -51,8 +51,7 @@ done
 echo -e "\nRunning modkit DMRs for CpGs"
 $MODKIT dmr pair \
     {5} \
-    --out-dir $out_dir \
-    --prefix {0}_cpg \
+    --out-dir $out_dir/{0}_cpg.bed \
     --regions-bed $cpg_islands \
     --ref $ref \
     --base C \
@@ -64,8 +63,7 @@ $MODKIT dmr pair \
 echo -e "\nRunning modkit DMRs base"
 $MODKIT dmr pair \
     {5} \
-    --out-dir $out_dir \
-    --prefix {0}_base \
+    --out-dir $out_dir/{0}_base.bed \
     --ref $ref \
     --base C \
     --threads 8 \
