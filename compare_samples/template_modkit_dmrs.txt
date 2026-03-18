@@ -1,8 +1,8 @@
 #!/bin/sh
 #SBATCH -N 1
-#SBATCH --cpus-per-task 8
-#SBATCH --mem 32G
-#SBATCH -t 00-23:00 # time (DD-HH:MM)
+#SBATCH --cpus-per-task 4
+#SBATCH --mem 16G
+#SBATCH -t 00-01:00 # time (DD-HH:MM)
 #SBATCH -o modkit_dmrs_{0}.%N.%j.log
 #SBATCH -e modkit_dmrs_{0}.%N.%j.log
 #SBATCH --mail-type=FAIL
@@ -56,8 +56,9 @@ $MODKIT dmr pair \
     --regions-bed $cpg_islands \
     --ref $ref \
     --base C \
-    --threads 8 \
-    --io-threads 8 \
+    --header \
+    --threads 4 \
+    --io-threads 4 \
     --force \
 
 # Per base
@@ -67,6 +68,7 @@ $MODKIT dmr pair \
     -o $out_dir/{0}_base.bed \
     --ref $ref \
     --base C \
-    --threads 8 \
-    --io-threads 8 \
+    --header \
+    --threads 4 \
+    --io-threads 4 \
     --force \
