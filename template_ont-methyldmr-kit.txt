@@ -30,9 +30,14 @@ do
 
     export NXF_TEMP={3}/ont-methylDMR-kit/$sample/tmp
     output_dir="{3}/ont-methylDMR-kit/$sample"
-    
-    gunzip -k {3}/epi2me/$sample/$sample.wf_mods.1.bedmethyl.gz
-    gunzip -k {3}/epi2me/$sample/$sample.wf_mods.2.bedmethyl.gz
+
+    if [[ ! -f "{3}/epi2me/$sample/$sample.wf_mods.1.bedmethyl" ]]; then
+        gunzip -k {3}/epi2me/$sample/$sample.wf_mods.1.bedmethyl.gz
+    fi
+
+    if [[ ! -f "{3}/epi2me/$sample/$sample.wf_mods.2.bedmethyl" ]]; then
+        gunzip -k {3}/epi2me/$sample/$sample.wf_mods.2.bedmethyl.gz
+    fi
 
     nextflow run $tool_dir -profile offline \
             -c $tool_dir/nextflow.config \
