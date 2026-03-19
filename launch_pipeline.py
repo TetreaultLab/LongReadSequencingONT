@@ -94,7 +94,15 @@ def main():
     # DNA specific
     if toml_config["general"]["seq_type"] == "WGS":
         # EPI2ME
-        function_queue.append(epi2me)
+        if (
+            "SNP" in toml_config["general"]["analysis"]
+            or "SV" in toml_config["general"]["analysis"]
+            or "CNV" in toml_config["general"]["analysis"]
+            or "phasing" in toml_config["general"]["analysis"]
+            or "repeats" in toml_config["general"]["analysis"]
+            or "methylation" in toml_config["general"]["analysis"]
+        ):
+            function_queue.append(epi2me)
 
         # Repeat expansions
         if "repeats" in toml_config["general"]["analysis"]:
