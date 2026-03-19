@@ -1814,7 +1814,7 @@ def cleanup(toml_config, done):
     # Tool specific cleamup
     for sample in samples:
         # cutesv
-        commands.append(f"rm -r {scratch}/results/cuteSV/{sample}/tmp")
+        commands.append(f"rm -r {scratch}/results/cutesv/{sample}/tmp")
 
         # deepvariant
         commands.append(f"rm -r {scratch}/results/deepvariant/{sample}/logs")
