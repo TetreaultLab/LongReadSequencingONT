@@ -110,6 +110,8 @@ def make_manifest_quantify(df, toml_config):
     username = os.environ.get("USER")
     scratch = f"/lustre10/scratch/{username}/{name}/flair_diff"
 
+    df["samples"] = df["samples"].str.replace("_", "-")
+
     df["batch"] = (
         df["project_path"]
         .str.rstrip("/")
@@ -118,6 +120,8 @@ def make_manifest_quantify(df, toml_config):
         .str.split("_", n=1)
         .str[1]
     )
+    df["batch"] = df["batch"].str.replace("_", "-")
+
     df["fastq"] = scratch + "/fastq/" + df["samples"] + ".fastq"
 
     df = df[["samples", "phenotype", "batch", "fastq"]]
