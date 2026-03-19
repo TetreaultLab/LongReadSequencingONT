@@ -48,7 +48,7 @@ def main():
 
     if "as" in toml_config["general"]["analyses"]:
         df = pd.read_csv(metadata, sep="\t", header=0)
-        make_manifest_combine(df)
+        make_manifest_combine(df, toml_config)
         make_manifest_quantify(df, toml_config)
 
         function_queue.append(flair_diffsplice)
@@ -87,34 +87,16 @@ def read_metadata(toml_config):
     return df
 
 
-def make_manifest_combine(df):
+def make_manifest_combine(df, toml_config):
     current_directory = os.getcwd()
+    name = toml_config["general"]["comparison_name"]
+    username = os.environ.get("USER")
+    scratch = f"/lustre10/scratch/{username}/{name}/flair_diff"
 
     df["isoform"] = "isoform"
-    df["bed"] = (
-        df["project_path"]
-        + "/results/flair/"
-        + df["samples"]
-        + "/"
-        + df["samples"]
-        + ".isoforms.bed"
-    )
-    df["fa"] = (
-        df["project_path"]
-        + "/results/flair/"
-        + df["samples"]
-        + "/"
-        + df["samples"]
-        + ".isoforms.fa"
-    )
-    df["readmap"] = (
-        df["project_path"]
-        + "/results/flair/"
-        + df["samples"]
-        + "/"
-        + df["samples"]
-        + ".isoform.read.map.txt"
-    )
+    df["bed"] = scratch + "/" + df["samples"] + ".isoforms.bed"
+    df["fa"] = scratch + "/" + df["samples"] + ".isoforms.fa"
+    df["readmap"] = scratch + "/" + df["samples"] + ".isoform.read.map.txt"
 
     df = df[["samples", "isoform", "bed", "fa", "readmap"]]
     df.to_csv(
