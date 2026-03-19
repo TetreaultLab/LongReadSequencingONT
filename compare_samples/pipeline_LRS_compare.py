@@ -269,17 +269,31 @@ def modkit(toml_config):
     ctrl = df[df["phenotype"] == conditionB]
 
     for row in ctrl.itertuples():
-        line = (
-            f"-a {row.project_path}/results/epi2me/{row.samples}/{row.samples}.wf_mods.1.bedmethyl.gz "
-            f"-a {row.project_path}/results/epi2me/{row.samples}/{row.samples}.wf_mods.2.bedmethyl.gz"
-        )
+        # Files are phased
+        if os.path.exists(
+            f"{row.project_path}/results/epi2me/{row.samples}/{row.samples}.wf_mods.1.bedmethyl.gz"
+        ):
+            line = (
+                f"-a {row.project_path}/results/epi2me/{row.samples}/{row.samples}.wf_mods.1.bedmethyl.gz "
+                f"-a {row.project_path}/results/epi2me/{row.samples}/{row.samples}.wf_mods.2.bedmethyl.gz"
+            )
+        # Files are not phased
+        else:
+            line = f"-a {row.project_path}/results/epi2me/{row.samples}/{row.samples}.wf_mods.bedmethyl.gz"
         result_list.append(line)
 
     for row in case.itertuples():
-        line = (
-            f"-b {row.project_path}/results/epi2me/{row.samples}/{row.samples}.wf_mods.1.bedmethyl.gz "
-            f"-b {row.project_path}/results/epi2me/{row.samples}/{row.samples}.wf_mods.2.bedmethyl.gz"
-        )
+        # Files are phased
+        if os.path.exists(
+            f"{row.project_path}/results/epi2me/{row.samples}/{row.samples}.wf_mods.2.bedmethyl.gz"
+        ):
+            line = (
+                f"-b {row.project_path}/results/epi2me/{row.samples}/{row.samples}.wf_mods.1.bedmethyl.gz "
+                f"-b {row.project_path}/results/epi2me/{row.samples}/{row.samples}.wf_mods.2.bedmethyl.gz"
+            )
+        # Files are not phased
+        else:
+            line = f"-b {row.project_path}/results/epi2me/{row.samples}/{row.samples}.wf_mods.bedmethyl.gz"
         result_list.append(line)
 
     pairs = " ".join(result_list)
