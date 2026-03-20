@@ -110,8 +110,9 @@ def main():
             function_queue.append(strkit)
 
         # Methylation
-        if "methylation" in toml_config["general"]["analysis"]:
-            function_queue.append(ont_methyldmr_kit)
+        if "phasing" in toml_config["general"]["analysis"]:
+            if "methylation" in toml_config["general"]["analysis"]:
+                function_queue.append(ont_methyldmr_kit)
 
     # RNA specific
     if toml_config["general"]["seq_type"] == "RNA":
