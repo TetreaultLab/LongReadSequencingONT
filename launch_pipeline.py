@@ -1520,7 +1520,7 @@ def flair(toml_config, done):
         manifest = output + "/scripts/manifest_" + tool + "_" + sample + ".txt"
         with open(manifest, "w") as m:
             m.write(
-                f"{sample}\tflair\t{name}\t/lustre10/scratch/{username}/{name}/results/flair/{sample}/{sample}.fastq"
+                f"{sample}\tflair\t{name}\t/lustre10/scratch/{username}/{name}/results/flair/{sample}/{sample}.isoforms.fa"
             )
 
         bam = f"/lustre10/scratch/{username}/{name}/alignments/{sample}_sorted.bam"
