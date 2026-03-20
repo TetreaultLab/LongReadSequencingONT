@@ -1857,6 +1857,14 @@ def cleanup(toml_config, done):
         commands.append(f"rm {scratch}/results/TRGT/{sample}/{sample}.vcf.gz")
         commands.append(f"rm {scratch}/results/TRGT/{sample}/{sample}.spanning.bam")
 
+        # HapCUT2
+        commands.append(
+            f"rm {scratch}/results/hapcut2/{sample}/{sample}_haplotype.phased.VCF"
+        )
+        commands.append(
+            f"rm {scratch}/results/hapcut2/{sample}/{sample}_fragment_file.txt"
+        )
+
     # Transfer bam and results in scratch to projects directory
     commands.append(
         f"rsync -avxH --no-g --no-p --partial {scratch}/alignments/*sorted* {output}/alignments/"

@@ -52,7 +52,7 @@ fi
 # extractHAIRS is run per chromosome with --region to avoid excessive memory usage faults
 # Chromosome fragments are then concatenated into a single file
 CHROMS=$(grep -v '^#' "$VCF" | cut -f1 | sort -u)
-COMBINED_FRAGMENTS="$WD/{0}_fragment_file"
+COMBINED_FRAGMENTS="$WD/{0}_fragment_file.txt"
 
 > "$COMBINED_FRAGMENTS"
 
@@ -88,7 +88,7 @@ done
 $IMAGE $TOOLDIR/build/HAPCUT2 \
     --fragments "$COMBINED_FRAGMENTS" \
     --VCF "$VCF" \
-    --output "$WD/{0}_haplotype"
+    --output "$WD/{0}_haplotype.txt"
 
 # Bgzip and tabix the phased vcf if using methphaser or just to save space
 bgzip -c "$WD/{0}_haplotype.phased.VCF" > "$WD/{0}_haplotype.phased.vcf.gz"
