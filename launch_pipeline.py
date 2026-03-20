@@ -1515,8 +1515,7 @@ def flair(toml_config, done):
     username = os.environ.get("USER")
 
     for sample in toml_config["general"]["samples"]:
-        # Make manifest (f"{sample}_manifest.txt"). Tab delimited file containing sample id, condition, batch,reads.fq, where reads.fq is the path to the sample fastq file.
-        # TO-DO
+        # Make manifest
         manifest = output + "/scripts/manifest_" + tool + "_" + sample + ".txt"
         with open(manifest, "w") as m:
             m.write(
@@ -1853,9 +1852,9 @@ def cleanup(toml_config, done):
             f"rm {scratch}/results/ont-methylDMR-kit/{sample}/empty_gene_list.txt"
         )
 
-        # strkit
-
         # trgt
+        commands.append(f"rm {scratch}/results/TRGT/{sample}/{sample}.vcf.gz")
+        commands.append(f"rm {scratch}/results/TRGT/{sample}/{sample}.spanning.bam")
 
     # Transfer bam and results in scratch to projects directory
     commands.append(
