@@ -13,7 +13,7 @@ set -euo pipefail
 
 ml apptainer/1.4.5 bedtools/2.31.0
 
-flair_img="/lustre09/project/6019267/shared/tools/splicing/flair/flair.sif"
+flair_img="/lustre09/project/6019267/shared/tools/splicing/flair/flair_20260320.sif"
 intron_prospector_tool="/lustre09/project/6019267/shared/tools/splicing/flair/intronProspector/bin"
 project_path="/lustre10/scratch/$USER/{0}/flair_diff"
 genome_fa="{2}"
@@ -21,9 +21,6 @@ annotation_gtf="{3}"
 work_dir="{4}"
 manifest_combine="$work_dir/manifest_combine.txt"
 manifest_quantify="$work_dir/manifest_quantify.txt"
-
-mkdir -p $project_path
-mkdir -p $project_path/fastq
 
 # Clear list
 if [[ -f "$project_path/IPjunctions_{0}_list.txt" ]]; then
@@ -65,6 +62,7 @@ do
         -f $annotation_gtf \
         --threads 8 \
         --parallelmode bychrom \
+        --junction_support 2 \
         --junction_bed $project_path/IPjunctions_{0}_list_merged.bed \
         -o $project_path/$sample
 done
@@ -73,6 +71,10 @@ done
 echo -e "\nMerging transcriptomes"
 apptainer run $flair_img flair combine \
     -m $manifest_combine \
+    --include_se \
+    -p 0 \
+    -f 1 \
+    -s \
     -o $project_path/{0}_combined
 
 # Quantify splicing
@@ -81,10 +83,12 @@ apptainer run $flair_img flair quantify \
     -r $manifest_quantify \
     -i $project_path/{0}_combined.fa \
     --threads 8 \
+    --temp_dir $project_path/temp \
     -o $project_path/{0}_quantify \
     --isoform_bed $project_path/{0}_combined.bed \
     --stringent \
-    --check_splice
+    --check_splice \
+    --quality 0
 
 # Run differential expression
 echo -e "\nRunning FLAIR diff expression"
