@@ -23,6 +23,7 @@ manifest_combine="$work_dir/manifest_combine.txt"
 manifest_quantify="$work_dir/manifest_quantify.txt"
 
 mkdir -p $project_path
+mkdir -p $project_path/fastq
 
 # Clear list
 if [[ -f "$project_path/IPjunctions_{0}_list.txt" ]]; then
