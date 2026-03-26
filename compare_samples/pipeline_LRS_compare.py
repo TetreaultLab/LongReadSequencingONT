@@ -120,7 +120,7 @@ def make_manifest_quantify(df, toml_config):
     )
     df["batch"] = df["batch"].str.replace("_", "-")
 
-    df["fastq"] = scratch + "/" + df["samples"] + ".isoforms.fa"
+    df["fastq"] = scratch + "/fastq/" + df["samples"] + ".fastq"
 
     df["samples"] = df["samples"].str.replace("_", "-")
 

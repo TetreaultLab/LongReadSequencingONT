@@ -44,6 +44,10 @@ do
 
     echo -e "$project_path/${{sample}}_intron_calls.tsv" >> $project_path/IPjunctions_{0}_list.txt
 
+    # Make fastq files
+    echo -e "\nBam to Fastq for $sample"
+    bedtools bamtofastq -i $bam_file -fq $project_path/fastq/$sample.fastq
+
 done
 
 # Merge junctions into one junctions file
