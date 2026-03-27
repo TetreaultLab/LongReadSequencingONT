@@ -1,6 +1,6 @@
 #!/bin/sh
 #SBATCH -N 1
-#SBATCH --cpus-per-task 6
+#SBATCH --cpus-per-task 8
 #SBATCH --mem 24G
 #SBATCH -t 02-23:00 # time (DD-HH:MM)
 #SBATCH -o isoquant_apalord_{0}.%N.%j.log
