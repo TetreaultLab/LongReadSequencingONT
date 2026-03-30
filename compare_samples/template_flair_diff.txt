@@ -2,7 +2,7 @@
 #SBATCH -N 1 #Number of nodes
 #SBATCH -n 8 # number of cores
 #SBATCH --mem 32G # memory pool for all cores
-#SBATCH -t 2-23:00 # time (D-HH:MM)
+#SBATCH -t 3-23:00 # time (D-HH:MM)
 #SBATCH -o flair_diff_{0}.%N.%j.log
 #SBATCH -e flair_diff_{0}.%N.%j.log
 #SBATCH --mail-type=FAIL
