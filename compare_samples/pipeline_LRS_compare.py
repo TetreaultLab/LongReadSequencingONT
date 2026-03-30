@@ -113,7 +113,7 @@ def make_manifest_quantify(df, toml_config):
 
     df["batch"] = (
         df["project_path"]
-        .str.extract(r"\d{4}-\d{2}-\d{2}_([^/]+)")
+        .str.extract(r"\d{4}-\d{2}-\d{2}_([^/]+)")[0]
         .str.replace("_", "-")
     )
     print(df)
