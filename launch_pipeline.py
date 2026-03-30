@@ -306,8 +306,8 @@ def create_config_final(filename):
 
     # Add TRGT options
     toml_config["trgt"] = {}
-    toml_config["trgt"]["gene_interest"] = ""
-    toml_config["trgt"]["motif"] = ""
+    toml_config["trgt"]["gene_of_interest"] = ""
+    toml_config["trgt"]["repeat_motif"] = ""
 
     # Add next tool options
 
@@ -1371,6 +1371,8 @@ def trgt(toml_config, done):
     email = toml_config["general"]["email"]
     genome = get_reference(toml_config["general"]["reference"])["fasta"]
     name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
+    goi = toml_config["trgt"]["gene_of_interest"]
+    motif = toml_config["trgt"]["repeat_motif"]
     samples = toml_config["general"]["samples"]
     str_samples = " ".join(samples)
 
@@ -1380,7 +1382,7 @@ def trgt(toml_config, done):
         "r",
     ) as f:
         slurm = f.read()
-        slurm_filled = slurm.format(email, output, genome, str_samples, name)
+        slurm_filled = slurm.format(email, output, genome, str_samples, name, goi, motif)
 
         with open(job, "w") as o:
             o.write(slurm_filled)
