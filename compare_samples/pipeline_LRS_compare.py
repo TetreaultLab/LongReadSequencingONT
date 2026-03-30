@@ -116,7 +116,6 @@ def make_manifest_quantify(df, toml_config):
         .str.extract(r"\d{4}-\d{2}-\d{2}_([^/]+)")[0]
         .str.replace("_", "-")
     )
-    print(df)
 
     df["fastq"] = scratch + "/fastq/" + df["samples"] + ".fastq"
 
