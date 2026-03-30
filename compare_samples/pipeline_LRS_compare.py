@@ -88,14 +88,6 @@ def read_metadata(toml_config):
     return df
 
 
-def get_project_name(path):
-    print(path)
-    # Search for the date pattern followed by the name
-    match = re.search(r"\d{4}-\d{2}-\d{2}_([^/]+)", path)
-    print(match)
-    return match.group(1) if match else None
-
-
 def make_manifest_combine(df, toml_config):
     current_directory = os.getcwd()
     name = toml_config["general"]["comparison_name"]
@@ -119,7 +111,11 @@ def make_manifest_quantify(df, toml_config):
     username = os.environ.get("USER")
     scratch = f"/lustre10/scratch/{username}/{name}/flair_diff"
 
-    df["batch"] = get_project_name(str(df["project_path"])).str.replace("_", "-")
+    df["batch"] = (
+        df["project_path"]
+        .str.extract(r"\d{4}-\d{2}-\d{2}_([^/]+)")
+        .str.replace("_", "-")
+    )
     print(df)
 
     df["fastq"] = scratch + "/fastq/" + df["samples"] + ".fastq"
