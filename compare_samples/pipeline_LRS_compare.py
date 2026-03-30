@@ -89,6 +89,7 @@ def read_metadata(toml_config):
 
 
 def get_project_name(path):
+    print(path)
     # Search for the date pattern followed by the name
     match = re.search(r"\d{4}-\d{2}-\d{2}_([^/]+)", path)
     print(match)
