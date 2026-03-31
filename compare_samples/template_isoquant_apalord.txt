@@ -36,7 +36,6 @@ do
                 --reference $genome_fa \
                 --genedb $isoquant/gencode.v48.primary_assembly.annotation.db \
                 --bam $bam_file \
-                --prefix $sample \
                 --threads 8 \
                 --data_type nanopore \
                 -o $isoquant_dir/$sample
