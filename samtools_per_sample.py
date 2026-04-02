@@ -72,8 +72,6 @@ try:
 
     # SAMTOOLS
     print(f"\nRunning Samtools for sample {s}")
-    bam = tmp / f"{s}.bam"
-
     bam_files = []
     for p in all_inputs:
         bam_files.extend(p.glob(f"{s}_*.bam"))
@@ -82,6 +80,7 @@ try:
 
     # merge
     print("Merge")
+    bam = tmp / f"{s}.bam"
     cmd = [
         "samtools",
         "merge",
@@ -106,7 +105,7 @@ try:
         "4G",
         "-o",
         str(sorted_bam),
-        str(output_file),
+        str(bam),
     ]
     subprocess.run(cmd2, check=True)
 
