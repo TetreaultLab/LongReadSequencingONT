@@ -22,13 +22,14 @@ STEPS_DONE="{2}/scripts/steps_done.txt"
 echo "Sort"
 samtools sort --threads 3 -m 4G -o $SLURM_TMPDIR/{0}_sorted.bam {3}/{0}.bam 
 
-# Transfer
-echo "Transfer"
-cp $SLURM_TMPDIR/{0}_sorted.bam {3}/{0}_sorted.bam
-
 # Index
 echo "Index"
-samtools index --threads 3 {3}/{0}_sorted.bam
+samtools index --threads 3 $SLURM_TMPDIR/{0}_sorted.bam
+
+# Transfer
+echo "Transfer"
+rsync -avzh --no-g --no-p $SLURM_TMPDIR/{0}_sorted.bam {3}/{0}_sorted.bam
+rsync -avzh --no-g --no-p $SLURM_TMPDIR/{0}_sorted.bam.bai {3}/{0}_sorted.bam.bai
 
 echo "Done"
 if [ $? -eq 0 ]; then
