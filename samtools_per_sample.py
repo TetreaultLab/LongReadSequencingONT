@@ -112,7 +112,7 @@ try:
     # index
     print("Index")
     bai = tmp / f"{s}_sorted.bam.bai"
-    cmd3 = ["samtools", "index", "--threads", "3", str(output_path / f"{s}_sorted.bam")]
+    cmd3 = ["samtools", "index", "--threads", "3", "-o", str(bai), str(sorted_bam)]
     subprocess.run(cmd3, check=True)
 
     # transfer
