@@ -133,7 +133,7 @@ try:
         str(bai),
         str(output_path / f"{s}_sorted.bam.bai"),
     ]
-    subprocess.run(transfer2, check=True)
+    subprocess.run(transfer1, check=True)
     subprocess.run(transfer2, check=True)
 
     print(f"Done Samtools for {s}")
