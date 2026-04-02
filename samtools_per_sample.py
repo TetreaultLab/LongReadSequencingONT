@@ -72,7 +72,7 @@ try:
 
     # SAMTOOLS
     print(f"\nRunning Samtools for sample {s}")
-    output_file = tmp / f"{s}.bam"
+    bam = tmp / f"{s}.bam"
 
     bam_files = []
     for p in all_inputs:
@@ -90,13 +90,12 @@ try:
         "--threads",
         "3",
         "-o",
-        str(output_file),
+        str(bam),
     ] + bam_files_str
     subprocess.run(cmd, check=True)
 
     # sort
     print("Sort")
-    bam = output_path / f"{s}.bam"
     sorted_bam = tmp / f"{s}_sorted.bam"
     cmd2 = [
         "samtools",
@@ -107,7 +106,7 @@ try:
         "4G",
         "-o",
         str(sorted_bam),
-        str(bam),
+        str(output_file),
     ]
     subprocess.run(cmd2, check=True)
 
