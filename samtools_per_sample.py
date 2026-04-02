@@ -80,7 +80,7 @@ try:
 
     # merge
     print("Merge")
-    bam = tmp / f"{s}.bam"
+    bam = output_path / f"{s}.bam"
     cmd = [
         "samtools",
         "merge",
@@ -95,7 +95,7 @@ try:
 
     # sort
     print("Sort")
-    sorted_bam = tmp / f"{s}_sorted.bam"
+    sorted_bam = output_path / f"{s}_sorted.bam"
     cmd2 = [
         "samtools",
         "sort",
@@ -111,30 +111,30 @@ try:
 
     # index
     print("Index")
-    bai = tmp / f"{s}_sorted.bam.bai"
+    bai = output_path / f"{s}_sorted.bam.bai"
     cmd3 = ["samtools", "index", "--threads", "3", "-o", str(bai), str(sorted_bam)]
     subprocess.run(cmd3, check=True)
 
     # transfer
-    print("transfer")
-    transfer1 = [
-        "rsync",
-        "-avzh",
-        "--no-g",
-        "--no-p",
-        str(sorted_bam),
-        str(output_path / f"{s}_sorted.bam"),
-    ]
-    transfer2 = [
-        "rsync",
-        "-avzh",
-        "--no-g",
-        "--no-p",
-        str(bai),
-        str(output_path / f"{s}_sorted.bam.bai"),
-    ]
-    subprocess.run(transfer1, check=True)
-    subprocess.run(transfer2, check=True)
+    # print("transfer")
+    # transfer1 = [
+    #     "rsync",
+    #     "-avzh",
+    #     "--no-g",
+    #     "--no-p",
+    #     str(sorted_bam),
+    #     str(output_path / f"{s}_sorted.bam"),
+    # ]
+    # transfer2 = [
+    #     "rsync",
+    #     "-avzh",
+    #     "--no-g",
+    #     "--no-p",
+    #     str(bai),
+    #     str(output_path / f"{s}_sorted.bam.bai"),
+    # ]
+    # subprocess.run(transfer1, check=True)
+    # subprocess.run(transfer2, check=True)
 
     print(f"Done Samtools for {s}")
 
