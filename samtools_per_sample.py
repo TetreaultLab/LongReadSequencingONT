@@ -26,8 +26,8 @@ try:
     flowcells = toml_config["general"]["fc_dir_names"]
 
     username = os.environ.get("USER")
-    # tmpdir = os.environ.get("SLURM_TMPDIR")
-    # tmp = Path(tmpdir)
+    tmpdir = os.environ.get("SLURM_TMPDIR")
+    tmp = Path(tmpdir)
     dir_proj = toml_config["general"]["project_path"]
     name = dir_proj.rstrip("/").split("/")[-2].split("_", 1)[1]
     output = f"/lustre10/scratch/{username}/{name}/alignments"
@@ -71,72 +71,72 @@ try:
                             print(f"Renamed {file.name} -> {new_name}")
 
     # SAMTOOLS
-#     print(f"\nRunning Samtools for sample {s}")
-#     bam_files = []
-#     for p in all_inputs:
-#         bam_files.extend(p.glob(f"{s}_*.bam"))
+    print(f"\nRunning Samtools for sample {s}")
+    bam_files = []
+    for p in all_inputs:
+        bam_files.extend(p.glob(f"{s}_*.bam"))
 
-#     bam_files_str = [str(p) for p in bam_files]
+    bam_files_str = [str(p) for p in bam_files]
 
-#     # merge
-#     print("Merge")
-#     bam = tmp / f"{s}.bam"
-#     cmd = [
-#         "samtools",
-#         "merge",
-#         "-c",
-#         "-f",
-#         "--threads",
-#         "3",
-#         "-o",
-#         str(bam),
-#     ] + bam_files_str
-#     subprocess.run(cmd, check=True)
+    # merge
+    print("Merge")
+    bam = tmp / f"{s}.bam"
+    cmd = [
+        "samtools",
+        "merge",
+        "-c",
+        "-f",
+        "--threads",
+        "3",
+        "-o",
+        str(bam),
+    ] + bam_files_str
+    subprocess.run(cmd, check=True)
 
-#     # sort
-#     print("Sort")
-#     sorted_bam = tmp / f"{s}_sorted.bam"
-#     cmd2 = [
-#         "samtools",
-#         "sort",
-#         "--threads",
-#         "3",
-#         "-m",
-#         "4G",
-#         "-o",
-#         str(sorted_bam),
-#         str(bam),
-#     ]
-#     subprocess.run(cmd2, check=True)
+    # sort
+    print("Sort")
+    sorted_bam = tmp / f"{s}_sorted.bam"
+    cmd2 = [
+        "samtools",
+        "sort",
+        "--threads",
+        "3",
+        "-m",
+        "4G",
+        "-o",
+        str(sorted_bam),
+        str(bam),
+    ]
+    subprocess.run(cmd2, check=True)
 
-#     # index
-#     print("Index")
-#     bai = tmp / f"{s}_sorted.bam.bai"
-#     cmd3 = ["samtools", "index", "--threads", "3", "-o", str(bai), str(sorted_bam)]
-#     subprocess.run(cmd3, check=True)
+    # index
+    print("Index")
+    bai = tmp / f"{s}_sorted.bam.bai"
+    cmd3 = ["samtools", "index", "--threads", "3", "-o", str(bai), str(sorted_bam)]
+    subprocess.run(cmd3, check=True)
 
-#     # transfer
-#     print("transfer")
-#     transfer1 = [
-#         "rsync",
-#         "-avzh",
-#         "--no-g",
-#         "--no-p",
-#         str(sorted_bam),
-#         str(output_path / f"{s}_sorted.bam"),
-#     ]
-#     transfer2 = [
-#         "rsync",
-#         "-avzh",
-#         "--no-g",
-#         "--no-p",
-#         str(bai),
-#         str(output_path / f"{s}_sorted.bam.bai"),
-#     ]
-#     subprocess.run(transfer1, check=True)
-#     subprocess.run(transfer2, check=True)
+    # transfer
+    print("transfer")
+    transfer1 = [
+        "rsync",
+        "-avzh",
+        "--no-g",
+        "--no-p",
+        str(sorted_bam),
+        str(output_path / f"{s}_sorted.bam"),
+    ]
+    transfer2 = [
+        "rsync",
+        "-avzh",
+        "--no-g",
+        "--no-p",
+        str(bai),
+        str(output_path / f"{s}_sorted.bam.bai"),
+    ]
+    subprocess.run(transfer1, check=True)
+    subprocess.run(transfer2, check=True)
 
-#     print(f"Done Samtools for {s}")
+    print(f"Done Samtools for {s}")
 
 except Exception as e:
     print(f"Error: {e}")
