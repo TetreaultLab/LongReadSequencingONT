@@ -26,8 +26,8 @@ try:
     flowcells = toml_config["general"]["fc_dir_names"]
 
     username = os.environ.get("USER")
-    tmpdir = os.environ.get("SLURM_TMPDIR")
-    tmp = Path(tmpdir)
+    # tmpdir = os.environ.get("SLURM_TMPDIR")
+    # tmp = Path(tmpdir)
     dir_proj = toml_config["general"]["project_path"]
     name = dir_proj.rstrip("/").split("/")[-2].split("_", 1)[1]
     output = f"/lustre10/scratch/{username}/{name}/alignments"
