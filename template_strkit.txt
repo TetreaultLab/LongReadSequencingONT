@@ -6,7 +6,7 @@
 #SBATCH -o strkit.%N.%j.log
 #SBATCH -e strkit.%N.%j.log
 #SBATCH --mail-type=FAIL
-#SBATCH --account=rrg-tetreaum
+#SBATCH --account=def-tetreaum
 #SBATCH --mail-user={0}
 
 set -euo pipefail

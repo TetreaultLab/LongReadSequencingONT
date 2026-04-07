@@ -563,7 +563,7 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
                     flowcell,
                     "out",
                     "log",
-                    "rrg",
+                    "def",
                     email,
                     name,
                 )
@@ -579,7 +579,7 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
                     flowcell,
                     "log",
                     "log",
-                    "rrg",
+                    "def",
                     email,
                     name,
                 )
@@ -619,7 +619,7 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
                 "run",
                 "log",
                 "log",
-                "rrg",
+                "def",
                 email,
                 name,
             )

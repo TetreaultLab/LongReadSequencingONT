@@ -6,7 +6,7 @@
 #SBATCH -o hapcut2_{0}.%N.%j.log
 #SBATCH -e hapcut2_{0}.%N.%j.log
 #SBATCH --mail-type=FAIL
-#SBATCH --account=rrg-tetreaum
+#SBATCH --account=def-tetreaum
 #SBATCH --mail-user={1}
 
 set -euo pipefail

@@ -7,7 +7,7 @@
 #SBATCH -o samtools_{0}.%N.%j.log
 #SBATCH -e samtools_{0}.%N.%j.log
 #SBATCH --mail-type=FAIL
-#SBATCH --account=rrg-tetreaum
+#SBATCH --account=def-tetreaum
 #SBATCH --mail-user={1}
 
 set -euo pipefail
