@@ -45,6 +45,7 @@ try:
         inputs = f"/lustre10/scratch/{username}/{name}/{fc}/"
         inputs = Path(inputs)
         all_inputs.append(inputs)
+        print(all_inputs)
 
         # Load the CSV file
         df = pd.read_csv(
