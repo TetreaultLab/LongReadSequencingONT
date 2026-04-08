@@ -79,9 +79,8 @@ echo -e "\nMerging transcriptomes"
 apptainer run $flair_img flair combine \
     -m $manifest_combine \
     --include_se \
-    -p 0 \
+    -p 5 \
     -f 1 \
-    -s \
     -o $project_path/{0}_combined
 
 # Quantify splicing
@@ -93,7 +92,6 @@ apptainer run $flair_img flair quantify \
     --temp_dir $project_path/temp \
     -o $project_path/{0}_quantify \
     --isoform_bed $project_path/{0}_combined.bed \
-    --quality 0 \
     --stringent \
     --check_splice
 
