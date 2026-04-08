@@ -31,9 +31,9 @@ do
     fi
 
     $CUTESV_IMAGE cuteSV \
-        /lustre10/scratch/{3}/{4}/alignments/${{sample}}_sorted.bam\
+        {1}/alignments/${{sample}}_sorted.bam\
         {5} \
-        $WORKDIR/$sample\_cutesv.vcf \
+        $WORKDIR/${{sample}}_cutesv.vcf \
         $WORKDIR/tmp \
         --sample $sample \
         --max_size 1000000 \

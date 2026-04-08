@@ -1382,7 +1382,9 @@ def trgt(toml_config, done):
         "r",
     ) as f:
         slurm = f.read()
-        slurm_filled = slurm.format(email, output, genome, str_samples, name, goi, motif)
+        slurm_filled = slurm.format(
+            email, output, genome, str_samples, name, goi, motif
+        )
 
         with open(job, "w") as o:
             o.write(slurm_filled)
@@ -1519,7 +1521,7 @@ def flair(toml_config, done):
                 f"{sample}\tflair\t{name}\t/lustre10/scratch/{username}/{name}/results/flair/{sample}/{sample}.isoforms.fa"
             )
 
-        bam = f"/lustre10/scratch/{username}/{name}/alignments/{sample}_sorted.bam"
+        bam = f"{output}/alignments/{sample}_sorted.bam"
 
         job = output + "/scripts/" + tool + "_" + sample + ".slurm"
         with open(
@@ -1562,10 +1564,9 @@ def deepvariant(toml_config, done):
     email = toml_config["general"]["email"]
     genome = get_reference(toml_config["general"]["reference"])["fasta"]
     name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
-    username = os.environ.get("USER")
 
     for sample in toml_config["general"]["samples"]:
-        bam = f"/lustre10/scratch/{username}/{name}/alignments/{sample}_sorted.bam"
+        bam = f"{output}/alignments/{sample}_sorted.bam"
 
         job = output + "/scripts/" + tool + "_" + sample + ".slurm"
         with open(
@@ -1655,7 +1656,7 @@ def hapcut2(toml_config, done):
     username = os.environ.get("USER")
 
     for sample in toml_config["general"]["samples"]:
-        bam = f"/lustre10/scratch/{username}/{name}/alignments/{sample}_sorted.bam"
+        bam = f"{output}/alignments/{sample}_sorted.bam"
         caller = "clair3"
         vcf = f"/lustre10/scratch/{username}/{name}/results/epi2me/{sample}/{sample}.wf_snp.vcf"
 
@@ -1776,10 +1777,7 @@ def cleanup(toml_config, done):
             f"rm {scratch}/results/hapcut2/{sample}/{sample}_fragment_file.txt"
         )
 
-    # Transfer bam and results in scratch to projects directory
-    commands.append(
-        f"rsync -avxH --no-g --no-p --partial {scratch}/alignments/*sorted* {output}/alignments/"
-    )
+    # Transfer results in scratch to projects directory
     commands.append(
         f"rsync -avxH --no-g --no-p --partial {scratch}/results/* {output}/results/"
     )

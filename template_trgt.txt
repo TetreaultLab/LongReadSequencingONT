@@ -31,7 +31,7 @@ do
             --genome $GENOME \
             --repeats $REPEATS \
             --sample-name $sample \
-            --reads /lustre10/scratch/$USER/{4}/alignments/$sample\_sorted.bam  \
+            --reads {1}/alignments/${{sample}}_sorted.bam  \
             --output-prefix $WORKDIR/$sample
 
     # Sort and index VCF

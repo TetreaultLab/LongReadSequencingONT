@@ -26,7 +26,7 @@ do
     mkdir -p $WORKDIR
 
     # Main STRkit Command
-    $IMAGE strkit call /lustre10/scratch/$USER/{4}/alignments/$sample\_sorted.bam \
+    $IMAGE strkit call {1}/alignments/${{sample}}_sorted.bam \
     --hq \
     --realign \
     --use-hp \
@@ -41,9 +41,9 @@ do
     --count-kmers both
 
     # STRkit Visualizer
-    # $IMAGE strkit visualize /lustre10/scratch/$USER/{4}/alignments/$sample\_sorted.bam \
+    # $IMAGE strkit visualize {1}/alignments/${{sample}}_sorted.bam \
     # --ref hg38 \
-    # --json $WORKDIR/$sample\_last.json \
+    # --json $WORKDIR/${{sample}}_last.json \
     # -i 1
 done
 
