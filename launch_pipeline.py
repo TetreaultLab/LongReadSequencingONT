@@ -1375,11 +1375,11 @@ def annotate_snps(toml_config, done):
     email = toml_config["general"]["email"]
     name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
     username = os.environ.get("USER")
-    res = f"/lustre10/scratch/{username}/{name}/results/annotated_variants"
     samples = toml_config["general"]["samples"]
 
     for sample in samples:
         job = f"{output}/scripts/{tool}_{sample}.slurm"
+        res = f"/lustre10/scratch/{username}/{name}/results/annotated_variants/{sample}"
         vcf = f"/lustre10/scratch/{username}/{name}/results/epi2me/{sample}/{sample}.wf_snp.vcf.gz"
 
         with open(
@@ -1513,7 +1513,7 @@ def ont_methyldmr_kit(toml_config, done):
     email = toml_config["general"]["email"]
     name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
     username = os.environ.get("USER")
-    res = f"/lustre10/scratch/{username}/{name}/results"
+    res = f"/lustre10/scratch/{username}/{name}/results/"
     samples = toml_config["general"]["samples"]
     str_samples = " ".join(samples)
 
