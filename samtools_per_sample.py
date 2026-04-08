@@ -30,6 +30,8 @@ try:
     tmp = Path(tmpdir)
     dir_proj = toml_config["general"]["project_path"]
     name = dir_proj.rstrip("/").split("/")[-2].split("_", 1)[1]
+    alignments = dir_proj + "/alignments"
+    alignments_path = Path(alignments)
     output = f"/lustre10/scratch/{username}/{name}/alignments"
     output_path = Path(output)
 
@@ -130,7 +132,7 @@ try:
         "--no-g",
         "--no-p",
         str(sorted_bam),
-        str(output_path / f"{s}_sorted.bam"),
+        str(alignments_path / f"{s}_sorted.bam"),
     ]
     transfer1_str = " ".join(transfer1)
     print(transfer1_str)
@@ -142,7 +144,7 @@ try:
         "--no-g",
         "--no-p",
         str(bai),
-        str(output_path / f"{s}_sorted.bam.bai"),
+        str(alignments_path / f"{s}_sorted.bam.bai"),
     ]
     transfer2_str = " ".join(transfer2)
     print(transfer2_str)
