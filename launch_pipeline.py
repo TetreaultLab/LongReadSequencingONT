@@ -133,6 +133,7 @@ def main():
     # SNPs
     if "SNP" in toml_config["general"]["analysis"]:
         function_queue.append(deepvariant)
+        function_queue.append(annotate_snps)
 
     # # SVs
     if "SV" in toml_config["general"]["analysis"]:
@@ -1358,13 +1359,58 @@ def epi2me(toml_config, done):
                     if (
                         "phasing" in toml_config["general"]["analysis"]
                         and "methylation" in toml_config["general"]["analysis"]
-                    ):
+                    ) or ("SNP" in toml_config["general"]["analysis"]):
                         f.write(f"\n{epi_name}=$(sbatch --parsable {job})\n")
                     else:
                         f.write(f"\nDEPS+=($(sbatch --parsable {job}))\n")
 
             else:
                 print("Done: " + epi_name)
+
+
+def annotate_snps(toml_config, done):
+    tool = "annotate"
+
+    output = toml_config["general"]["project_path"]
+    email = toml_config["general"]["email"]
+    name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
+    username = os.environ.get("USER")
+    res = f"/lustre10/scratch/{username}/{name}/results/annotated_variants"
+    samples = toml_config["general"]["samples"]
+
+    for sample in samples:
+        job = f"{output}/scripts/{tool}_{sample}.slurm"
+        vcf = f"/lustre10/scratch/{username}/{name}/results/epi2me/{sample}/{sample}.wf_snp.vcf.gz"
+
+        with open(
+            TOOL_PATH
+            + "main_pipelines/long-read/LongReadSequencingONT/template_annotate_snps.txt",
+            "r",
+        ) as f:
+            slurm = f.read()
+            slurm_filled = slurm.format(sample, email, output, res, vcf)
+
+            with open(job, "w") as o:
+                o.write(slurm_filled)
+
+        epi_name = f"epi2me_{sample}"
+        anno_name = f"annotate_{sample}"
+
+        if epi_name not in done:
+            print("To-Do: " + anno_name)
+            with open(output + "/scripts/main.sh", "a") as f:
+                f.write(f"\n# Annotate SNPs for {sample}")
+                f.write(
+                    f"\nDEPS+=($(sbatch --parsable --dependency=afterok:{epi_name} {job}))\n"
+                )
+        else:
+            if anno_name not in done:
+                print("To-Do: " + anno_name)
+                with open(output + "/scripts/main.sh", "a") as f:
+                    f.write(f"\n# Annotate SNPs for {sample}")
+                    f.write(f"\nDEPS+=($(sbatch --parsable {job}))\n")
+            else:
+                print("Done: " + anno_name)
 
 
 def trgt(toml_config, done):
