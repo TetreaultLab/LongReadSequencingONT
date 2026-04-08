@@ -29,7 +29,7 @@ echo -e "\nRunning VEP\n"
 apptainer run /lustre09/project/6019267/shared/tools/variants/annotation/VEP/vep.sif vep \
     --offline \
     --cache \
-    --dir_cache "/lustre09/project/6019267/shared/tools/variants/annotation/VEP/vep_data/ \
+    --dir_cache /lustre09/project/6019267/shared/tools/variants/annotation/VEP/vep_data/ \
     -i $VCF \
     -o $VEP_VCF \
     --vcf \
