@@ -19,6 +19,8 @@ output_path="{3}"
 VCF="{4}"
 VEP_VCF="{3}/{0}_vep.vcf"
 
+mkdir -p $output_path
+
 # Running VEP
 echo -e "\nRunning VEP\n"
 apptainer run /lustre09/project/6019267/shared/tools/variants/annotation/VEP/vep.sif vep \
