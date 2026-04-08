@@ -91,6 +91,8 @@ try:
         "-o",
         str(bam),
     ] + bam_files_str
+    cmd_str = " ".join(cmd)
+    print(cmd_str)
     subprocess.run(cmd, check=True)
 
     # sort
@@ -107,12 +109,16 @@ try:
         str(sorted_bam),
         str(bam),
     ]
+    cmd2_str = " ".join(cmd2)
+    print(cmd2_str)
     subprocess.run(cmd2, check=True)
 
     # index
     print("Index")
     bai = tmp / f"{s}_sorted.bam.bai"
     cmd3 = ["samtools", "index", "--threads", "3", "-o", str(bai), str(sorted_bam)]
+    cmd3_str = " ".join(cmd3)
+    print(cmd3_str)
     subprocess.run(cmd3, check=True)
 
     # transfer
@@ -125,6 +131,10 @@ try:
         str(sorted_bam),
         str(output_path / f"{s}_sorted.bam"),
     ]
+    transfer1_str = " ".join(transfer1)
+    print(transfer1_str)
+    subprocess.run(transfer1, check=True)
+
     transfer2 = [
         "rsync",
         "-avzh",
@@ -133,7 +143,8 @@ try:
         str(bai),
         str(output_path / f"{s}_sorted.bam.bai"),
     ]
-    subprocess.run(transfer1, check=True)
+    transfer2_str = " ".join(transfer2)
+    print(transfer2_str)
     subprocess.run(transfer2, check=True)
 
     print(f"Done Samtools for {s}")
