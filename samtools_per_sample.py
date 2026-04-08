@@ -45,7 +45,6 @@ try:
         inputs = f"/lustre10/scratch/{username}/{name}/{fc}/"
         inputs = Path(inputs)
         all_inputs.append(inputs)
-        print(all_inputs)
 
         # Load the CSV file
         df = pd.read_csv(
@@ -73,6 +72,7 @@ try:
 
     # SAMTOOLS
     print(f"\nRunning Samtools for sample {s}")
+    print(all_inputs)
     bam_files = []
     for p in all_inputs:
         bam_files.extend(p.glob(f"{s}_*.bam"))
