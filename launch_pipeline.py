@@ -1355,7 +1355,10 @@ def epi2me(toml_config, done):
                 print("To-Do: " + epi_name)
                 with open(output + "/scripts/main.sh", "a") as f:
                     f.write(f"\n# Epi2me workflow human variation for {sample}")
-                    if "methylation" in toml_config["general"]["analysis"]:
+                    if (
+                        "phasing" in toml_config["general"]["analysis"]
+                        and "methylation" in toml_config["general"]["analysis"]
+                    ):
                         f.write(f"\n{epi_name}=$(sbatch --parsable {job})\n")
                     else:
                         f.write(f"\nDEPS+=($(sbatch --parsable {job}))\n")
