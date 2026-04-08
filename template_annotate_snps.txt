@@ -13,11 +13,6 @@ set -euo pipefail
 
 ml apptainer/1.4.5
 
-env -i PATH=/lustre09/project/6019267/shared/tools/variants/annotation/openCravat_env/bin:/usr/bin:/bin
-module --force purge
-module load StdEnv/2023 python/3.10
-source /lustre09/project/6019267/shared/tools/variants/annotation/openCravat_env/bin/activate
-
 STEPS_DONE="{2}/scripts/steps_done.txt"
 
 output_path="{3}"
@@ -58,6 +53,12 @@ apptainer run /lustre09/project/6019267/shared/tools/variants/annotation/VEP/vep
 
 # Running openCravat
 echo -e "\nRunning openCravat\n"
+
+env -i PATH=/lustre09/project/6019267/shared/tools/variants/annotation/openCravat_env/bin:/usr/bin:/bin
+module --force purge
+module load StdEnv/2023 python/3.10
+source /lustre09/project/6019267/shared/tools/variants/annotation/openCravat_env/bin/activate
+
 /lustre09/project/6019267/shared/tools/variants/annotation/openCravat_env/bin/oc run \
     $VEP_VCF \
     -a alfa alphamissense cadd clingen clinvar clinvar_acmg dbsnp denovo gerp geuvadis gnomad4 gtex gwas_catalog hg19 interpro mutation_assessor mutationtaster phastcons phylop polyphen2 provean revel sift spliceai thousandgenomes aloft bayesdel clinpred fathmm genehancer hpo mitomap mutpred_indel omim pangolin repeat \
