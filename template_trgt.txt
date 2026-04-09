@@ -15,7 +15,7 @@ ml apptainer samtools bcftools
 
 IMAGE="apptainer run /lustre09/project/6019267/shared/tools/repeat_expansions/TRGT/trgt.sif"
 STEPS_DONE="{1}/scripts/steps_done.txt"
-GENOME={2}
+GENOME="{2}"
 REPEATS="/lustre09/project/6019267/shared/tools/repeat_expansions/reference_regions/trgt_STRchive_pathogenic.hg38.bed"
 
 ### Repeat quantification with TRGT/TRVZ
@@ -43,8 +43,8 @@ do
     samtools index $WORKDIR/$sample.spanning.sorted.bam
 
     # Optional if Gene and Motifs specified in config
-    GOI={5}
-    MOTIF={6}
+    GOI="{5}"
+    MOTIF="{6}"
 
     if [ "$GOI" != "" ]; then
         $IMAGE trgt plot --genome $GENOME \
@@ -52,11 +52,11 @@ do
         --vcf $WORKDIR/$sample.sorted.vcf.gz \
         --spanning-reads $WORKDIR/$sample.spanning.sorted.bam \
         --repeat-id $GOI \
-        --image $WORKDIR/$sample_$GOI.svg
+        --image $WORKDIR/${{sample}}_${{GOI}}.svg
     fi
 
     if [ "$MOTIF" != "" ]; then
-        python3 /lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/tools_specific_scripts/TRGT/countTRGT.py $WORKDIR/ $GOI $MOTIF $WORKDIR/summaryTRGT_$GOI_$MOTIF.txt
+        python3 /lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/tools_specific_scripts/TRGT/countTRGT.py $WORKDIR/ $GOI $MOTIF $WORKDIR/summaryTRGT_${{GOI}}_${{MOTIF}}.txt
     fi
 
 done
