@@ -74,12 +74,13 @@ try:
 
     # SAMTOOLS
     print(f"\nRunning Samtools for sample {s}")
-    print(all_inputs)
+
     bam_files = []
     for p in all_inputs:
         bam_files.extend(p.glob(f"{s}_*.bam"))
 
     bam_files_str = [str(p) for p in bam_files]
+    print(bam_files_str)
 
     # merge
     print("Merge")
