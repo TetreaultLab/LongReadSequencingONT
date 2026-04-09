@@ -54,5 +54,7 @@ nextflow run epi2me-labs/wf-human-variation \
 
 if [ $? -eq 0 ]; then
     echo "epi2me_{4}" >> "$STEPS_DONE"
-    rm -r $WORKDIR
+    if [ -d "$WORKDIR" ]; then
+        rm -r $WORKDIR
+    fi
 fi
