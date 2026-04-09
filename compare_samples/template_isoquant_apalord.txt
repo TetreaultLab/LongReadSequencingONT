@@ -7,7 +7,7 @@
 #SBATCH -e isoquant_apalord_{0}.%N.%j.log
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user={1}
-#SBATCH --account=rrg-tetreaum
+#SBATCH --account=def-tetreaum
 
 set -euo pipefail
 
