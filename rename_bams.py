@@ -47,10 +47,8 @@ try:
             for (barcode, alias), code in barcode_to_alias.items():
                 if barcode in file.name:
                     if file.name.endswith(".bam"):
-                        print(file.name)
                         new_name = f"{alias}_{barcode}_{code}.bam"
                     else:
-                        print(file.name)
                         continue
 
                     new_path = inputs / new_name
