@@ -14,13 +14,16 @@ set -euo pipefail
 #
 ### Calling dorado_demux
 #
-{3}
+STEPS_DONE="{3}/scripts/steps_done.txt"
+
+{4}
 
 python -u /lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/rename_bams.py \
-    --config {4} \
+    --config {5} \
     --flowcell {1}
 
-rsync -azh --no-g --no-p {5} {6}
+echo "rsync -azh --no-g --no-p {6} {7}"
+rsync -azh --no-g --no-p {6} {7}
 
 if [ $? -eq 0 ]; then
     echo "dorado_demux_{1}" >> "$STEPS_DONE"

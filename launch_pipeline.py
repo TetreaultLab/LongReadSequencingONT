@@ -761,7 +761,13 @@ def dorado_basecaller(toml_config, done):
         ) as f:
             slurm = f.read()
             slurm_filled = slurm.format(
-                formatted_time, flowcell, email, command_str, tmp_bam, bam_dorado
+                formatted_time,
+                flowcell,
+                email,
+                output,
+                command_str,
+                tmp_bam,
+                bam_dorado,
             )
 
             with open(job, "w") as o:
@@ -827,7 +833,14 @@ def dorado_demux(toml_config, done):
         ) as f:
             slurm = f.read()
             slurm_filled = slurm.format(
-                formatted_time, flowcell, email, command_str, config, tmp_space, final
+                formatted_time,
+                flowcell,
+                email,
+                output,
+                command_str,
+                config,
+                tmp_space,
+                final,
             )
 
             with open(job, "w") as o:
