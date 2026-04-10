@@ -32,45 +32,16 @@ try:
     name = dir_proj.rstrip("/").split("/")[-2].split("_", 1)[1]
     alignments = dir_proj + "/alignments"
     alignments_path = Path(alignments)
-    output = f"/lustre10/scratch/{username}/{name}/alignments"
-    output_path = Path(output)
 
     s = args.sample
 
     all_inputs = []
 
-    # RENAME
+    # GET FLOWCELLS
     for fc in flowcells:
-        print(f"\nRunning: rename for flowcell {fc}")
-        code = fc.split("_")[-1]
-
         inputs = f"/lustre10/scratch/{username}/{name}/{fc}/"
         inputs = Path(inputs)
         all_inputs.append(inputs)
-
-        # Load the CSV file
-        df = pd.read_csv(
-            toml_config["general"]["project_path"] + "/scripts/" + fc + ".csv", header=0
-        )
-        df["code"] = df["flow_cell_id"].str.split("_").str[-1]
-
-        # Create a mapping from barcode -> alias
-        barcode_to_alias = dict(zip(zip(df["barcode"], df["alias"]), df["code"]))
-
-        # Process each file in the directory
-        for file in inputs.iterdir():
-            if file.is_file() and file.name.startswith(code):
-                for (barcode, alias), code in barcode_to_alias.items():
-                    if barcode in file.name:
-                        if file.name.endswith(".bam"):
-                            new_name = f"{alias}_{barcode}_{code}.bam"
-                        else:
-                            continue
-
-                        if new_name.startswith(s):
-                            new_path = inputs / new_name
-                            file.rename(new_path)
-                            print(f"Renamed {file.name} -> {new_name}")
 
     # SAMTOOLS
     print(f"\nRunning Samtools for sample {s}")

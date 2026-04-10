@@ -1,0 +1,26 @@
+#!/bin/sh
+#SBATCH -N 1 #Number of nodes
+#SBATCH --cpus-per-task 6
+#SBATCH --mem 24G # memory pool for all cores
+#SBATCH --tmp 1000G # amount of temporary disk space
+#SBATCH -t {0} # time (DD-HH:MM)
+#SBATCH -o dorado_demux_{1}.%N.%j.out
+#SBATCH -e dorado_demux_{1}.%N.%j.log
+#SBATCH --mail-type=FAIL
+#SBATCH --account=def-tetreaum
+#SBATCH --mail-user={2}
+
+set -euo pipefail
+#
+### Calling dorado_demux
+#
+{3}
+
+python -u /lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/rename_bams.py \
+    
+
+rsync -azh --no-g --no-p {4} {5}
+
+if [ $? -eq 0 ]; then
+    echo "dorado_demux_{1}" >> "$STEPS_DONE"
+fi
