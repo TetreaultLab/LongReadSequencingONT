@@ -17,8 +17,6 @@ set -euo pipefail
 #
 STEPS_DONE="{3}/scripts/steps_done.txt"
 
-mkdir $SLURM_TMPDIR/{1}
-
 {4}
 
 echo "rsync -azh --no-g --no-p {5} {6}"
