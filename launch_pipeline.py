@@ -982,7 +982,10 @@ def samtools(toml_config, done):
         print(f"To-Do: {samtools_name}")
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("\n# Samtools sort and index")
-            if len(toml_config["general"]["analysis"]) == 0:
+            if all(
+                x not in toml_config["general"]["analysis"]
+                for x in ["SNP", "CNV", "SV", "phasing", "splicing", "repeats"]
+            ):
                 f.write(
                     f"\nDEPS+=($(sbatch --parsable --dependency=afterok:${var_name_bc} {job}))\n"
                 )
@@ -996,7 +999,10 @@ def samtools(toml_config, done):
             print(f"To-Do: {samtools_name}")
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write("\n# Samtools sort and index")
-                if len(toml_config["general"]["analysis"]) == 0:
+                if all(
+                    x not in toml_config["general"]["analysis"]
+                    for x in ["SNP", "CNV", "SV", "phasing", "splicing", "repeats"]
+                ):
                     f.write(f"\nDEPS+=($(sbatch --parsable {job}))\n")
                 else:
                     f.write(f"\n{samtools_name}=$(sbatch --parsable {job})\n")
