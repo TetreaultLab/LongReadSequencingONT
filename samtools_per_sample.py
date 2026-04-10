@@ -80,7 +80,6 @@ try:
         bam_files.extend(p.glob(f"{s}_*.bam"))
 
     bam_files_str = [str(p) for p in bam_files]
-    print(bam_files_str)
 
     # merge
     print("Merge")
