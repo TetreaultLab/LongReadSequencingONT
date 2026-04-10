@@ -216,7 +216,7 @@ def create_config_final(filename):
             os.makedirs(scratch + "/" + d)
 
     # Making directory structure in project
-    directories = ["scripts", "scripts/logs", "alignments", "results", "qc"]
+    directories = ["scripts", "scripts/logs", "alignments", "results"]
     for d in directories:
         if not os.path.exists(path + "/" + d):
             os.makedirs(path + "/" + d)
@@ -1220,8 +1220,6 @@ def toulligqc(toml_config, done):
     size_str = size.rstrip("G")
     hours = int(size_str) * 0.003
     formatted_time = format_time(hours)
-
-    subprocess.run(["rm", "-r", output + "/qc/"])
 
     seq_summary = []
     for fc in flowcells:
