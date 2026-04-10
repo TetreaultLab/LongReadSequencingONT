@@ -1005,12 +1005,7 @@ def samtools_py(toml_config, done):
     samples = toml_config["general"]["samples"]
     config = toml_config["general"]["project_path"] + "/scripts/config_final.toml"
 
-    codes = []
-    for flowcell in flowcells:
-        code = flowcell.split("_")[-1]
-        codes.append(code)
-
-    all_fc = [f"dorado_demux_{code}" for code in codes]
+    all_fc = [f"dorado_demux_{flowcell}" for flowcell in flowcells]
     done_fc = [x for x in done if x.startswith("dorado_demux")]
     to_dos = [x for x in all_fc if x not in done_fc]
 
