@@ -43,7 +43,6 @@ try:
 
     # Process each file in the directory
     for file in inputs.iterdir():
-        print(file)
         if file.is_file() and file.name.startswith(code):
             for (barcode, alias), code in barcode_to_alias.items():
                 if barcode in file.name:
@@ -55,7 +54,7 @@ try:
                         continue
 
                     new_path = inputs / new_name
-                    # file.rename(new_path)
+                    file.rename(new_path)
                     print(f"Renamed {file.name} -> {new_name}")
 
     print(f"\nDone: rename for flowcell {fc}")
