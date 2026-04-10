@@ -785,6 +785,7 @@ def dorado_demux(toml_config, done):
     output = toml_config["general"]["project_path"]
     email = toml_config["general"]["email"]
     flowcells = toml_config["general"]["fc_dir_names"]
+    config = toml_config["general"]["project_path"] + "/scripts/config_final.toml"
 
     # Iterate through each flowcell for demultiplexing
     for flowcell in flowcells:
@@ -826,7 +827,7 @@ def dorado_demux(toml_config, done):
         ) as f:
             slurm = f.read()
             slurm_filled = slurm.format(
-                formatted_time, flowcell, email, command_str, tmp_space, final
+                formatted_time, flowcell, email, command_str, config, tmp_space, final
             )
 
             with open(job, "w") as o:
