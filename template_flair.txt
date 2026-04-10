@@ -41,7 +41,7 @@ apptainer run $flair_img flair \
     -o $workdir/{0}
 
 # echo -e "\n=== Running Bedtools bamtofastq ===\n"
-# bedtools bamtofastq -i {5} -fq $workdir/{0}.fastq
+bedtools bamtofastq -i {5} -fq $workdir/{0}.fastq
 
 echo -e "\n=== Running Flair quantify ===\n"
 apptainer run $flair_img flair \
