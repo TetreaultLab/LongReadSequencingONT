@@ -126,8 +126,8 @@ def main():
             function_queue.append(epi2me)
 
         # Splicing
-        # if "splicing" in toml_config["general"]["analysis"]:
-        # function_queue.append(flair)
+        if "splicing" in toml_config["general"]["analysis"]:
+            function_queue.append(flair)
 
     # General variants analyses possible for DNA and RNA
     # SNPs
@@ -982,30 +982,16 @@ def samtools(toml_config, done):
         print(f"To-Do: {samtools_name}")
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("\n# Samtools sort and index")
-            if all(
-                x not in toml_config["general"]["analysis"]
-                for x in ["SNP", "CNV", "SV", "phasing", "splicing", "repeats"]
-            ):
-                f.write(
-                    f"\nDEPS+=($(sbatch --parsable --dependency=afterok:${var_name_bc} {job}))\n"
-                )
-            else:
-                f.write(
-                    f"\n{samtools_name}=$(sbatch --parsable --dependency=afterok:${var_name_bc} {job})\n"
-                )
+            f.write(
+                f"\n{samtools_name}=$(sbatch --parsable --dependency=afterok:${var_name_bc} {job})\n"
+            )
 
     else:
         if samtools_name not in done:
             print(f"To-Do: {samtools_name}")
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write("\n# Samtools sort and index")
-                if all(
-                    x not in toml_config["general"]["analysis"]
-                    for x in ["SNP", "CNV", "SV", "phasing", "splicing", "repeats"]
-                ):
-                    f.write(f"\nDEPS+=($(sbatch --parsable {job}))\n")
-                else:
-                    f.write(f"\n{samtools_name}=$(sbatch --parsable {job})\n")
+                f.write(f"\n{samtools_name}=$(sbatch --parsable {job})\n")
         else:
             print(f"Done: {samtools_name}")
 
