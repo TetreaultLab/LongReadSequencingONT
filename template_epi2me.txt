@@ -51,7 +51,7 @@ nextflow run epi2me-labs/wf-human-variation \
 
 # Run mosdepth downstream scripts
 python -u /lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/tools_specific_scripts/mosdepth/SummarizedMosdepth.py \
-    --prefix {4} \
+    --prefix $OUT/{4} \
     --thresholds 1,10,20,30 \
     --plot-out $OUT
 
