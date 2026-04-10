@@ -56,7 +56,7 @@ do
     fi
 
     if [ "$MOTIF" != "" ]; then
-        python3 /lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/tools_specific_scripts/TRGT/countTRGT.py $WORKDIR/ $GOI $MOTIF $WORKDIR/summaryTRGT_${{GOI}}_${{MOTIF}}.txt
+        python -u /lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/tools_specific_scripts/TRGT/countTRGT.py $WORKDIR/ $GOI $MOTIF $WORKDIR/summaryTRGT_${{GOI}}_${{MOTIF}}.txt
     fi
 
 done

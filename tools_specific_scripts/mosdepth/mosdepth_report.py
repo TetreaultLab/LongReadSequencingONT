@@ -15,19 +15,29 @@ Options:
     --delimiter STR    delimiter between sample and slot in filename (default "_")
     --ext EXT          image extension to include (default "png")
 """
+
 import os
 import argparse
-import glob 
+import glob
 import base64
 import re
 import html
 
 # Script parameters
 parser = argparse.ArgumentParser()
-parser.add_argument("--indir", "-i", default=".", help="directory with PNG files (default: current dir)")
+parser.add_argument(
+    "--indir", "-i", default=".", help="directory with PNG files (default: current dir)"
+)
 parser.add_argument("--out", "-o", default="report.html", help="output html file")
-parser.add_argument("--delimiter", "-d", default="_", help="delimiter between sample and slot (default '_')")
-parser.add_argument("--ext", default="png", help="image extension to look for (default png)")
+parser.add_argument(
+    "--delimiter",
+    "-d",
+    default="_",
+    help="delimiter between sample and slot (default '_')",
+)
+parser.add_argument(
+    "--ext", default="png", help="image extension to look for (default png)"
+)
 args = parser.parse_args()
 
 indir = os.path.abspath(args.indir)
@@ -51,7 +61,7 @@ if not files:
     raise SystemExit(1)
 
 # Parse files into structure: slots -> sample -> filepath
-slots = {}   # { slot_name: { sample: filepath } }
+slots = {}  # { slot_name: { sample: filepath } }
 samples_set = set()
 
 for fp in files:
@@ -69,20 +79,24 @@ for fp in files:
 
 samples = sorted(samples_set)
 
+
 # Helper functions
 def safe_id(text):
     # Make a string safe for HTML id/class (letters, digits, underscore, dash)
-    return re.sub(r'[^0-9A-Za-z_-]', '_', text)
+    return re.sub(r"[^0-9A-Za-z_-]", "_", text)
+
 
 def nice_label(slot):
     # Turn "coverage_plot" -> "Coverage Plot"
-    s = slot.replace('_', ' ').replace('-', ' ')
+    s = slot.replace("_", " ").replace("-", " ")
     return s.title()
+
 
 def embed_b64(path):
     with open(path, "rb") as f:
         data = f.read()
     return base64.b64encode(data).decode("ascii")
+
 
 # Build HTML
 html_parts = []
@@ -126,8 +140,10 @@ function show(slot, sample) {
 """)
 html_parts.append("</head><body>")
 html_parts.append("<h1>Sequencing QC Report</h1>")
-html_parts.append(f"<div class='note'>Generated from images in <strong>{html.escape(indir)}</strong>.<br>"
-                  "This HTML was generated only for two plots but more could be added.</div>")
+html_parts.append(
+    f"<div class='note'>Generated from images in <strong>{html.escape(indir)}</strong>.<br>"
+    "This HTML was generated only for two plots but more could be added.</div>"
+)
 
 # For each slot, emit tabs and panels
 first_slot = True
@@ -146,8 +162,10 @@ for slot_key in sorted(slots.keys()):
         for i, s in enumerate(slot_samples):
             s_safe = safe_id(s)
             active = " active" if i == 0 else ""
-            html_parts.append(f"<span id='tab_{slot_safe}_{s_safe}' class='tab tab_slot_{slot_safe}{active}' "
-                              f" onclick=\"show('{slot_safe}','{s_safe}')\">{html.escape(s)}</span>")
+            html_parts.append(
+                f"<span id='tab_{slot_safe}_{s_safe}' class='tab tab_slot_{slot_safe}{active}' "
+                f" onclick=\"show('{slot_safe}','{s_safe}')\">{html.escape(s)}</span>"
+            )
     html_parts.append("</div>")  # end tabs
 
     # Panels with embedded images
@@ -155,19 +173,27 @@ for slot_key in sorted(slots.keys()):
         s_safe = safe_id(s)
         panel_id = f"panel_{slot_safe}_{s_safe}"
         style = "display:block" if i == 0 else "display:none"
-        html_parts.append(f"<div id='{panel_id}' class='panel panel_slot_{slot_safe}' style='{style}'>")
+        html_parts.append(
+            f"<div id='{panel_id}' class='panel panel_slot_{slot_safe}' style='{style}'>"
+        )
         img_path = slots[slot_key].get(s)
         if img_path and os.path.exists(img_path):
             b64 = embed_b64(img_path)
-            html_parts.append(f"<div class='meta'>File: {html.escape(os.path.basename(img_path))} &nbsp; | &nbsp; Size: {os.path.getsize(img_path):,} bytes</div>")
-            html_parts.append(f"<img src='data:image/{ext};base64,{b64}' alt='{html.escape(s)} - {html.escape(slot_label)}'/>")
+            html_parts.append(
+                f"<div class='meta'>File: {html.escape(os.path.basename(img_path))} &nbsp; | &nbsp; Size: {os.path.getsize(img_path):,} bytes</div>"
+            )
+            html_parts.append(
+                f"<img src='data:image/{ext};base64,{b64}' alt='{html.escape(s)} - {html.escape(slot_label)}'/>"
+            )
         else:
             html_parts.append("<div><em>Image file missing</em></div>")
         html_parts.append("</div>")  # end panel
 
     html_parts.append("</div>")  # end slot-section
 
-html_parts.append("<div style='font-size:0.9em;color:#666;margin-top:18px'>Report generated with mosdepth_report.py</div>")
+html_parts.append(
+    "<div style='font-size:0.9em;color:#666;margin-top:18px'>Report generated with mosdepth_report.py</div>"
+)
 html_parts.append("</body></html>")
 
 with open(outpath, "w") as fh:
