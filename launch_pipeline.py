@@ -126,8 +126,8 @@ def main():
             function_queue.append(epi2me)
 
         # Splicing
-        if "splicing" in toml_config["general"]["analysis"]:
-            function_queue.append(flair)
+        # if "splicing" in toml_config["general"]["analysis"]:
+        # function_queue.append(flair)
 
     # General variants analyses possible for DNA and RNA
     # SNPs
