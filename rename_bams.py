@@ -3,6 +3,7 @@ from pathlib import Path
 import argparse
 import toml
 import sys
+import os
 
 try:
     parser = argparse.ArgumentParser(
@@ -27,7 +28,8 @@ try:
 
     code = fc.split("_")[-1]
 
-    inputs = f"$SLURM_TMPDIR/{fc}"
+    slurmtmp = os.environ.get("SLURM_TMPDIR")
+    inputs = f"{slurmtmp}/{fc}"
     inputs = Path(inputs)
 
     # Load the CSV file
