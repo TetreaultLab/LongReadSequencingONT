@@ -27,7 +27,7 @@ try:
 
     code = fc.split("_")[-1]
 
-    inputs = f"$SLURM_TMPDIR/{fc}/alignments/"
+    inputs = f"$SLURM_TMPDIR/"
     inputs = Path(inputs)
 
     # Load the CSV file
