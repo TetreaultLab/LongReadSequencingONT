@@ -693,7 +693,7 @@ def dorado_basecaller(toml_config, done):
     # Iterate through each flowcell for basecalling
     for flowcell in flowcells:
         reads = output + "/" + flowcell + "/reads/pod5"
-        tmp_bam = f"$SLURM_TMPDIR/{flowcell}.bam"
+        tmp_bam = f"$SLURM_TMPDIR/{flowcell}/{flowcell}.bam"
         bam_dorado = f"{output}/{flowcell}/alignments/{flowcell}.bam"
 
         # Get reads files size
@@ -798,7 +798,7 @@ def dorado_demux(toml_config, done):
         reads = output + "/" + flowcell + "/reads/pod5"
         final = f"{output}/{flowcell}/alignments/"
         bam_dorado = f"{final}{flowcell}.bam"
-        tmp_space = "$SLURM_TMPDIR/"
+        tmp_space = f"$SLURM_TMPDIR/{flowcell}/"
 
         # Get reads files size
         cmd = ["du", "-sh", "--apparent-size", "--block-size", "G", reads]
