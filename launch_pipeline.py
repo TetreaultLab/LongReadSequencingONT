@@ -828,7 +828,7 @@ def dorado_demux(toml_config, done):
         job = output + "/scripts/" + tool + "_" + flowcell + ".slurm"
         with open(
             TOOL_PATH
-            + "main_pipelines/long-read/LongReadSequencingONT/template_dorado_basecaller.txt",
+            + "main_pipelines/long-read/LongReadSequencingONT/template_dorado_demux.txt",
             "r",
         ) as f:
             slurm = f.read()
