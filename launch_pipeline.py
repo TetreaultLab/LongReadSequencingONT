@@ -815,7 +815,7 @@ def dorado_demux(toml_config, done):
             "demux",
             "-vv",
             "--threads",
-            "2",
+            "4",
             "--no-trim",
             "--output-dir",
             tmp_space,
