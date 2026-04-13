@@ -38,7 +38,7 @@ try:
 
     # GET FLOWCELLS
     for fc in flowcells:
-        inputs = f"{dir_proj}/{fc}/"
+        inputs = f"{dir_proj}/{fc}/alignments/"
         inputs = Path(inputs)
         all_inputs.append(inputs)
 
