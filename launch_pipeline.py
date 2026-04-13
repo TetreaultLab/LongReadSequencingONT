@@ -774,7 +774,8 @@ def dorado_basecaller(toml_config, done):
                 o.write(slurm_filled)
 
         # Creates a variable job name for each flowcell (used for dependencies)
-        var_name_bc = f"dorado_basecaller_{flowcell}"
+        fc_name = flowcell.replace("-", "_")
+        var_name_bc = f"dorado_basecaller_{fc_name}"
 
         # Add slurm job to main.sh
         if var_name_bc not in done:
@@ -847,8 +848,9 @@ def dorado_demux(toml_config, done):
                 o.write(slurm_filled)
 
         # Different variable name for next set of dependencies
-        var_name = f"dorado_demux_{flowcell}"
-        var_name_bc = f"dorado_basecaller_{flowcell}"
+        fc_name = flowcell.replace("-", "_")
+        var_name = f"dorado_demux_{fc_name}"
+        var_name_bc = f"dorado_basecaller_{fc_name}"
 
         # Add slurm job to main.sh
         if var_name not in done:  # demux not done
