@@ -38,7 +38,7 @@ try:
 
     # GET FLOWCELLS
     for fc in flowcells:
-        inputs = f"/lustre10/scratch/{username}/{name}/{fc}/"
+        inputs = f"{dir_proj}/{fc}/"
         inputs = Path(inputs)
         all_inputs.append(inputs)
 
