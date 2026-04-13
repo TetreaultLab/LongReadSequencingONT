@@ -528,7 +528,6 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
 
     # Enables creating a script per flowcell, or a single script if "" is added as the argument
     if flowcell != "":
-        code = flowcell.split("_")[-1]
         job = output + "/scripts/" + tool + "_" + flowcell + ".slurm"
 
         # Uses a slurm template for each job script
@@ -597,7 +596,7 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
 
             # Keep track of completed steps
             slurm_filled += (
-                f'if [ $? -eq 0 ]; then echo "{tool}_{code}" >> "{steps_done}"; fi\n\n'
+                f'if [ $? -eq 0 ]; then echo "{tool}_{flowcell}" >> "{steps_done}"; fi\n\n'
             )
 
     # This is for tools running on all the data at once
@@ -849,7 +848,6 @@ def dorado_demux(toml_config, done):
 
         # Different variable name for next set of dependencies
         fc_name = flowcell.replace("-", "_")
-        print(fc_name)
         var_name = f"dorado_demux_{fc_name}"
         var_name_bc = f"dorado_basecaller_{fc_name}"
 
@@ -887,7 +885,6 @@ def dorado(toml_config, done):
     email = toml_config["general"]["email"]
     genome = get_reference(toml_config["general"]["reference"])["fasta"]
     flowcell = toml_config["general"]["fc_dir_names"][0]
-    code = flowcell.split("_")[-1]
     sample = toml_config["general"]["samples"][0]
     name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
     username = os.environ.get("USER")
@@ -956,10 +953,11 @@ def dorado(toml_config, done):
         tool, cores, memory, formatted_time, output, email, command_str, flowcell
     )
 
-    var_name_bc = f"dorado_basecaller_{code}"
+    fc_name = flowcell.replace("-", "_")
+    var_name_bc = f"dorado_basecaller_{fc_name}"
 
     # Add slurm job to main.sh
-    if var_name_bc not in done:
+    if f"dorado_basecaller_{flowcell}" not in done:
         print(f"To-Do: {var_name_bc}")
         with open(output + "/scripts/main.sh", "a") as f:
             f.write(f"\n# Dorado Basecall for sample : {sample}")
@@ -974,7 +972,6 @@ def samtools(toml_config, done):
     output = toml_config["general"]["project_path"]
     email = toml_config["general"]["email"]
     flowcell = toml_config["general"]["fc_dir_names"][0]
-    code = flowcell.split("_")[-1]
     sample = toml_config["general"]["samples"][0]
     name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
     username = os.environ.get("USER")
@@ -992,10 +989,11 @@ def samtools(toml_config, done):
         with open(job, "w") as o:
             o.write(slurm_filled)
 
+    fc_name = flowcell.replace("-", "_")
     samtools_name = f"samtools_{sample}"
-    var_name_bc = f"dorado_basecaller_{code}"
+    var_name_bc = f"dorado_basecaller_{fc_name}"
 
-    if var_name_bc not in done:
+    if f"dorado_basecaller_{flowcell}" not in done:
         print(f"To-Do: {samtools_name}")
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("\n# Samtools sort and index")
@@ -1022,7 +1020,7 @@ def samtools_py(toml_config, done):
     samples = toml_config["general"]["samples"]
     config = toml_config["general"]["project_path"] + "/scripts/config_final.toml"
 
-    all_fc = [f"dorado_demux_{flowcell}" for flowcell in flowcells]
+    all_fc = [f"dorado_demux_{flowcell.replace("-", "_")}" for flowcell in flowcells]
     done_fc = [x for x in done if x.startswith("dorado_demux")]
     to_dos = [x for x in all_fc if x not in done_fc]
 
