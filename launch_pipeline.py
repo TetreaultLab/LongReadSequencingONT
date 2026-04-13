@@ -849,6 +849,7 @@ def dorado_demux(toml_config, done):
 
         # Different variable name for next set of dependencies
         fc_name = flowcell.replace("-", "_")
+        print(fc_name)
         var_name = f"dorado_demux_{fc_name}"
         var_name_bc = f"dorado_basecaller_{fc_name}"
 
