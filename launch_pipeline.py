@@ -1022,10 +1022,9 @@ def samtools_py(toml_config, done):
 
     all_fc = []
     for fc in flowcells:
-        # Clean the name first
         clean_name = fc.replace("-", "_")
-        # Then append the formatted string
         all_fc.append(f"dorado_demux_{clean_name}")
+        
     done_fc = [x for x in done if x.startswith("dorado_demux")]
     to_dos = [x for x in all_fc if x not in done_fc]
 
