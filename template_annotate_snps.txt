@@ -20,6 +20,7 @@ VCF="{4}"
 
 mkdir -p $output_path
 mkdir -p $SLURM_TMPDIR/{0}
+touch $SLURM_TMPDIR/{0}/{0}_vep.vcf
 
 # Running VEP
 echo -e "\nRunning VEP\n"
