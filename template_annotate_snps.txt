@@ -28,10 +28,10 @@ apptainer run /lustre09/project/6019267/shared/tools/variants/annotation/VEP/vep
     --cache \
     --dir_cache /lustre09/project/6019267/shared/tools/variants/annotation/VEP/vep_data/ \
     -i $VCF \
-    -o {3}/{0}_vep.vcf \
+    -o $SLURM_TMPDIR/{0}/{0}_vep.vcf \
     --vcf \
     --force_overwrite \
-    --stats_file "$output_path/{0}_vep_summary.html" \
+    --stats_file "$SLURM_TMPDIR/{0}/{0}_vep_summary.html" \
     --variant_class \
     --domains \
     --regulatory \
@@ -62,7 +62,7 @@ module load StdEnv/2023 python/3.10
 source /lustre09/project/6019267/shared/tools/variants/annotation/openCravat_env/bin/activate
 
 /lustre09/project/6019267/shared/tools/variants/annotation/openCravat_env/bin/oc run \
-    {3}/{0}_vep.vcf \
+    $SLURM_TMPDIR/{0}/{0}_vep.vcf \
     -a alfa alphamissense cadd clingen clinvar clinvar_acmg dbsnp denovo gerp geuvadis gnomad4 gtex gwas_catalog hg19 interpro mutation_assessor mutationtaster phastcons phylop polyphen2 provean revel sift spliceai thousandgenomes aloft bayesdel clinpred fathmm genehancer hpo mitomap mutpred_indel omim pangolin repeat \
     --mp 8 \
     --debug \
@@ -75,7 +75,7 @@ source /lustre09/project/6019267/shared/tools/variants/annotation/openCravat_env
 echo -e "\nFiltering Variants\n"
 python -u /lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/filter_variants.py \
     --output $SLURM_TMPDIR/{0}/ \
-    --vcf {3}/{0}_vep.vcf \
+    --vcf $SLURM_TMPDIR/{0}/{0}_vep.vcf \
     --sample {0}
 
 rsync -azh --no-g --no-p $SLURM_TMPDIR/{0}/* {3}/
