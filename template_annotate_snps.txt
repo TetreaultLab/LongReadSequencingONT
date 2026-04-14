@@ -31,7 +31,7 @@ apptainer run /lustre09/project/6019267/shared/tools/variants/annotation/VEP/vep
     -o $SLURM_TMPDIR/{0}/{0}_vep.vcf \
     --vcf \
     --force_overwrite \
-    --stats_file "$SLURM_TMPDIR/{0}/{0}_vep_summary.html" \
+    --stats_file "$output_path/{0}_vep_summary.html" \
     --variant_class \
     --domains \
     --regulatory \
