@@ -1136,7 +1136,6 @@ def mosdepth(toml_config, done):
     tool = "mosdepth"
     output = toml_config["general"]["project_path"]
     name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
-    flowcells = toml_config["general"]["fc_dir_names"]
     threads = "4"
     memory = "8"
     time = "00-01:00"
