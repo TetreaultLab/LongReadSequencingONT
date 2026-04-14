@@ -1,0 +1,29 @@
+#!/bin/sh
+#SBATCH -N 1 #Number of nodes
+#SBATCH --cpus-per-task 8
+#SBATCH --gpus=h100:1
+#SBATCH --mem 64G # memory pool for all cores
+#SBATCH --tmp 1000G # amount of temporary disk space
+#SBATCH -t {0} # time (DD-HH:MM)
+#SBATCH -o dorado_basecaller_{1}.%N.%j.log
+#SBATCH -e dorado_basecaller_{1}.%N.%j.log
+#SBATCH --mail-type=FAIL
+#SBATCH --account=def-tetreaum
+#SBATCH --mail-user={2}
+
+set -euo pipefail
+#
+### Calling dorado_basecaller
+#
+STEPS_DONE="{3}/scripts/steps_done.txt"
+
+mkdir $SLURM_TMPDIR/{1}
+
+{4}
+
+echo "rsync -azh --no-g --no-p {5} {6}"
+rsync -azh --no-g --no-p {5} {6}
+
+if [ $? -eq 0 ]; then
+    echo "dorado_basecaller_{1}" >> "$STEPS_DONE"
+fi

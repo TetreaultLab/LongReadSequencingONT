@@ -88,11 +88,12 @@ def main():
         function_queue.append(samtools_py)
 
     # Call all other functions for downstream analysis
-    # QC
-    # function_queue.append(mosdepth)
 
     # DNA specific
     if toml_config["general"]["seq_type"] == "WGS":
+        # QC
+        function_queue.append(mosdepth)
+
         # EPI2ME
         if (
             "SNP" in toml_config["general"]["analysis"]
@@ -528,7 +529,6 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
 
     # Enables creating a script per flowcell, or a single script if "" is added as the argument
     if flowcell != "":
-        code = flowcell.split("_")[-1]
         job = output + "/scripts/" + tool + "_" + flowcell + ".slurm"
 
         # Uses a slurm template for each job script
@@ -596,9 +596,7 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
             slurm_filled += "\n"
 
             # Keep track of completed steps
-            slurm_filled += (
-                f'if [ $? -eq 0 ]; then echo "{tool}_{code}" >> "{steps_done}"; fi\n\n'
-            )
+            slurm_filled += f'if [ $? -eq 0 ]; then echo "{tool}_{flowcell}" >> "{steps_done}"; fi\n\n'
 
     # This is for tools running on all the data at once
     else:
@@ -689,25 +687,18 @@ def dorado_basecaller(toml_config, done):
     email = toml_config["general"]["email"]
     genome = get_reference(toml_config["general"]["reference"])["fasta"]
     flowcells = toml_config["general"]["fc_dir_names"]
-    name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
-    username = os.environ.get("USER")
 
     # Iterate through each flowcell for basecalling
     for flowcell in flowcells:
         reads = output + "/" + flowcell + "/reads/pod5"
-        final = f"/lustre10/scratch/{username}/{name}/{flowcell}/"
-        bam_dorado = final + flowcell + ".bam"
-
-        cores = "8"
-        memory = "64"
+        tmp_bam = f"$SLURM_TMPDIR/{flowcell}/{flowcell}.bam"
+        bam_dorado = f"{output}/{flowcell}/alignments/{flowcell}.bam"
 
         # Get reads files size
         cmd = ["du", "-sh", "--apparent-size", "--block-size", "G", reads]
         result = subprocess.run(cmd, capture_output=True, text=True)
 
         size_str = result.stdout.split()[0].rstrip("G")
-
-        code = flowcell.split("_")[-1]
 
         # Scale required job time based on amount of data
         hours = int(size_str) * 0.04
@@ -756,19 +747,36 @@ def dorado_basecaller(toml_config, done):
             + "main_pipelines/long-read/dorado_models/"
             + toml_config["dorado"]["model"]
         )
-        command.extend([model, reads, ">", bam_dorado])
+        command.extend([model, reads, ">", tmp_bam])
 
         command_str = " ".join(command)
 
-        job = create_script(
-            tool, cores, memory, formatted_time, output, email, command_str, flowcell
-        )
+        job = output + "/scripts/" + tool + "_" + flowcell + ".slurm"
+        with open(
+            TOOL_PATH
+            + "main_pipelines/long-read/LongReadSequencingONT/template_dorado_basecaller.txt",
+            "r",
+        ) as f:
+            slurm = f.read()
+            slurm_filled = slurm.format(
+                formatted_time,
+                flowcell,
+                email,
+                output,
+                command_str,
+                tmp_bam,
+                bam_dorado,
+            )
+
+            with open(job, "w") as o:
+                o.write(slurm_filled)
 
         # Creates a variable job name for each flowcell (used for dependencies)
-        var_name_bc = f"dorado_basecaller_{code}"
+        fc_name = flowcell.replace("-", "_")
+        var_name_bc = f"dorado_basecaller_{fc_name}"
 
         # Add slurm job to main.sh
-        if var_name_bc not in done:
+        if f"dorado_basecaller_{flowcell}" not in done:
             print("To-Do: " + var_name_bc)
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write(f"\n# Dorado Basecall for flowcell : {flowcell}")
@@ -782,17 +790,14 @@ def dorado_demux(toml_config, done):
     output = toml_config["general"]["project_path"]
     email = toml_config["general"]["email"]
     flowcells = toml_config["general"]["fc_dir_names"]
-    name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
-    username = os.environ.get("USER")
-
-    cores = "6"
-    memory = "24"
+    config = toml_config["general"]["project_path"] + "/scripts/config_final.toml"
 
     # Iterate through each flowcell for demultiplexing
     for flowcell in flowcells:
         reads = output + "/" + flowcell + "/reads/pod5"
-        final = f"/lustre10/scratch/{username}/{name}/{flowcell}/"
-        bam_dorado = final + flowcell + ".bam"
+        final = f"{output}/{flowcell}/alignments/"
+        bam_dorado = f"{final}{flowcell}.bam"
+        tmp_space = f"$SLURM_TMPDIR/{flowcell}/"
 
         # Get reads files size
         cmd = ["du", "-sh", "--apparent-size", "--block-size", "G", reads]
@@ -804,36 +809,53 @@ def dorado_demux(toml_config, done):
         hours = int(size_str) * 0.02
         formatted_time = format_time(hours)
 
-        code = flowcell.split("_")[-1]
-
         command = [
             TOOL_PATH + DORADO,
             "demux",
             "-vv",
             "--threads",
-            cores,
+            "4",
             "--no-trim",
             "--output-dir",
-            final,
+            tmp_space,
             "--no-classify",
             bam_dorado,
             "\n\n",
         ]
         command_str = " ".join(command)
 
-        # Create slurm job
-        job = create_script(
-            tool, cores, memory, formatted_time, output, email, command_str, flowcell
-        )
+        job = output + "/scripts/" + tool + "_" + flowcell + ".slurm"
+        with open(
+            TOOL_PATH
+            + "main_pipelines/long-read/LongReadSequencingONT/template_dorado_demux.txt",
+            "r",
+        ) as f:
+            slurm = f.read()
+            slurm_filled = slurm.format(
+                formatted_time,
+                flowcell,
+                email,
+                output,
+                command_str,
+                config,
+                tmp_space,
+                final,
+            )
+
+            with open(job, "w") as o:
+                o.write(slurm_filled)
 
         # Different variable name for next set of dependencies
-        var_name = f"dorado_demux_{code}"
-        var_name_bc = f"dorado_basecaller_{code}"
+        fc_name = flowcell.replace("-", "_")
+        var_name = f"dorado_demux_{fc_name}"
+        var_name_bc = f"dorado_basecaller_{fc_name}"
 
         # Add slurm job to main.sh
-        if var_name not in done:  # demux not done
+        if f"dorado_demux_{flowcell}" not in done:  # demux not done
             print("To-Do: " + var_name)
-            if var_name_bc not in done:  # basecall and demux not done
+            if (
+                f"dorado_basecaller_{flowcell}" not in done
+            ):  # basecall and demux not done
                 with open(output + "/scripts/main.sh", "a") as f:
                     f.write(f"\n# Dorado Demux for flowcell : {flowcell}")
                     f.write(
@@ -845,7 +867,7 @@ def dorado_demux(toml_config, done):
                     f.write(f"\n{var_name}=$(sbatch --parsable {job})\n")
         else:  # demux done
             if (
-                var_name_bc not in done
+                f"dorado_basecaller_{flowcell}" not in done
             ):  # demux done but not basecall, redo demux after basecall
                 print("To-Do: " + var_name)
                 with open(output + "/scripts/main.sh", "a") as f:
@@ -864,7 +886,6 @@ def dorado(toml_config, done):
     email = toml_config["general"]["email"]
     genome = get_reference(toml_config["general"]["reference"])["fasta"]
     flowcell = toml_config["general"]["fc_dir_names"][0]
-    code = flowcell.split("_")[-1]
     sample = toml_config["general"]["samples"][0]
     name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
     username = os.environ.get("USER")
@@ -933,10 +954,11 @@ def dorado(toml_config, done):
         tool, cores, memory, formatted_time, output, email, command_str, flowcell
     )
 
-    var_name_bc = f"dorado_basecaller_{code}"
+    fc_name = flowcell.replace("-", "_")
+    var_name_bc = f"dorado_basecaller_{fc_name}"
 
     # Add slurm job to main.sh
-    if var_name_bc not in done:
+    if f"dorado_basecaller_{flowcell}" not in done:
         print(f"To-Do: {var_name_bc}")
         with open(output + "/scripts/main.sh", "a") as f:
             f.write(f"\n# Dorado Basecall for sample : {sample}")
@@ -951,7 +973,6 @@ def samtools(toml_config, done):
     output = toml_config["general"]["project_path"]
     email = toml_config["general"]["email"]
     flowcell = toml_config["general"]["fc_dir_names"][0]
-    code = flowcell.split("_")[-1]
     sample = toml_config["general"]["samples"][0]
     name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
     username = os.environ.get("USER")
@@ -969,10 +990,11 @@ def samtools(toml_config, done):
         with open(job, "w") as o:
             o.write(slurm_filled)
 
+    fc_name = flowcell.replace("-", "_")
     samtools_name = f"samtools_{sample}"
-    var_name_bc = f"dorado_basecaller_{code}"
+    var_name_bc = f"dorado_basecaller_{fc_name}"
 
-    if var_name_bc not in done:
+    if f"dorado_basecaller_{flowcell}" not in done:
         print(f"To-Do: {samtools_name}")
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("\n# Samtools sort and index")
@@ -999,12 +1021,10 @@ def samtools_py(toml_config, done):
     samples = toml_config["general"]["samples"]
     config = toml_config["general"]["project_path"] + "/scripts/config_final.toml"
 
-    codes = []
-    for flowcell in flowcells:
-        code = flowcell.split("_")[-1]
-        codes.append(code)
+    all_fc = []
+    for fc in flowcells:
+        all_fc.append(f"dorado_demux_{fc}")
 
-    all_fc = [f"dorado_demux_{code}" for code in codes]
     done_fc = [x for x in done if x.startswith("dorado_demux")]
     to_dos = [x for x in all_fc if x not in done_fc]
 
@@ -1026,8 +1046,9 @@ def samtools_py(toml_config, done):
         if len(to_dos) > 0:
             print("To-Do: " + samtools_name)
             dependencies = ":".join([f"${code}" for code in to_dos])
+            dependencies = dependencies.replace("-", "_")
             with open(output + "/scripts/main.sh", "a") as f:
-                f.write("\n# Rename, merge, sort and index bams")
+                f.write(f"\n# Rename, merge, sort and index bams for {sample}")
                 f.write(
                     f"\n{samtools_name}=$(sbatch --parsable --dependency=afterok:{dependencies} {job})\n"
                 )
@@ -1040,7 +1061,7 @@ def samtools_py(toml_config, done):
             if samtools_name not in done:
                 print("To-Do: " + samtools_name)
                 with open(output + "/scripts/main.sh", "a") as f:
-                    f.write("\n# Rename, merge, sort and index bams for {sample}")
+                    f.write(f"\n# Rename, merge, sort and index bams for {sample}")
                     f.write(f"\n{samtools_name}=$(sbatch --parsable {job})\n")
             else:
                 # All dorado_demux are done and samtools is done
@@ -1112,25 +1133,13 @@ def longReadSum(toml_config, done):
 
 
 def mosdepth(toml_config, done):
-    # As a module until nextflow is usable
     tool = "mosdepth"
     output = toml_config["general"]["project_path"]
-    flowcells = toml_config["general"]["fc_dir_names"]
+    name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
     threads = "4"
     memory = "8"
+    time = "00-01:00"
     email = toml_config["general"]["email"]
-
-    dirs = [f"{output}/{fc}/reads/pod5" for fc in flowcells]
-    cmd = ["du", "-sh", "--apparent-size", "--block-size", "G", "--total"] + dirs
-    result = subprocess.run(cmd, capture_output=True, text=True)
-
-    for line in result.stdout.splitlines():
-        if line.endswith("total"):
-            size = line.split()[0]
-
-    size_str = size.rstrip("G")
-    hours = int(size_str) * 0.003
-    formatted_time = format_time(hours)
 
     command_str = ""
     for sample in toml_config["general"]["samples"]:
@@ -1153,11 +1162,13 @@ def mosdepth(toml_config, done):
             input_file,
         ]
         command_str += " ".join(command) + "\n"
+
         # Added visualization function
         command2 = [
             "python",
             "-u",
-            TOOL_PATH + "others/mosdepth/SummarizedMosdepth.py",
+            TOOL_PATH
+            + "main_pipelines/long-read/LongReadSequencingONT/tools_specific_scripts/mosdepth/SummarizedMosdepth.py",
             "-p",
             output + "/qc/" + sample,
             "--bins",
@@ -1171,31 +1182,37 @@ def mosdepth(toml_config, done):
     command3 = [
         "python",
         "-u",
-        TOOL_PATH + "others/mosdepth/mosdepth_report.py",
+        TOOL_PATH
+        + "main_pipelines/long-read/LongReadSequencingONT/tools_specific_scripts/mosdepth/mosdepth_report.py",
         "-i",
         output + "/qc",
+        "--out",
+        output + "/qc/" + name + ".html",
     ]
     command_str += " ".join(command3) + "\n"
 
-    job = create_script(
-        tool, threads, memory, formatted_time, output, email, command_str, ""
-    )
+    job = create_script(tool, threads, memory, time, output, email, command_str, "")
+
+    all_fc = [f"samtools_{s}" for s in toml_config["general"]["samples"]]
+    done_fc = [x for x in done if x.startswith("samtools")]
+    to_dos = [x for x in all_fc if x not in done_fc]
+
+    dependencies = ":".join([f"${code}" for code in to_dos])
 
     # Add slurm job to main.sh
-    if "samtools" not in done:
+    if len(to_dos) > 0:
         print("To-Do: " + tool)
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("\n# Mosdepth")
             f.write(
-                f"\nmosdepth=$(sbatch --parsable --dependency=afterok:$samtools {job})\n"
+                f"\nDEPS+=($(sbatch --parsable --dependency=afterok:{dependencies} {job}))\n"
             )
-
     else:
         if tool not in done:
             print("To-Do: " + tool)
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write("\n# Mosdepth")
-                f.write(f"\nmosdepth=$(sbatch --parsable {job})\n")
+                f.write(f"\nDEPS+=($(sbatch --parsable {job}))\n")
         else:
             print("Done: " + tool)
 
@@ -1219,8 +1236,6 @@ def toulligqc(toml_config, done):
     size_str = size.rstrip("G")
     hours = int(size_str) * 0.003
     formatted_time = format_time(hours)
-
-    subprocess.run(["rm", "-r", output + "/qc/"])
 
     seq_summary = []
     for fc in flowcells:
@@ -1567,7 +1582,7 @@ def flair(toml_config, done):
         manifest = output + "/scripts/manifest_" + tool + "_" + sample + ".txt"
         with open(manifest, "w") as m:
             m.write(
-                f"{sample}\tflair\t{name}\t/lustre10/scratch/{username}/{name}/results/flair/{sample}/{sample}.isoforms.fa"
+                f"{sample}\tflair\t{name}\t/lustre10/scratch/{username}/{name}/results/flair/{sample}/{sample}.fastq"
             )
 
         bam = f"{output}/alignments/{sample}_sorted.bam"
