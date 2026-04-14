@@ -89,10 +89,13 @@ def main():
 
     # Call all other functions for downstream analysis
     # QC
-    # function_queue.append(mosdepth)
+    function_queue.append(mosdepth)
 
     # DNA specific
     if toml_config["general"]["seq_type"] == "WGS":
+        # QC
+        function_queue.append(mosdepth)
+
         # EPI2ME
         if (
             "SNP" in toml_config["general"]["analysis"]
@@ -216,7 +219,7 @@ def create_config_final(filename):
             os.makedirs(scratch + "/" + d)
 
     # Making directory structure in project
-    directories = ["scripts", "scripts/logs", "alignments", "results"]
+    directories = ["scripts", "scripts/logs", "alignments", "results", "qc"]
     for d in directories:
         if not os.path.exists(path + "/" + d):
             os.makedirs(path + "/" + d)
@@ -595,9 +598,7 @@ def create_script(tool, cores, memory, time, output, email, command, flowcell):
             slurm_filled += "\n"
 
             # Keep track of completed steps
-            slurm_filled += (
-                f'if [ $? -eq 0 ]; then echo "{tool}_{flowcell}" >> "{steps_done}"; fi\n\n'
-            )
+            slurm_filled += f'if [ $? -eq 0 ]; then echo "{tool}_{flowcell}" >> "{steps_done}"; fi\n\n'
 
     # This is for tools running on all the data at once
     else:
@@ -854,7 +855,9 @@ def dorado_demux(toml_config, done):
         # Add slurm job to main.sh
         if f"dorado_demux_{flowcell}" not in done:  # demux not done
             print("To-Do: " + var_name)
-            if f"dorado_basecaller_{flowcell}" not in done:  # basecall and demux not done
+            if (
+                f"dorado_basecaller_{flowcell}" not in done
+            ):  # basecall and demux not done
                 with open(output + "/scripts/main.sh", "a") as f:
                     f.write(f"\n# Dorado Demux for flowcell : {flowcell}")
                     f.write(
@@ -1024,7 +1027,7 @@ def samtools_py(toml_config, done):
     for fc in flowcells:
         clean_name = fc.replace("-", "_")
         all_fc.append(f"dorado_demux_{clean_name}")
-        
+
     done_fc = [x for x in done if x.startswith("dorado_demux")]
     to_dos = [x for x in all_fc if x not in done_fc]
 
@@ -1132,7 +1135,6 @@ def longReadSum(toml_config, done):
 
 
 def mosdepth(toml_config, done):
-    # As a module until nextflow is usable
     tool = "mosdepth"
     output = toml_config["general"]["project_path"]
     flowcells = toml_config["general"]["fc_dir_names"]
@@ -1173,11 +1175,13 @@ def mosdepth(toml_config, done):
             input_file,
         ]
         command_str += " ".join(command) + "\n"
+
         # Added visualization function
         command2 = [
             "python",
             "-u",
-            TOOL_PATH + "others/mosdepth/SummarizedMosdepth.py",
+            TOOL_PATH
+            + "main_pipelines/long-read/LongReadSequencingONT/tools_specific_scripts/SummarizedMosdepth.py",
             "-p",
             output + "/qc/" + sample,
             "--bins",
@@ -1191,7 +1195,8 @@ def mosdepth(toml_config, done):
     command3 = [
         "python",
         "-u",
-        TOOL_PATH + "others/mosdepth/mosdepth_report.py",
+        TOOL_PATH
+        + "main_pipelines/long-read/LongReadSequencingONT/tools_specific_scripts/mosdepth_report.py",
         "-i",
         output + "/qc",
     ]
@@ -1201,21 +1206,26 @@ def mosdepth(toml_config, done):
         tool, threads, memory, formatted_time, output, email, command_str, ""
     )
 
+    all_fc = [f"samtools_{s}" for s in toml_config["general"]["samples"]]
+    done_fc = [x for x in done if x.startswith("samtools")]
+    to_dos = [x for x in all_fc if x not in done_fc]
+
+    dependencies = ":".join([f"${code}" for code in to_dos])
+
     # Add slurm job to main.sh
-    if "samtools" not in done:
+    if len(to_dos) > 0:
         print("To-Do: " + tool)
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("\n# Mosdepth")
             f.write(
-                f"\nmosdepth=$(sbatch --parsable --dependency=afterok:$samtools {job})\n"
+                f"\nDEPS+=($(sbatch --parsable --dependency=afterok:{dependencies} {job}))\n"
             )
-
     else:
         if tool not in done:
             print("To-Do: " + tool)
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write("\n# Mosdepth")
-                f.write(f"\nmosdepth=$(sbatch --parsable {job})\n")
+                f.write(f"\nDEPS+=($(sbatch --parsable {job}))\n")
         else:
             print("Done: " + tool)
 
