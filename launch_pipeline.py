@@ -1027,7 +1027,6 @@ def samtools_py(toml_config, done):
 
     done_fc = [x for x in done if x.startswith("dorado_demux")]
     to_dos = [x for x in all_fc if x not in done_fc]
-    print(to_dos)
 
     for sample in samples:
         job = output + "/scripts/" + tool + "_" + sample + ".slurm"
@@ -1047,6 +1046,9 @@ def samtools_py(toml_config, done):
         if len(to_dos) > 0:
             print("To-Do: " + samtools_name)
             dependencies = ":".join([f"${code}" for code in to_dos])
+            print(dependencies)
+            dependencies = dependencies.replace("-", "_")
+            print(dependencies)
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write(f"\n# Rename, merge, sort and index bams for {sample}")
                 f.write(
