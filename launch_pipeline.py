@@ -88,8 +88,6 @@ def main():
         function_queue.append(samtools_py)
 
     # Call all other functions for downstream analysis
-    # QC
-    function_queue.append(mosdepth)
 
     # DNA specific
     if toml_config["general"]["seq_type"] == "WGS":
