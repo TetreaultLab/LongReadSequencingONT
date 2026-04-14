@@ -20,7 +20,6 @@ VCF="{4}"
 
 mkdir -p $output_path
 mkdir -p $SLURM_TMPDIR/{0}
-touch $SLURM_TMPDIR/{0}/{0}_vep.vcf
 
 # Running VEP
 echo -e "\nRunning VEP\n"
@@ -29,7 +28,7 @@ apptainer run /lustre09/project/6019267/shared/tools/variants/annotation/VEP/vep
     --cache \
     --dir_cache /lustre09/project/6019267/shared/tools/variants/annotation/VEP/vep_data/ \
     -i $VCF \
-    -o $SLURM_TMPDIR/{0}/{0}_vep.vcf \
+    -o $output_path/{0}_vep.vcf \
     --vcf \
     --force_overwrite \
     --stats_file "$output_path/{0}_vep_summary.html" \
@@ -53,6 +52,8 @@ apptainer run /lustre09/project/6019267/shared/tools/variants/annotation/VEP/vep
     --tsl \
     --pick \
     --fork 8
+
+cp $output_path/{0}_vep.vcf $SLURM_TMPDIR/{0}/{0}_vep.vcf
 
 # Running openCravat
 echo -e "\nRunning openCravat\n"
