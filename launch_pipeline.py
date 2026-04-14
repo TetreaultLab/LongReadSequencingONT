@@ -1139,19 +1139,8 @@ def mosdepth(toml_config, done):
     flowcells = toml_config["general"]["fc_dir_names"]
     threads = "4"
     memory = "8"
+    time = "00-01:00"
     email = toml_config["general"]["email"]
-
-    dirs = [f"{output}/{fc}/reads/pod5" for fc in flowcells]
-    cmd = ["du", "-sh", "--apparent-size", "--block-size", "G", "--total"] + dirs
-    result = subprocess.run(cmd, capture_output=True, text=True)
-
-    for line in result.stdout.splitlines():
-        if line.endswith("total"):
-            size = line.split()[0]
-
-    size_str = size.rstrip("G")
-    hours = int(size_str) * 0.003
-    formatted_time = format_time(hours)
 
     command_str = ""
     for sample in toml_config["general"]["samples"]:
@@ -1203,9 +1192,7 @@ def mosdepth(toml_config, done):
     ]
     command_str += " ".join(command3) + "\n"
 
-    job = create_script(
-        tool, threads, memory, formatted_time, output, email, command_str, ""
-    )
+    job = create_script(tool, threads, memory, time, output, email, command_str, "")
 
     all_fc = [f"samtools_{s}" for s in toml_config["general"]["samples"]]
     done_fc = [x for x in done if x.startswith("samtools")]
