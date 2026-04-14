@@ -1046,9 +1046,7 @@ def samtools_py(toml_config, done):
         if len(to_dos) > 0:
             print("To-Do: " + samtools_name)
             dependencies = ":".join([f"${code}" for code in to_dos])
-            print(dependencies)
             dependencies = dependencies.replace("-", "_")
-            print(dependencies)
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write(f"\n# Rename, merge, sort and index bams for {sample}")
                 f.write(
@@ -1181,7 +1179,7 @@ def mosdepth(toml_config, done):
             "python",
             "-u",
             TOOL_PATH
-            + "main_pipelines/long-read/LongReadSequencingONT/tools_specific_scripts/SummarizedMosdepth.py",
+            + "main_pipelines/long-read/LongReadSequencingONT/tools_specific_scripts/mosdepth/SummarizedMosdepth.py",
             "-p",
             output + "/qc/" + sample,
             "--bins",
@@ -1196,7 +1194,7 @@ def mosdepth(toml_config, done):
         "python",
         "-u",
         TOOL_PATH
-        + "main_pipelines/long-read/LongReadSequencingONT/tools_specific_scripts/mosdepth_report.py",
+        + "main_pipelines/long-read/LongReadSequencingONT/tools_specific_scripts/mosdepth/mosdepth_report.py",
         "-i",
         output + "/qc",
     ]
