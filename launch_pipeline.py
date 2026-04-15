@@ -1416,7 +1416,7 @@ def annotate_snps(toml_config, done):
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write(f"\n# Annotate SNPs for {sample}")
                 f.write(
-                    f"\nDEPS+=($(sbatch --parsable --dependency=afterok:{epi_name} {job}))\n"
+                    f"\nDEPS+=($(sbatch --parsable --dependency=afterok:${epi_name} {job}))\n"
                 )
         else:
             if anno_name not in done:
