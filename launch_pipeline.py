@@ -223,7 +223,7 @@ def create_config_final(filename):
             os.makedirs(path + "/" + d)
 
     # Making directory structure in flowcells subdirectories
-    directories = ["main_reports", "reads"]
+    directories = ["main_reports", "reads", "alignments"]
     for flow in fc_dir_names:
         for d in directories:
             if not os.path.exists(path + "/" + flow + "/" + d):
