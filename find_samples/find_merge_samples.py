@@ -39,10 +39,10 @@ def main():
         seq = ["WGS", "wgs"]
 
     print(f"\n########## Project name : {project} ##########")
-    print("Looking for sequencing type :")
-    print(*seq, sep="/")
-    print("For samples :")
-    print(*samples, sep="\n")
+    print("Looking for sequencing type :", *seq, sep="/")
+    print("\nFor samples :")
+    print(*samples, sep="\n\t")
+    print("\n")
 
     output = (
         f"/lustre09/project/6019267/shared/projects/Nanopore_Dock/Combined/{project}"
@@ -53,8 +53,8 @@ def main():
     Path(dir_path).mkdir(exist_ok=False)
 
     # for each sample run the find function to create a file with bam paths.
-    for s in samples:
-        find(s)
+    for sample in samples:
+        find(sample, seq)
 
 
 def find(sample, seq):
@@ -66,6 +66,7 @@ def find(sample, seq):
             subdir.is_dir()
             and subdir.name.startswith("2")
             and "Unified" not in subdir.name
+            and any(item in subdir.name for item in seq)
         ):
             # Recursively search within each matching directory
             paths = list(subdir.rglob(f"{sample}_sorted.bam"))
