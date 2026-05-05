@@ -47,13 +47,25 @@ def main():
 
 def find(sample):
     print(f"\n>>> Looking for {sample}")
-    nanopore = Path("/lustre09/project/6019267/shared/projects/Nanopore_Dock/2*")
-    files = list(nanopore.rglob(f"{sample}_sorted.bam"))
+    nanopore = Path("/lustre09/project/6019267/shared/projects/Nanopore_Dock/")
+    # Look only in directories starting with a "2" and not in other directories as they could already be combined
+    files = [
+        f
+        for subdir in nanopore.iterdir()
+        if subdir.is_dir() and subdir.name.startswith("2")
+        for f in subdir.rglob(f"{sample}_sorted.bam")
+    ]
     print(files)
 
 
 def merge():
     print("Merge")
+
+
+def create_config():
+    print(
+        "Create confing for merged samples and launch pipeline for downstream analyses"
+    )
 
 
 # Launches main function
