@@ -892,10 +892,8 @@ def dorado(toml_config, done):
 
     reads = output + "/" + flowcell + "/reads/pod5"
     final = f"/lustre10/scratch/{username}/{name}/alignments/"
+    tmp_bam = f"$SLURM_TMPDIR/{flowcell}/{sample}.bam"
     bam_dorado = f"{final}{sample}.bam"
-
-    cores = "8"
-    memory = "64"
 
     # Get reads files size
     cmd = ["du", "-sh", "--apparent-size", "--block-size", "G", reads]
@@ -904,7 +902,7 @@ def dorado(toml_config, done):
     size_str = result.stdout.split()[0].rstrip("G")
 
     # Scale required job time based on amount of data
-    hours = int(size_str) * 0.04
+    hours = int(size_str) * 0.02
     formatted_time = format_time(hours)
 
     command = [
@@ -950,10 +948,27 @@ def dorado(toml_config, done):
 
     command_str = " ".join(command)
 
-    job = create_script(
-        tool, cores, memory, formatted_time, output, email, command_str, flowcell
-    )
+    job = output + "/scripts/" + tool + "_" + flowcell + ".slurm"
+    with open(
+        TOOL_PATH
+        + "main_pipelines/long-read/LongReadSequencingONT/template_dorado_basecaller.txt",
+        "r",
+    ) as f:
+        slurm = f.read()
+        slurm_filled = slurm.format(
+            formatted_time,
+            flowcell,
+            email,
+            output,
+            command_str,
+            tmp_bam,
+            bam_dorado,
+        )
 
+        with open(job, "w") as o:
+            o.write(slurm_filled)
+
+    # Creates a variable job name for each flowcell (used for dependencies)
     fc_name = flowcell.replace("-", "_")
     var_name_bc = f"dorado_basecaller_{fc_name}"
 
