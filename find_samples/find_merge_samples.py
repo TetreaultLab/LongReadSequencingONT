@@ -48,7 +48,7 @@ def main():
 def find(sample):
     print(f"\n>>> Looking for {sample}")
     nanopore = Path("/lustre09/project/6019267/shared/projects/Nanopore_Dock")
-    files = list(nanopore.rglob(f"{sample}*.bam"))
+    files = list(nanopore.rglob(f"{sample}_sorted.bam"))
     print(files)
 
 
