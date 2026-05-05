@@ -15,6 +15,12 @@ def main():
     parser.add_argument(
         "--project", type=str, required=True, help="Project name. Must be unique"
     )
+
+    group = parser.add_mutually_exclusive_group(required=True)
+
+    group.add_argument("--rna", action="store_true", help="RNA-seq analysis")
+    group.add_argument("--genome", action="store_true", help="WGS analysis")
+
     parser.add_argument(
         "--samples",
         nargs="+",
@@ -27,9 +33,15 @@ def main():
 
     project = args.project
     samples = args.samples
-    print(samples)
+    if args.rna:
+        seq = ["RNA", "rna", "Transcriptome", "transcriptome"]
+    if args.genome:
+        seq = ["WGS", "wgs"]
 
     print(f"\n########## Project name : {project} ##########")
+    print("Looking for sequencing type :")
+    print(*seq, sep="/")
+    print("For samples :")
     print(*samples, sep="\n")
 
     output = (
@@ -45,7 +57,7 @@ def main():
         find(s)
 
 
-def find(sample):
+def find(sample, seq):
     print(f"\n>>> Looking for {sample}")
     nanopore = Path("/lustre09/project/6019267/shared/projects/Nanopore_Dock/")
     # Look only in directories starting with a "2" and not containing "Unified" and not in other directories as they could already be combined
