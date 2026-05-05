@@ -54,10 +54,10 @@ def main():
 
     # for each sample run the find function to create a file with bam paths.
     for sample in samples:
-        find(sample, seq)
+        find(sample, seq, output)
 
 
-def find(sample, seq):
+def find(sample, seq, output):
     print(f"\n>>> Looking for {sample}")
     nanopore = Path("/lustre09/project/6019267/shared/projects/Nanopore_Dock/")
     # Look only in directories starting with a "2" and not containing "Unified" and not in other directories as they could already be combined
@@ -72,11 +72,10 @@ def find(sample, seq):
             paths = list(subdir.rglob(f"{sample}_sorted.bam"))
 
     if len(paths) > 0:
-        print("Files found!")
         print(*paths, sep="\n")
 
         # Save paths to file
-        with open(f"{str(nanopore)}/{sample}_bam_paths.txt", "w") as f:
+        with open(f"{output}/{sample}_bam_paths.txt", "w") as f:
             for p in paths:
                 f.write(f"{str(p)}\n")
     else:
