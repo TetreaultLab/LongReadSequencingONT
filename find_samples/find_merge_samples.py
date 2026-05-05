@@ -71,12 +71,16 @@ def find(sample, seq):
         ):
             # Recursively search within each matching directory
             paths = list(subdir.rglob(f"{sample}_sorted.bam"))
-    print(paths)
 
-    # Save paths to file
-    with open(f"{str(nanopore)}/{sample}_bam_paths.txt", "w") as f:
-        for p in paths:
-            f.write(f"{str(p)}\n")
+    if len(paths) > 0:
+        print("Files found!")
+        print(str(paths), sep="\n")
+        # Save paths to file
+        with open(f"{str(nanopore)}/{sample}_bam_paths.txt", "w") as f:
+            for p in paths:
+                f.write(f"{str(p)}\n")
+    else:
+        print("Files not found, please verify the names.")
 
 
 def merge():
