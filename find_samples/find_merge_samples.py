@@ -12,11 +12,14 @@ def main():
         description="Pipeline to compare LRS samples.",
     )
 
-    parser.add_argument("--project", type=str, help="Project name.")
+    parser.add_argument(
+        "--project", type=str, required=True, help="Project name. Must be unique"
+    )
     parser.add_argument(
         "--samples",
         nargs="+",
         type=str,
+        required=True,
         help="Samples to include in project. Space delimited, e.g.: --samples S1 S2 S3",
     )
 
