@@ -43,7 +43,6 @@ def main():
     print(f"Looking for sequencing type : {seq_list}")
     print("For samples :")
     print(*samples, sep="\n")
-    print("\n")
 
     output = (
         f"/lustre09/project/6019267/shared/projects/Nanopore_Dock/Combined/{project}"
@@ -74,7 +73,8 @@ def find(sample, seq):
 
     if len(paths) > 0:
         print("Files found!")
-        print(str(paths), sep="\n")
+        print(*paths, sep="\n")
+
         # Save paths to file
         with open(f"{str(nanopore)}/{sample}_bam_paths.txt", "w") as f:
             for p in paths:
