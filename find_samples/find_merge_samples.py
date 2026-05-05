@@ -79,7 +79,7 @@ def find(sample, seq, output):
             for p in paths:
                 f.write(f"{str(p)}\n")
     else:
-        print("Files not found, please verify the names.")
+        print(f"Files not found, please verify that '{sample}' is the right name.")
 
 
 def merge():
