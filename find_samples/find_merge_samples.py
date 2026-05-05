@@ -38,10 +38,10 @@ def main():
     if args.genome:
         seq = ["WGS", "wgs"]
 
-    print(f"\n########## Project name : {project} ##########")
-    print("Looking for sequencing type :", *seq, sep="/")
-    print("\nFor samples :")
-    print(*samples, sep="\n\t")
+    print(f"########## Project name : {project} ##########")
+    print("Looking for sequencing type : ", *seq, sep="/")
+    print("For samples :")
+    print(*samples, sep="\n")
     print("\n")
 
     output = (
