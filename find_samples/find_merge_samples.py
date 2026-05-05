@@ -46,7 +46,9 @@ def main():
 
 def find(sample):
     print(f">>> Looking for {sample}")
-    for path in Path("your/base/dir").rglob(f"{sample}.bam"):
+    for path in Path("/lustre09/project/6019267/shared/projects/Nanopore_Dock").rglob(
+        f"{sample}.bam"
+    ):
         print(path)
 
 
