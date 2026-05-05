@@ -27,6 +27,7 @@ def main():
 
     project = args.project
     samples = args.samples
+    print(samples)
 
     print(f"########## Project name : {project} ##########")
     print(print(*samples, sep="\n"))
@@ -37,7 +38,7 @@ def main():
     dir_path = Path(output)
 
     # check if project name is unique and create output directory
-    Path(dir_path).mkdir(exist_ok=True)
+    Path(dir_path).mkdir(exist_ok=False)
 
     # for each sample run the find function to create a file with bam paths.
     for s in samples:
