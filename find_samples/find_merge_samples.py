@@ -48,14 +48,21 @@ def main():
 def find(sample):
     print(f"\n>>> Looking for {sample}")
     nanopore = Path("/lustre09/project/6019267/shared/projects/Nanopore_Dock/")
-    # Look only in directories starting with a "2" and not in other directories as they could already be combined
-    files = [
-        f
-        for subdir in nanopore.iterdir()
-        if subdir.is_dir() and subdir.name.startswith("2")
-        for f in subdir.rglob(f"{sample}_sorted.bam")
-    ]
-    print(files)
+    # Look only in directories starting with a "2" and not containing "Unified" and not in other directories as they could already be combined
+    for subdir in nanopore.iterdir():
+        if (
+            subdir.is_dir()
+            and subdir.name.startswith("2")
+            and "Unified" not in subdir.name
+        ):
+            # Recursively search within each matching directory
+            paths = list(subdir.rglob(f"{sample}_sorted.bam"))
+    print(paths)
+
+    # Save paths to file
+    with open(f"{str(nanopore)}/{sample}_bam_paths.txt", "w") as f:
+        for p in paths:
+            f.write(f"{str(p)}\n")
 
 
 def merge():
