@@ -37,9 +37,10 @@ def main():
         seq = ["RNA", "rna", "Transcriptome", "transcriptome"]
     if args.genome:
         seq = ["WGS", "wgs"]
+    seq_list = "/".join(item for item in seq if item)
 
     print(f"########## Project name : {project} ##########")
-    print("Looking for sequencing type : ", *seq, sep="/")
+    print(f"Looking for sequencing type : {seq_list}")
     print("For samples :")
     print(*samples, sep="\n")
     print("\n")
