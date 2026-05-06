@@ -887,13 +887,10 @@ def dorado(toml_config, done):
     genome = get_reference(toml_config["general"]["reference"])["fasta"]
     flowcell = toml_config["general"]["fc_dir_names"][0]
     sample = toml_config["general"]["samples"][0]
-    name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
-    username = os.environ.get("USER")
 
     reads = output + "/" + flowcell + "/reads/pod5"
-    final = f"/lustre10/scratch/{username}/{name}/alignments/"
     tmp_bam = f"$SLURM_TMPDIR/{flowcell}/{sample}.bam"
-    bam_dorado = f"{final}{sample}.bam"
+    bam_dorado = f"{output}/alignments/{sample}.bam"
 
     # Get reads files size
     cmd = ["du", "-sh", "--apparent-size", "--block-size", "G", reads]
@@ -944,7 +941,7 @@ def dorado(toml_config, done):
         + "main_pipelines/long-read/dorado_models/"
         + toml_config["dorado"]["model"]
     )
-    command.extend([model, reads, ">", bam_dorado])
+    command.extend([model, reads, ">", tmp_bam])
 
     command_str = " ".join(command)
 
