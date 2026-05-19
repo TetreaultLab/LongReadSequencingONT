@@ -1310,9 +1310,9 @@ def toulligqc(toml_config, done):
 
 def epi2me(toml_config, done):
     tool = "epi2me"
-    cores = "24"
-    memory = "96"
-    time = "00-23:00"
+    cores = "8"
+    memory = "16"
+    time = "00-01:00"
 
     output = toml_config["general"]["project_path"]
     email = toml_config["general"]["email"]
