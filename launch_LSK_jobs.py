@@ -22,7 +22,7 @@ cwd = os.getcwd()
 subfolders = [f.path for f in os.scandir(cwd) if f.is_dir()]
 
 # Loop over subfolders/samples
-for s in subfolders[0]:
+for s in subfolders:
     os.chdir(s)
     print("Current Working Directory:", os.getcwd())
 
@@ -53,3 +53,5 @@ for s in subfolders[0]:
             "--test",
         ]
     )
+
+    exit()
