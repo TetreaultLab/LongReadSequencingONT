@@ -50,7 +50,6 @@ for s in subfolders:
             "python",
             "/lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/launch_pipeline.py",
             s + "/config.toml",
-            "--test",
         ]
     )
 
