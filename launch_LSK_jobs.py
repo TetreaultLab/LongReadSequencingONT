@@ -33,8 +33,11 @@ for s in subfolders:
     # Check if analyses are specified
     if toml_config_initial["general"]["analysis"] == [""]:
         toml_config_initial["general"]["analysis"] = analyses
+
     else:
-        print(toml_config_initial["general"]["analysis"])
+        continue
+
+    print("Analyses to-do:", toml_config_initial["general"]["analysis"])
 
     # Save modification
     with open("config.toml", "w") as f:
