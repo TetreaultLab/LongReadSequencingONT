@@ -24,7 +24,7 @@ subfolders = [f.path for f in os.scandir(cwd) if f.is_dir()]
 # Loop over subfolders/samples
 for s in subfolders:
     os.chdir(s)
-    print("Current Working Directory:", os.getcwd())
+    print("\n\nCurrent Working Directory:", os.getcwd())
 
     # Open config file and change email adress
     toml_config_initial = toml.load("config_initial.txt")
