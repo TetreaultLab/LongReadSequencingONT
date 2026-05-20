@@ -52,5 +52,3 @@ for s in subfolders:
             s + "/config.toml",
         ]
     )
-
-    exit()
