@@ -13,8 +13,7 @@ flowcells = toml_config["general"]["fc_dir_names"]
 output = toml_config["general"]["project_path"]
 name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
 
-# Check alignments
-## In flowcells. Folder "alignments" should not exist.
+# Check alignments in flowcells. Folder "alignments" should not exist.
 for f in flowcells:
     path = f"{cwd}/{f}/alignments"
     if not os.path.isdir(path):
@@ -26,25 +25,25 @@ for f in flowcells:
             f"WARNING! Directory '{f}/alignments' exists and is NOT empty! Please remove directory."
         )
 
-## In alignments. Check bam for all sample
+# Check QC
+mosdepth = Path(f"{cwd}/qc/{name}.html")
+if mosdepth.is_file():
+    print("Mosdepth summary found!")
+
 for s in samples:
+    print(s)
+
+    # Check alignments
     align_dir = Path(f"{cwd}/alignments")
     bam_file = align_dir / f"{s}_sorted.bam"
     bai_file = align_dir / f"{s}_sorted.bam.bai"
 
     if bam_file.is_file() and bai_file.is_file():
-        print(f"{s} alignments files found!")
+        print("\tAlignments files found!")
     else:
         print(f"WARNING! No alignemnt for {s}!")
 
-# Check QC
-mosdepth = Path(f"{cwd}/qc/{name}.html")
-if mosdepth.is_file():
-    print(f"Mosdepth summary found : 'qc/{name}.html'")
-
-# Check results
-for s in samples:
-    print(f"Checking results for {s}")
+    # Check results
     all_exist = True
 
     base_dir = Path(f"{cwd}/results")
@@ -230,4 +229,4 @@ for s in samples:
                 all_exist = False
 
     if all_exist:
-        print("\tAll results files are present!")
+        print("\tAll results files found!")
