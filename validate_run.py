@@ -19,7 +19,7 @@ for f in flowcells:
     if not os.path.isdir(path):
         print(f"Directory '{f}/alignments' was previously removed to free space.")
     elif not os.listdir(path):
-        print(f"Directory '{f}/alignments' exists but is empty.")
+        print(f"Directory '{f}/alignments' exists but is empty. Please remove.")
     elif path.is_dir() and any(path.iterdir()):
         print(
             f"WARNING! Directory '{f}/alignments' exists and is NOT empty! Please remove directory."
@@ -31,7 +31,7 @@ if mosdepth.is_file():
     print("Mosdepth summary found!")
 
 for s in samples:
-    print(s)
+    print(f"\n{s}")
 
     # Check alignments
     align_dir = Path(f"{cwd}/alignments")
