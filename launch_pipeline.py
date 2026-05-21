@@ -1794,6 +1794,10 @@ def cleanup(toml_config, done):
         f'find {output} -maxdepth 1 -name "*.log" ! -name "cleanup*" -exec mv -t {output}/scripts/logs/ {{}} +'
     )
 
+    # Remove .nextflow files
+    commands.append(f"rm {output}/.nextflow*")
+    commands.append(f"rm {output}/.watcher_seen")
+
     # Remove empty dorado_demux.out
     commands.append(f"rm {output}/dorado_demux*.out")
 
