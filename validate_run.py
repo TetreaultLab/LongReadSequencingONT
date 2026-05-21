@@ -139,7 +139,7 @@ for s in samples:
             f"{s}.wf_str.vcf.gz.tbi",
             f"{s}.sorted.vcf.gz",
             f"{s}.sorted.vcf.gz.csi",
-            f"{s}sample.spanning.sorted.bam",
+            f"{s}.spanning.sorted.bam",
             f"{s}.spanning.sorted.bam.bai",
             f"{s}_last.json",
             f"{s}_last.vcf",
