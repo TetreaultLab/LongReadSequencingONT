@@ -1368,7 +1368,10 @@ def epi2me(toml_config, done):
             print("To-Do: " + epi_name)
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write(f"\n# Epi2me workflow human variation for {sample}")
-                if ("phasing" in toml_config["general"]["analysis"] and "methylation" in toml_config["general"]["analysis"]) or ("SNP" in toml_config["general"]["analysis"]):
+                if (
+                    "phasing" in toml_config["general"]["analysis"]
+                    and "methylation" in toml_config["general"]["analysis"]
+                ) or ("SNP" in toml_config["general"]["analysis"]):
                     f.write(
                         f"\n{epi_name}=$(sbatch --parsable --dependency=afterok:${samtools_name} {job})\n"
                     )
@@ -1781,7 +1784,7 @@ def cleanup(toml_config, done):
 
     threads = "1"
     memory = "4"
-    time = "00-23:00"
+    time = "00-03:00"
 
     # Build cleanup commands
     commands = []
@@ -1852,9 +1855,15 @@ def cleanup(toml_config, done):
         )
 
     # Transfer results in scratch to projects directory
-    commands.append(
-        f"rsync -avxH --no-g --no-p --partial {scratch}/results/* {output}/results/"
-    )
+    if toml_config["general"]["kit"] == "SQK-LSK114":
+        commands.append(
+            f"rsync -avxH --no-g --no-p --partial {scratch}/results/*/{sample} {output}/results/"
+        )
+    else:
+        commands.append(
+            f"rsync -avxH --no-g --no-p --partial {scratch}/results/* {output}/results/"
+        )
+
     # Join all commands into a single string
     command_str = "\n".join(commands)
 
