@@ -28,7 +28,7 @@ for f in flowcells:
 # Check QC
 mosdepth = Path(f"{cwd}/qc/{name}.html")
 if mosdepth.is_file():
-    print("Mosdepth summary found!")
+    print("\nMosdepth summary found!")
 
 for s in samples:
     print(f"\n{s}")
