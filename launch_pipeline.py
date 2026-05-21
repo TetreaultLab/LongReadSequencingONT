@@ -1806,6 +1806,7 @@ def cleanup(toml_config, done):
     for flow in flowcells:
         # commands.append(f"rm -r {output}/{flow}/fastq_*")
         commands.append(f"rm -r {output}/{flow}/bam_*")
+        commands.append(f"rm -r {output}/{flow}/alignments/")
         # commands.append(f"rm {output}/{flow}/main_reports/sequencing_summary*.txt")
 
     # Tool specific cleamup
