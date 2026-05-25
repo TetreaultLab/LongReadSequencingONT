@@ -1813,8 +1813,11 @@ def cleanup(toml_config, done):
         commands.append(f"rm -r {output}/{flow}/alignments/")
         # commands.append(f"rm {output}/{flow}/main_reports/sequencing_summary*.txt")
 
-    # Tool specific cleamup
+    # Tool specific cleanup
     for sample in samples:
+        # unsorted bam file
+        commands.append(f"rm -r {output}/alignments/{sample}.bam")
+
         # cutesv
         commands.append(f"rm -r {scratch}/results/cutesv/{sample}/tmp")
 
