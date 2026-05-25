@@ -1795,7 +1795,7 @@ def cleanup(toml_config, done):
     )
 
     # Remove .nextflow files
-    commands.append(f"rm {output}/.nextflow*")
+    commands.append(f"rm -r {output}/.nextflow*")
     commands.append(f"rm {output}/.watcher_seen")
 
     # Remove empty dorado_demux.out
