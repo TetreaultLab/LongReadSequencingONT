@@ -31,7 +31,7 @@ for s in subfolders:
     toml_config_initial["general"]["email"] = email
 
     # Check if analyses are specified
-    if (toml_config_initial["general"]["analysis"] == "") and (analyses != ""):
+    if (toml_config_initial["general"]["analysis"] == [""]) and (analyses != ""):
         a_list = analyses.split()
         toml_config_initial["general"]["analysis"] = a_list
 
