@@ -11,7 +11,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument(
     "--email", type=str, required=True, help="email address for SLURM notification."
 )
-parser.add_argument("--analyses", type=str, help="which analyses to do.")
+parser.add_argument("--analyses", type=str, help="which analyses to do. Space separated for multiple analyses. Ex: methylation SNP")
 args = parser.parse_args()
 
 email = args.email
