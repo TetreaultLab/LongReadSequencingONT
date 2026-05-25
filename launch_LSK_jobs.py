@@ -11,7 +11,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument(
     "--email", type=str, required=True, help="email address for SLURM notification."
 )
-parser.add_argument("--analyses", type=str, required=True, help="which analyses to do.")
+parser.add_argument("--analyses", type=str, help="which analyses to do.")
 args = parser.parse_args()
 
 email = args.email
@@ -31,8 +31,9 @@ for s in subfolders:
     toml_config_initial["general"]["email"] = email
 
     # Check if analyses are specified
-    if toml_config_initial["general"]["analysis"] == [""]:
-        toml_config_initial["general"]["analysis"] = analyses
+    if toml_config_initial["general"]["analysis"] == "" and analyses != "":
+        a_list = analyses.split()
+        toml_config_initial["general"]["analysis"] = a_list
 
     else:
         continue
