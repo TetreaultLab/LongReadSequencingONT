@@ -1407,8 +1407,8 @@ def annotate_snps(toml_config, done):
 
     for sample in samples:
         job = f"{output}/scripts/{tool}_{sample}.slurm"
-        res = f"/lustre10/scratch/{username}/{name}/results/annotated_variants/{sample}"
-        vcf = f"/lustre10/scratch/{username}/{name}/results/epi2me/{sample}/{sample}.wf_snp.vcf.gz"
+        res = f"/lustre10/scratch/{username}/{name}/results/{sample}/annotated_snps"
+        vcf = f"/lustre10/scratch/{username}/{name}/results/{sample}/epi2me/{sample}.wf_snp.vcf.gz"
 
         with open(
             TOOL_PATH
@@ -1595,7 +1595,7 @@ def flair(toml_config, done):
         manifest = output + "/scripts/manifest_" + tool + "_" + sample + ".txt"
         with open(manifest, "w") as m:
             m.write(
-                f"{sample}\tflair\t{name}\t/lustre10/scratch/{username}/{name}/results/flair/{sample}/{sample}.fastq"
+                f"{sample}\tflair\t{name}\t/lustre10/scratch/{username}/{name}/results/{sample}/flair/{sample}.fastq"
             )
 
         bam = f"{output}/alignments/{sample}_sorted.bam"
@@ -1735,7 +1735,7 @@ def hapcut2(toml_config, done):
     for sample in toml_config["general"]["samples"]:
         bam = f"{output}/alignments/{sample}_sorted.bam"
         caller = "clair3"
-        vcf = f"/lustre10/scratch/{username}/{name}/results/epi2me/{sample}/{sample}.wf_snp.vcf"
+        vcf = f"/lustre10/scratch/{username}/{name}/results/{sample}/epi2me/{sample}.wf_snp.vcf"
 
         job = output + "/scripts/" + tool + "_" + sample + ".slurm"
         with open(
@@ -1819,57 +1819,52 @@ def cleanup(toml_config, done):
         commands.append(f"rm -r {output}/alignments/{sample}.bam")
 
         # cutesv
-        commands.append(f"rm -r {scratch}/results/cutesv/{sample}/tmp")
+        commands.append(f"rm -r {scratch}/results/{sample}/cutesv/tmp")
 
         # deepvariant
-        commands.append(f"rm -r {scratch}/results/deepvariant/{sample}/logs")
+        commands.append(f"rm -r {scratch}/results/{sample}/deepvariant/logs")
 
         # epi2me
-        commands.append(f"rm -r {scratch}/results/epi2me/{sample}/tmp")
-        commands.append(f"rm -r {scratch}/results/epi2me/{sample}/execution")
+        commands.append(f"rm -r {scratch}/results/{sample}/epi2me/tmp")
+        commands.append(f"rm -r {scratch}/results/{sample}/epi2me/execution")
 
         # flair
-        commands.append(f"rm -r {scratch}/results/flair/{sample}/tmp")
+        commands.append(f"rm -r {scratch}/results/{sample}/flair/tmp")
 
         # ont-methylDMR-kit
         commands.append(
-            f"mv -t {scratch}/results/ont-methylDMR-kit/{sample}/ {scratch}/results/ont-methylDMR-kit/{sample}/annotated_dmrs/annotation_summary.log {scratch}/results/ont-methylDMR-kit/{sample}/annotated_dmrs/dmrs_table_annotated.bed {scratch}/results/ont-methylDMR-kit/{sample}/annotated_dmrs/report/dmr_summary_report.html {scratch}/results/ont-methylDMR-kit/{sample}/dmrs/dmrs_table.bed {scratch}/results/ont-methylDMR-kit/{sample}/dmrs/dmr_summary_stats.tsv {scratch}/results/ont-methylDMR-kit/{sample}/dmrs/dmr_status.log {scratch}/results/ont-methylDMR-kit/{sample}/modified_beds/*"
+            f"mv -t {scratch}/results/{sample}/ont-methylDMR-kit/ {scratch}/results/{sample}/ont-methylDMR-kit/annotated_dmrs/annotation_summary.log {scratch}/results/{sample}/ont-methylDMR-kit/annotated_dmrs/dmrs_table_annotated.bed {scratch}/results/{sample}/ont-methylDMR-kit/annotated_dmrs/report/dmr_summary_report.html {scratch}/results/{sample}/ont-methylDMR-kit/dmrs/dmrs_table.bed {scratch}/results/{sample}/ont-methylDMR-kit/dmrs/dmr_summary_stats.tsv {scratch}/results/{sample}/ont-methylDMR-kit/dmrs/dmr_status.log {scratch}/results/{sample}/ont-methylDMR-kit/modified_beds/*"
         )
         commands.append(
-            f"rm -r {scratch}/results/ont-methylDMR-kit/{sample}/annotated_dmrs/"
+            f"rm -r {scratch}/results/{sample}/ont-methylDMR-kit/annotated_dmrs/"
         )
-        commands.append(f"rm -r {scratch}/results/ont-methylDMR-kit/{sample}/dmrs/")
+        commands.append(f"rm -r {scratch}/results/{sample}/ont-methylDMR-kit/dmrs/")
         commands.append(
-            f"rm -r {scratch}/results/ont-methylDMR-kit/{sample}/execution/"
+            f"rm -r {scratch}/results/{sample}/ont-methylDMR-kit/execution/"
         )
         commands.append(
-            f"rm -r {scratch}/results/ont-methylDMR-kit/{sample}/modified_beds/"
+            f"rm -r {scratch}/results/{sample}/ont-methylDMR-kit/modified_beds/"
         )
-        commands.append(f"rm -r {scratch}/results/ont-methylDMR-kit/{sample}/tmp")
+        commands.append(f"rm -r {scratch}/results/{sample}/ont-methylDMR-kit/tmp")
         commands.append(
-            f"rm {scratch}/results/ont-methylDMR-kit/{sample}/empty_gene_list.txt"
+            f"rm {scratch}/results/{sample}/ont-methylDMR-kit/empty_gene_list.txt"
         )
 
         # trgt
-        commands.append(f"rm {scratch}/results/TRGT/{sample}/{sample}.vcf.gz")
-        commands.append(f"rm {scratch}/results/TRGT/{sample}/{sample}.spanning.bam")
+        commands.append(f"rm {scratch}/results/{sample}/TRGT/{sample}.vcf.gz")
+        commands.append(f"rm {scratch}/results/{sample}/TRGT/{sample}.spanning.bam")
 
         # HapCUT2
         commands.append(
-            f"rm {scratch}/results/hapcut2/{sample}/{sample}_haplotype.phased.VCF"
+            f"rm {scratch}/results/{sample}/hapcut2/{sample}_haplotype.phased.VCF"
         )
         commands.append(
-            f"rm {scratch}/results/hapcut2/{sample}/{sample}_fragment_file.txt"
+            f"rm {scratch}/results/{sample}/hapcut2/{sample}_fragment_file.txt"
         )
 
-    # Transfer results in scratch to projects directory
-    if toml_config["general"]["kit"] == "SQK-LSK114":
+        # Transfer results in scratch to projects directory
         commands.append(
-            f"rsync -avxH --no-g --no-p --partial {scratch}/results/*/{sample} {output}/results/"
-        )
-    else:
-        commands.append(
-            f"rsync -avxH --no-g --no-p --partial {scratch}/results/* {output}/results/"
+            f"rsync -avxH --no-g --no-p --partial {scratch}/results/{sample} {output}/results/"
         )
 
     # Join all commands into a single string

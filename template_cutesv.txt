@@ -21,7 +21,7 @@ for sample in {2}
 do
     echo -e "\n===== Running $sample =====\n"
 
-    WORKDIR="/lustre10/scratch/{3}/{4}/results/cutesv/$sample"
+    WORKDIR="/lustre10/scratch/{3}/{4}/results/$sample/cutesv"
 
     mkdir -p $WORKDIR
     mkdir -p $WORKDIR/tmp

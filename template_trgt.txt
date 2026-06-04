@@ -23,7 +23,7 @@ for sample in {3}
 do
     echo -e "\n===== Running $sample =====\n"
 
-    WORKDIR="/lustre10/scratch/$USER/{4}/results/TRGT/$sample"
+    WORKDIR="/lustre10/scratch/$USER/{4}/results/$sample/TRGT"
     mkdir -p $WORKDIR
 
     # Main TRGT Command

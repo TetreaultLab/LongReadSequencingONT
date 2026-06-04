@@ -28,22 +28,22 @@ for sample in {2}
 do  
     echo -e "\n===== Running $sample =====\n"
 
-    export NXF_TEMP={3}/ont-methylDMR-kit/$sample/tmp
-    output_dir="{3}/ont-methylDMR-kit/$sample"
+    export NXF_TEMP={3}/$sample/ont-methylDMR-kit/tmp
+    output_dir="{3}/$sample/ont-methylDMR-kit"
 
-    if [[ ! -f "{3}/epi2me/$sample/$sample.wf_mods.1.bedmethyl" ]]; then
-        gunzip -k {3}/epi2me/$sample/$sample.wf_mods.1.bedmethyl.gz
+    if [[ ! -f "{3}/$sample/epi2me/$sample.wf_mods.1.bedmethyl" ]]; then
+        gunzip -k {3}/$sample/epi2me/$sample.wf_mods.1.bedmethyl.gz
     fi
 
-    if [[ ! -f "{3}/epi2me/$sample/$sample.wf_mods.2.bedmethyl" ]]; then
-        gunzip -k {3}/epi2me/$sample/$sample.wf_mods.2.bedmethyl.gz
+    if [[ ! -f "{3}/$sample/epi2me/$sample.wf_mods.2.bedmethyl" ]]; then
+        gunzip -k {3}/$sample/epi2me/$sample.wf_mods.2.bedmethyl.gz
     fi
 
     nextflow run $tool_dir -profile offline \
             -c $tool_dir/nextflow.config \
             -w $output_dir/tmp \
-            --input_file1 {3}/epi2me/$sample/$sample.wf_mods.1.bedmethyl \
-            --input_file2 {3}/epi2me/$sample/$sample.wf_mods.2.bedmethyl \
+            --input_file1 {3}/$sample/epi2me/$sample.wf_mods.1.bedmethyl \
+            --input_file2 {3}/$sample/epi2me/$sample.wf_mods.2.bedmethyl \
             --phased_mC \
             --output_dir $output_dir/ \
             --threads 1
