@@ -69,7 +69,7 @@ for s in samples:
         ]
 
         for file_name in epi2me_files:
-            matching_files = list(base_dir.glob(f"*/{s}/{file_name}"))
+            matching_files = list(base_dir.glob(f"{s}/*/{file_name}"))
             if matching_files:
                 continue
             else:
@@ -89,7 +89,7 @@ for s in samples:
         ]
 
         for file_name in snp_files:
-            matching_files = list(base_dir.glob(f"*/{s}/{file_name}"))
+            matching_files = list(base_dir.glob(f"{s}/*/{file_name}"))
             if matching_files:
                 continue
             else:
@@ -107,7 +107,7 @@ for s in samples:
         ]
 
         for file_name in sv_files:
-            matching_files = list(base_dir.glob(f"*/{s}/{file_name}"))
+            matching_files = list(base_dir.glob(f"{s}/*/{file_name}"))
             if matching_files:
                 continue
             else:
@@ -123,7 +123,7 @@ for s in samples:
         ]
 
         for file_name in cnv_files:
-            matching_files = list(base_dir.glob(f"*/{s}/{file_name}"))
+            matching_files = list(base_dir.glob(f"{s}/*/{file_name}"))
             if matching_files:
                 continue
             else:
@@ -146,7 +146,7 @@ for s in samples:
         ]
 
         for file_name in repeats_files:
-            matching_files = list(base_dir.glob(f"*/{s}/{file_name}"))
+            matching_files = list(base_dir.glob(f"{s}/*/{file_name}"))
             if matching_files:
                 continue
             else:
@@ -161,7 +161,7 @@ for s in samples:
         ]
 
         for file_name in methylation_files:
-            matching_files = list(base_dir.glob(f"*/{s}/{file_name}"))
+            matching_files = list(base_dir.glob(f"{s}/*/{file_name}"))
             if matching_files:
                 continue
             else:
@@ -200,7 +200,7 @@ for s in samples:
             )
 
         for file_name in phasing_files:
-            matching_files = list(base_dir.glob(f"*/{s}/{file_name}"))
+            matching_files = list(base_dir.glob(f"{s}/*/{file_name}"))
             if matching_files:
                 continue
             else:
@@ -221,7 +221,7 @@ for s in samples:
         ]
 
         for file_name in splicing_files:
-            matching_files = list(base_dir.glob(f"*/{s}/{file_name}"))
+            matching_files = list(base_dir.glob(f"{s}/*/{file_name}"))
             if matching_files:
                 continue
             else:
