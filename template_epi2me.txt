@@ -2,6 +2,7 @@
 #SBATCH -N 1 #Number of nodes
 #SBATCH --cpus-per-task={0}
 #SBATCH --mem {1}G # memory pool for all cores
+#SBATCH --tmp 200G # amount of temporary disk space
 #SBATCH -t {2} # time (DD-HH:MM)
 #SBATCH -o {3}_{4}.%N.%j.log
 #SBATCH -e {3}_{4}.%N.%j.log
