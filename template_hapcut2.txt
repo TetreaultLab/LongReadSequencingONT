@@ -88,7 +88,7 @@ done
 $IMAGE $TOOLDIR/build/HAPCUT2 \
     --fragments "$COMBINED_FRAGMENTS" \
     --VCF "$VCF" \
-    --output "$WD/{0}_haplotype.txt"
+    --output "$WD/{0}_haplotype"
 
 # Bgzip and tabix the phased vcf if using methphaser or just to save space
 bgzip -c "$WD/{0}_haplotype.phased.VCF" > "$WD/{0}_haplotype.phased.vcf.gz"
