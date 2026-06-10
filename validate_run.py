@@ -178,26 +178,18 @@ for s in samples:
             f"{s}_haplotype.phased.vcf.gz.tbi",
         ]
         if "SNP" in toml_config["general"]["analysis"]:
-            phasing_files.append(
-                [
-                    f"{s}.wf_snp.haploblocks.gtf",
-                ]
-            )
+            phasing_files.append(f"{s}.wf_snp.haploblocks.gtf")
         if "methylation" in toml_config["general"]["analysis"]:
-            phasing_files.append(
-                [
-                    f"{s}.wf_mods.1-5mC.bw",
-                    f"{s}.wf_mods.1.bedmethyl.gz",
-                    f"{s}.wf_mods.2-5mC.bw",
-                    f"{s}.wf_mods.2.bedmethyl.gz",
-                    "dmrs_table.bed",
-                    "dmrs_table_annotated.bed",
-                    "annotation_summary.log",
-                    "dmr_status.log",
-                    "dmr_summary_report.html",
-                    "dmr_summary_stats.tsv",
-                ]
-            )
+            phasing_files.append(f"{s}.wf_mods.1-5mC.bw")
+            phasing_files.append(f"{s}.wf_mods.1.bedmethyl.gz")
+            phasing_files.append(f"{s}.wf_mods.2-5mC.bw")
+            phasing_files.append(f"{s}.wf_mods.2.bedmethyl.gz")
+            phasing_files.append("dmrs_table.bed")
+            phasing_files.append("dmrs_table_annotated.bed")
+            phasing_files.append("annotation_summary.log")
+            phasing_files.append("dmr_status.log")
+            phasing_files.append("dmr_summary_report.html")
+            phasing_files.append("dmr_summary_stats.tsv")
 
         for file_name in phasing_files:
             matching_files = list(base_dir.glob(f"{s}/*/{file_name}"))
