@@ -73,7 +73,7 @@ for s in samples:
             if matching_files:
                 continue
             else:
-                print(f"\tWARNING! Missing: {file_name}")
+                print(f"\tWARNING! Missing epi2me results : {file_name}")
                 all_exist = False
 
     ## SNP
@@ -93,7 +93,7 @@ for s in samples:
             if matching_files:
                 continue
             else:
-                print(f"\tWARNING! Missing: {file_name}")
+                print(f"\tWARNING! Missing SNPs results : {file_name}")
                 all_exist = False
 
     ## SV
@@ -111,7 +111,7 @@ for s in samples:
             if matching_files:
                 continue
             else:
-                print(f"\tWARNING! Missing: {file_name}")
+                print(f"\tWARNING! Missing SVs results : {file_name}")
                 all_exist = False
 
     ## CNV
@@ -127,7 +127,7 @@ for s in samples:
             if matching_files:
                 continue
             else:
-                print(f"\tWARNING! Missing: {file_name}")
+                print(f"\tWARNING! Missing CNVs results : {file_name}")
                 all_exist = False
 
     ## repeats
@@ -150,7 +150,7 @@ for s in samples:
             if matching_files:
                 continue
             else:
-                print(f"\tWARNING! Missing: {file_name}")
+                print(f"\tWARNING! Missing repeat expansions results: {file_name}")
                 all_exist = False
 
     ## methylation
@@ -165,7 +165,7 @@ for s in samples:
             if matching_files:
                 continue
             else:
-                print(f"\tWARNING! Missing: {file_name}")
+                print(f"\tWARNING! Missing methylation files: {file_name}")
                 all_exist = False
 
     ## phasing
@@ -204,7 +204,7 @@ for s in samples:
             if matching_files:
                 continue
             else:
-                print(f"\tWARNING! Missing: {file_name}")
+                print(f"\tWARNING! Missing phased results : {file_name}")
                 all_exist = False
 
     ## splicing
@@ -225,7 +225,7 @@ for s in samples:
             if matching_files:
                 continue
             else:
-                print(f"\tWARNING! Missing: {file_name}")
+                print(f"\tWARNING! Missing splicing results : {file_name}")
                 all_exist = False
 
     if all_exist:
