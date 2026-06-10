@@ -1856,7 +1856,7 @@ def cleanup(toml_config, done):
 
         # HapCUT2
         commands.append(
-            f"rm {scratch}/results/{sample}/hapcut2/{sample}_haplotype.phased.VCF"
+            f"rm {scratch}/results/{sample}/hapcut2/{sample}_haplotype.txt.phased.VCF"
         )
         commands.append(
             f"rm {scratch}/results/{sample}/hapcut2/{sample}_fragment_file.txt"
