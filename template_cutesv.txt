@@ -26,8 +26,8 @@ do
     mkdir -p $WORKDIR
     mkdir -p $WORKDIR/tmp
 
-    if [ -f "$WORKDIR/tmp/DEL.pickle" ]; then
-        rm -r $WORKDIR/tmp/*
+    if [ -d "$WORKDIR/tmp" ]; then
+        rm -r $WORKDIR/tmp
     fi
 
     $CUTESV_IMAGE cuteSV \
