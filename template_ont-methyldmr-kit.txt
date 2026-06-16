@@ -45,6 +45,17 @@ do
             --phased_mC \
             --output_dir $output_dir/ \
             --threads 1
+
+    nextflow_exit_code=$?
+
+    if [ $nextflow_exit_code -eq 0 ]; then
+        echo "===== Success: $sample completed successfully ====="
+    else
+        echo "===== Warning: Nextflow failed for $sample (Exit Code: $nextflow_exit_code) ====="
+        echo "This is likely due to low site counts on a specific chromosome (e.g., chr22)."
+        echo "Skipping to the next sample in the queue..."
+    fi
+
 done
 
 if [ $? -eq 0 ]; then
