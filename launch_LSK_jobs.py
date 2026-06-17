@@ -31,7 +31,14 @@ for s in subfolders:
     print("\n\nCurrent Working Directory:", os.getcwd())
 
     # Open config file and change email adress
-    toml_config_initial = toml.load("config_initial.txt")
+    try:
+        toml_config_initial = toml.load("config_initial.txt")
+    except FileNotFoundError:
+        try:
+            toml_config_initial = toml.load("scripts/config_initial.txt")
+        except FileNotFoundError:
+            print("No config file find")
+
     toml_config_initial["general"]["email"] = email
 
     # Check if analyses are specified
