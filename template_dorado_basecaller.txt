@@ -3,7 +3,7 @@
 #SBATCH --cpus-per-task 4
 #SBATCH --gpus=h100:1
 #SBATCH --mem 64G # memory pool for all cores
-#SBATCH --tmp 1000G # amount of temporary disk space
+#SBATCH --tmp 350G # amount of temporary disk space
 #SBATCH -t {0} # time (DD-HH:MM)
 #SBATCH -o dorado_basecaller_{1}.%N.%j.log
 #SBATCH -e dorado_basecaller_{1}.%N.%j.log

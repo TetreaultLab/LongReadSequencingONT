@@ -52,7 +52,7 @@ do
         echo "===== Success: $sample completed successfully ====="
     else
         echo "===== Warning: Nextflow failed for $sample (Exit Code: $nextflow_exit_code) ====="
-        echo "This is likely due to low site counts on a specific chromosome (e.g., chr22)."
+        echo "This is likely due to low site counts on a specific chromosome."
         echo "Skipping to the next sample in the queue..."
     fi
 
