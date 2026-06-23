@@ -1148,7 +1148,7 @@ def mosdepth(toml_config, done):
     name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
     threads = "4"
     memory = "8"
-    time = "00-01:00"
+    time = "00-03:00"
     email = toml_config["general"]["email"]
 
     command_str = ""
