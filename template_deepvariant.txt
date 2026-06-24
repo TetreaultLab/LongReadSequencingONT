@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH -N 1 #Number of nodes
-#SBATCH -n 8 # number of cores
+#SBATCH --cpus-per-task 8 # number of cores
 #SBATCH --mem 64G # memory pool for all cores
 #SBATCH -t 0-11:00 # time (D-HH:MM)
 #SBATCH -o deepvariant_{0}.%N.%j.log
