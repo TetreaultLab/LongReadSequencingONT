@@ -86,6 +86,10 @@ for s in samples:
             f"{s}.wf_snp.vcf.gz.tbi",
             f"{s}_deepvariant.vcf",
             f"{s}_deepvariant.visual_report.html",
+            f"{s}_all.tsv",
+            f"{s}_pathogenic.tsv",
+            f"{s}_rare.tsv",
+            f"{s}_vep_summary.html",
         ]
 
         for file_name in snp_files:
