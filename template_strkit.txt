@@ -13,7 +13,7 @@ set -euo pipefail
 
 ml apptainer
 
-IMAGE="apptainer run /lustre09/project/6019267/shared/tools/repeat_expansions/STRkit/strkit.sif"
+IMAGE="apptainer run --env PYTHONNOUSERSITE=true /lustre09/project/6019267/shared/tools/repeat_expansions/STRkit/strkit.sif"
 STEPS_DONE="{1}/scripts/steps_done.txt"
 GENOME={2}
 REPEATS="/lustre09/project/6019267/shared/tools/repeat_expansions/reference_regions/strkit_pathogenic_converted.hg38.bed"
