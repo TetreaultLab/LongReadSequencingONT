@@ -13,7 +13,7 @@ set -euo pipefail
 
 ml apptainer/1.4.5
 
-DEEPVARIANT_IMAGE="apptainer run /lustre09/project/6019267/shared/tools/variants/SNPs/deepvariant/deepvariant.sif"
+DEEPVARIANT_IMAGE="apptainer run --env PYTHONNOUSERSITE=true /lustre09/project/6019267/shared/tools/variants/SNPs/deepvariant/deepvariant.sif"
 WORKDIR="/lustre10/scratch/$USER/{2}/results/{0}/deepvariant"
 STEPS_DONE="{3}/scripts/steps_done.txt"
 
