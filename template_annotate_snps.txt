@@ -80,6 +80,13 @@ python -u /lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongRe
     --vcf $SLURM_TMPDIR/{0}/{0}_vep.vcf \
     --sample {0}
 
+# Remove vep files
+rm $SLURM_TMPDIR/{0}/{0}_vep.vcf
+rm $SLURM_TMPDIR/{0}/{0}_vep.vcf.err
+rm $SLURM_TMPDIR/{0}/{0}_vep.vcf.log
+rm $SLURM_TMPDIR/{0}/{0}_vep.vcf.sqlite
+rm $SLURM_TMPDIR/{0}/{0}_vep.vcf.tsv
+
 rsync -azh --no-g --no-p $SLURM_TMPDIR/{0}/* {3}/
 
 if [ $? -eq 0 ]; then
