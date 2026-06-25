@@ -24,11 +24,12 @@ do
     WORKDIR="/lustre10/scratch/{3}/{4}/results/$sample/cutesv"
 
     mkdir -p $WORKDIR
-    mkdir -p $WORKDIR/tmp
-
+    
     if [ -d "$WORKDIR/tmp" ]; then
         rm -r $WORKDIR/tmp
     fi
+
+    mkdir -p $WORKDIR/tmp
 
     $CUTESV_IMAGE cuteSV \
         {1}/alignments/${{sample}}_sorted.bam\
