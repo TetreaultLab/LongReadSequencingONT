@@ -27,7 +27,7 @@ s=""
 for sample in {4}
 do
     condition=$(grep -P "^$sample\t" $metadata | cut -f2)
-    pileup=$(grep -P "^$sample\t" $metadata | cut -f3)/results/epi2me/$sample
+    pileup=$(grep -P "^$sample\t" $metadata | cut -f3)/results/$sample/epi2me
     
     # If results ar phased
     if [[ -f "$pileup/$sample.wf_mods.1.bedmethyl.gz" ]]; then
