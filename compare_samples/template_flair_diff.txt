@@ -3,8 +3,8 @@
 #SBATCH -n 16 # number of cores
 #SBATCH --mem 64G # memory pool for all cores
 #SBATCH -t 3-23:00 # time (D-HH:MM)
-#SBATCH -o flair_diff_{0}.%N.%j.log
-#SBATCH -e flair_diff_{0}.%N.%j.log
+#SBATCH -o {0}_flair_diff.%N.%j.log
+#SBATCH -e {0}_flair_diff.%N.%j.log
 #SBATCH --mail-type=FAIL
 #SBATCH --account=def-tetreaum
 #SBATCH --mail-user={1}

@@ -3,8 +3,8 @@
 #SBATCH --cpus-per-task 8
 #SBATCH --mem 128G
 #SBATCH -t 02-23:00 # time (DD-HH:MM)
-#SBATCH -o isoquant_apalord_{0}.%N.%j.log
-#SBATCH -e isoquant_apalord_{0}.%N.%j.log
+#SBATCH -o {0}_isoquant_apalord.%N.%j.log
+#SBATCH -e {0}_isoquant_apalord.%N.%j.log
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user={1}
 #SBATCH --account=def-tetreaum

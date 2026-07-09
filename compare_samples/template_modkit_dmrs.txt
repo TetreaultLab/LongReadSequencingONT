@@ -3,8 +3,8 @@
 #SBATCH --cpus-per-task 4
 #SBATCH --mem 32G
 #SBATCH -t 00-01:00 # time (DD-HH:MM)
-#SBATCH -o modkit_dmrs_{0}.%N.%j.log
-#SBATCH -e modkit_dmrs_{0}.%N.%j.log
+#SBATCH -o {0}_modkit_dmrs.%N.%j.log
+#SBATCH -e {0}_modkit_dmrs.%N.%j.log
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user={1}
 #SBATCH --account=def-tetreaum
