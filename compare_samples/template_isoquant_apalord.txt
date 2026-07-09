@@ -30,7 +30,7 @@ for sample in {4}
 do
         echo -e "\nRunning IsoQuant for $sample\n"
         
-        bam_file=$(grep -P "^$sample\t" {5} | cut -f3)/alignments/${{sample}}_sorted.bam
+        bam_file=$(grep -P "^${{sample}}\t" {5} | cut -f3)/alignments/${{sample}}_sorted.bam
 
         apptainer run $isoquant/isoquant.sif $isoquant/bin/isoquant.py \
                 --reference $genome_fa \
