@@ -103,7 +103,10 @@ def make_manifest_combine(df, toml_config):
 
     df = df[["samples", "isoform", "bed", "fa", "readmap"]]
     df.to_csv(
-        f"{current_directory}/manifest_combine.txt", header=False, sep="\t", index=False
+        f"{current_directory}/manifest_combine_{name}.txt",
+        header=False,
+        sep="\t",
+        index=False,
     )
 
 
@@ -125,7 +128,7 @@ def make_manifest_quantify(df, toml_config):
 
     df = df[["samples", "phenotype", "batch", "fastq"]]
     df.to_csv(
-        f"{current_directory}/manifest_quantify.txt",
+        f"{current_directory}/manifest_quantify_{name}.txt",
         header=False,
         sep="\t",
         index=False,
@@ -156,7 +159,7 @@ def flair_diffsplice(toml_config):
     samples = df["samples"].tolist()
     str_samples = " ".join(samples)
 
-    job = current_directory + "/scripts/" + tool + ".slurm"
+    job = f"{current_directory}/scripts/{name}_{tool}.slurm"
     with open(
         TOOL_PATH
         + "main_pipelines/long-read/LongReadSequencingONT/compare_samples/template_flair_diff.txt",
@@ -209,7 +212,7 @@ def isoquant_apalord(toml_config):
     str_ctrls = ",".join(ctrls_list)
 
     # Run tool
-    job = current_directory + "/scripts/" + tool + ".slurm"
+    job = f"{current_directory}/scripts/{name}_{tool}.slurm"
     with open(
         TOOL_PATH
         + "main_pipelines/long-read/LongReadSequencingONT/compare_samples/template_isoquant_apalord.txt",
@@ -256,34 +259,34 @@ def modkit(toml_config):
     for row in ctrl.itertuples():
         # Files are phased
         if os.path.exists(
-            f"{row.project_path}/results/epi2me/{row.samples}/{row.samples}.wf_mods.1.bedmethyl.gz"
+            f"{row.project_path}/results/{row.samples}/epi2me/{row.samples}.wf_mods.1.bedmethyl.gz"
         ):
             line = (
-                f"-a {row.project_path}/results/epi2me/{row.samples}/{row.samples}.wf_mods.1.bedmethyl.gz "
-                f"-a {row.project_path}/results/epi2me/{row.samples}/{row.samples}.wf_mods.2.bedmethyl.gz"
+                f"-a {row.project_path}/results/{row.samples}/epi2me/{row.samples}.wf_mods.1.bedmethyl.gz"
+                f"-a {row.project_path}/results/{row.samples}/epi2me/{row.samples}.wf_mods.2.bedmethyl.gz"
             )
         # Files are not phased
         else:
-            line = f"-a {row.project_path}/results/epi2me/{row.samples}/{row.samples}.wf_mods.bedmethyl.gz"
+            line = f"-a {row.project_path}/results/{row.samples}/epi2me/{row.samples}.wf_mods.bedmethyl.gz"
         result_list.append(line)
 
     for row in case.itertuples():
         # Files are phased
         if os.path.exists(
-            f"{row.project_path}/results/epi2me/{row.samples}/{row.samples}.wf_mods.2.bedmethyl.gz"
+            f"{row.project_path}/results/{row.samples}/epi2me/{row.samples}.wf_mods.2.bedmethyl.gz"
         ):
             line = (
-                f"-b {row.project_path}/results/epi2me/{row.samples}/{row.samples}.wf_mods.1.bedmethyl.gz "
-                f"-b {row.project_path}/results/epi2me/{row.samples}/{row.samples}.wf_mods.2.bedmethyl.gz"
+                f"-b {row.project_path}/results/{row.samples}/epi2me/{row.samples}.wf_mods.1.bedmethyl.gz"
+                f"-b {row.project_path}/results/{row.samples}/epi2me/{row.samples}.wf_mods.2.bedmethyl.gz"
             )
         # Files are not phased
         else:
-            line = f"-b {row.project_path}/results/epi2me/{row.samples}/{row.samples}.wf_mods.bedmethyl.gz"
+            line = f"-b {row.project_path}/results/{row.samples}/epi2me/{row.samples}.wf_mods.bedmethyl.gz"
         result_list.append(line)
 
     pairs = " ".join(result_list)
 
-    job = current_directory + "/scripts/" + tool + ".slurm"
+    job = f"{current_directory}/scripts/{name}_{tool}.slurm"
     with open(
         TOOL_PATH
         + "main_pipelines/long-read/LongReadSequencingONT/compare_samples/template_modkit_dmrs.txt",
