@@ -26,24 +26,24 @@ s=""
 # index bedmethyl files
 for sample in {4}
 do
-    condition=$(grep -P "^$sample\t" $metadata | cut -f2)
-    pileup=$(grep -P "^$sample\t" $metadata | cut -f3)/results/$sample/epi2me
+    condition=$(grep -P "^${{sample}}\t" $metadata | cut -f2)
+    pileup=$(grep -P "^${{sample}}\t" $metadata | cut -f3)/results/${{sample}}/epi2me
     
     # If results ar phased
-    if [[ -f "$pileup/$sample.wf_mods.1.bedmethyl.gz" ]]; then
-        tabix -f -p bed $pileup/$sample.wf_mods.1.bedmethyl.gz
-        s+=" -s $pileup/$sample.wf_mods.1.bedmethyl.gz ${{condition}}_${{sample}}"
+    if [[ -f "$pileup/${{sample}}.wf_mods.1.bedmethyl.gz" ]]; then
+        tabix -f -p bed $pileup/${{sample}}.wf_mods.1.bedmethyl.gz
+        s+=" -s $pileup/${{sample}}.wf_mods.1.bedmethyl.gz ${{condition}}_${{sample}}"
     fi
     
-    if [[ -f "$pileup/$sample.wf_mods.2.bedmethyl.gz" ]]; then
-        tabix -f -p bed $pileup/$sample.wf_mods.2.bedmethyl.gz
-        s+=" -s $pileup/$sample.wf_mods.2.bedmethyl.gz ${{condition}}_${{sample}}"
+    if [[ -f "$pileup/${{sample}}.wf_mods.2.bedmethyl.gz" ]]; then
+        tabix -f -p bed $pileup/${{sample}}.wf_mods.2.bedmethyl.gz
+        s+=" -s $pileup/${{sample}}.wf_mods.2.bedmethyl.gz ${{condition}}_${{sample}}"
     fi
 
     # If results are not phased
-    if [[ -f "$pileup/$sample.wf_mods.bedmethyl.gz" ]]; then
-        tabix -f -p bed $pileup/$sample.wf_mods.bedmethyl.gz
-        s+=" -s $pileup/$sample.wf_mods.bedmethyl.gz ${{condition}}_$sample"
+    if [[ -f "$pileup/${{sample}}.wf_mods.bedmethyl.gz" ]]; then
+        tabix -f -p bed $pileup/${{sample}}.wf_mods.bedmethyl.gz
+        s+=" -s $pileup/${{sample}}.wf_mods.bedmethyl.gz ${{condition}}_${{sample}}"
     fi
 done
 
