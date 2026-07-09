@@ -263,7 +263,7 @@ def modkit(toml_config):
         ):
             line = (
                 f"-a {row.project_path}/results/{row.samples}/epi2me/{row.samples}.wf_mods.1.bedmethyl.gz"
-                f"-a {row.project_path}/results/{row.samples}/epi2me/{row.samples}.wf_mods.2.bedmethyl.gz"
+                f" -a {row.project_path}/results/{row.samples}/epi2me/{row.samples}.wf_mods.2.bedmethyl.gz"
             )
         # Files are not phased
         else:
@@ -277,7 +277,7 @@ def modkit(toml_config):
         ):
             line = (
                 f"-b {row.project_path}/results/{row.samples}/epi2me/{row.samples}.wf_mods.1.bedmethyl.gz"
-                f"-b {row.project_path}/results/{row.samples}/epi2me/{row.samples}.wf_mods.2.bedmethyl.gz"
+                f" -b {row.project_path}/results/{row.samples}/epi2me/{row.samples}.wf_mods.2.bedmethyl.gz"
             )
         # Files are not phased
         else:
