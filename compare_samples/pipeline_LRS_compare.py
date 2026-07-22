@@ -262,26 +262,26 @@ def modkit(toml_config):
             f"{row.project_path}/results/{row.samples}/epi2me/{row.samples}.wf_mods.1.bedmethyl.gz"
         ):
             line = (
-                f"-a {row.project_path}/results/{row.samples}/epi2me/{row.samples}.wf_mods.1.bedmethyl.gz"
-                f" -a {row.project_path}/results/{row.samples}/epi2me/{row.samples}.wf_mods.2.bedmethyl.gz"
+                f"-a {row.project_path}/results/{row.samples}/epi2me/{row.samples}.wf_mods.1.sorted.bedmethyl"
+                f" -a {row.project_path}/results/{row.samples}/epi2me/{row.samples}.wf_mods.2.sorted.bedmethyl"
             )
         # Files are not phased
         else:
-            line = f"-a {row.project_path}/results/{row.samples}/epi2me/{row.samples}.wf_mods.bedmethyl.gz"
+            line = f"-a {row.project_path}/results/{row.samples}/epi2me/{row.samples}.wf_mods.sorted.bedmethyl"
         result_list.append(line)
 
     for row in case.itertuples():
         # Files are phased
         if os.path.exists(
-            f"{row.project_path}/results/{row.samples}/epi2me/{row.samples}.wf_mods.2.bedmethyl.gz"
+            f"{row.project_path}/results/{row.samples}/epi2me/{row.samples}.wf_mods.1.bedmethyl.gz"
         ):
             line = (
-                f"-b {row.project_path}/results/{row.samples}/epi2me/{row.samples}.wf_mods.1.bedmethyl.gz"
-                f" -b {row.project_path}/results/{row.samples}/epi2me/{row.samples}.wf_mods.2.bedmethyl.gz"
+                f"-b {row.project_path}/results/{row.samples}/epi2me/{row.samples}.wf_mods.1.sorted.bedmethyl.gz"
+                f" -b {row.project_path}/results/{row.samples}/epi2me/{row.samples}.wf_mods.2.sorted.bedmethyl.gz"
             )
         # Files are not phased
         else:
-            line = f"-b {row.project_path}/results/{row.samples}/epi2me/{row.samples}.wf_mods.bedmethyl.gz"
+            line = f"-b {row.project_path}/results/{row.samples}/epi2me/{row.samples}.wf_mods.sorted.bedmethyl.gz"
         result_list.append(line)
 
     pairs = " ".join(result_list)
