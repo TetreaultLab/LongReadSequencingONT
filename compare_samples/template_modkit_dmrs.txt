@@ -31,22 +31,22 @@ do
     
     # If results ar phased
     if [[ -f "$pileup/${{sample}}.wf_mods.1.bedmethyl.gz" ]]; then
-        zcat $pileup/${{sample}}.wf_mods.1.bedmethyl.gz | sort -k1,1 -k2,2n > $pileup/${{sample}}.wf_mods.1.sorted.bedmethyl
-        tabix -f -p bed $pileup/${{sample}}.wf_mods.1.sorted.bedmethyl
-        s+=" -s $pileup/${{sample}}.wf_mods.1.sorted.bedmethyl ${{condition}}_${{sample}}"
+        zcat $pileup/${{sample}}.wf_mods.1.bedmethyl.gz | sort -k1,1 -k2,2n | bgzip > $pileup/${{sample}}.wf_mods.1.sorted.bedmethyl.gz
+        tabix -f -p bed $pileup/${{sample}}.wf_mods.1.sorted.bedmethyl.gz
+        s+=" -s $pileup/${{sample}}.wf_mods.1.sorted.bedmethyl.gz ${{condition}}_${{sample}}"
     fi
     
     if [[ -f "$pileup/${{sample}}.wf_mods.2.bedmethyl.gz" ]]; then
-        zcat $pileup/${{sample}}.wf_mods.2.bedmethyl.gz | sort -k1,1 -k2,2n > $pileup/${{sample}}.wf_mods.2.sorted.bedmethyl
-        tabix -f -p bed $pileup/${{sample}}.wf_mods.2.sorted.bedmethyl
-        s+=" -s $pileup/${{sample}}.wf_mods.2.sorted.bedmethyl ${{condition}}_${{sample}}"
+        zcat $pileup/${{sample}}.wf_mods.2.bedmethyl.gz | sort -k1,1 -k2,2n | bgzip > $pileup/${{sample}}.wf_mods.2.sorted.bedmethyl.gz
+        tabix -f -p bed $pileup/${{sample}}.wf_mods.2.sorted.bedmethyl.gz
+        s+=" -s $pileup/${{sample}}.wf_mods.2.sorted.bedmethyl.gz ${{condition}}_${{sample}}"
     fi
 
     # If results are not phased
     if [[ -f "$pileup/${{sample}}.wf_mods.bedmethyl.gz" ]]; then
-        zcat $pileup/${{sample}}.wf_mods.bedmethyl.gz | sort -k1,1 -k2,2n > $pileup/${{sample}}.wf_mods.sorted.bedmethyl
-        tabix -f -p bed $pileup/${{sample}}.wf_mods.sorted.bedmethyl
-        s+=" -s $pileup/${{sample}}.wf_mods.sorted.bedmethyl ${{condition}}_${{sample}}"
+        zcat $pileup/${{sample}}.wf_mods.bedmethyl.gz | sort -k1,1 -k2,2n | bgzip > $pileup/${{sample}}.wf_mods.sorted.bedmethyl.gz
+        tabix -f -p bed $pileup/${{sample}}.wf_mods.sorted.bedmethyl.gz
+        s+=" -s $pileup/${{sample}}.wf_mods.sorted.bedmethyl.gz ${{condition}}_${{sample}}"
     fi
 done
 
