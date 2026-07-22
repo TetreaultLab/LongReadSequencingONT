@@ -36,7 +36,7 @@ do
     bam_file=$(grep -P "^${{sample}}\t" {6} | cut -f3)/alignments/${{sample}}_sorted.bam
     echo -e "\nProcessing $bam_file for junctions"
 
-    apptainer run $flair_img $intron_prospector_tool/intronProspector \
+    apptainer run --env PYTHONNOUSERSITE=true $flair_img $intron_prospector_tool/intronProspector \
         -g $genome_fa \
         -b $project_path/${{sample}}.IPjunctions.bed \
         -C 0.0 \
@@ -53,7 +53,7 @@ done
 
 # Merge junctions into one junctions file
 echo -e "\nMerging junction files"
-apptainer run $flair_img $intron_prospector_tool/intronProspectorMerge \
+apptainer run --env PYTHONNOUSERSITE=true $flair_img $intron_prospector_tool/intronProspectorMerge \
     -i $project_path/IPjunctions_{0}_list.txt \
     -b $project_path/IPjunctions_{0}_list_merged.bed
 
@@ -63,7 +63,7 @@ do
     bam_file=$(grep -P "^$sample\t" {6} | cut -f3)/alignments/${{sample}}_sorted.bam
     echo -e "\nProcessing $bam_file for FLAIR transcriptomes"
 
-    apptainer run $flair_img flair transcriptome \
+    apptainer run --env PYTHONNOUSERSITE=true $flair_img flair transcriptome \
         -g $genome_fa \
         -b $bam_file \
         -f $annotation_gtf \
@@ -76,7 +76,7 @@ done
 
 # Combine transcriptomes
 echo -e "\nMerging transcriptomes"
-apptainer run $flair_img flair combine \
+apptainer run --env PYTHONNOUSERSITE=true $flair_img flair combine \
     -m $manifest_combine \
     --include_se \
     -p 5 \
@@ -85,7 +85,7 @@ apptainer run $flair_img flair combine \
 
 # Quantify splicing
 echo -e "\nRunning FLAIR quantify"
-apptainer run $flair_img flair quantify \
+apptainer run --env PYTHONNOUSERSITE=true $flair_img flair quantify \
     -r $manifest_quantify \
     -i $project_path/{0}_combined.fa \
     --threads 16 \
@@ -97,7 +97,7 @@ apptainer run $flair_img flair quantify \
 
 # Run differential expression
 echo -e "\nRunning FLAIR diff expression"
-apptainer run $flair_img flair diffexp \
+apptainer run --env PYTHONNOUSERSITE=true $flair_img flair diffexp \
     -q $project_path/{0}_quantify.counts.tsv \
     --threads 16 \
     --out_dir $project_path/diffexp \
@@ -105,7 +105,7 @@ apptainer run $flair_img flair diffexp \
 
 # Run differential splicing
 echo -e "\nRunning FLAIR diff splicing"
-apptainer run $flair_img flair diffsplice \
+apptainer run --env PYTHONNOUSERSITE=true $flair_img flair diffsplice \
     -i $project_path/{0}_combined.bed \
     -q $project_path/{0}_quantify.counts.tsv \
     --threads 16 \
