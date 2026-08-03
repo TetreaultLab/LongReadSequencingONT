@@ -1,6 +1,6 @@
 #!/bin/sh
 #SBATCH -N 1 #Number of nodes
-#SBATCH --cpus-per-task 8
+#SBATCH --cpus-per-task 4
 #SBATCH --gpus=h100_3g.40gb:1
 #SBATCH --mem 64G # memory pool for all cores
 #SBATCH --tmp 350G # amount of temporary disk space
