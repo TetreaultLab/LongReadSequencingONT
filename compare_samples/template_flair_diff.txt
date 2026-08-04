@@ -15,7 +15,7 @@ ml apptainer/1.4.5 bedtools/2.31.0
 
 flair_img="/lustre09/project/6019267/shared/tools/splicing/flair/flair_20260320.sif"
 intron_prospector_tool="/lustre09/project/6019267/shared/tools/splicing/flair/intronProspector/bin"
-project_path="/lustre10/scratch/$USER/{0}/flair_diff"
+project_path="flair_diff"
 genome_fa="{2}"
 annotation_gtf="{3}"
 work_dir="{4}"
@@ -25,12 +25,9 @@ manifest_quantify="$work_dir/manifest_quantify_{0}.txt"
 mkdir $SLURM_TMPDIR/$project_path
 mkdir $SLURM_TMPDIR/$project_path/fastq
 
-mkdir -p $project_path
-mkdir -p $project_path/fastq
-
 # Clear list
-if [[ -f "$project_path/IPjunctions_{0}_list.txt" ]]; then
-    rm $project_path/IPjunctions_{0}_list.txt
+if [[ -f "$SLURM_TMPDIR/$project_path/IPjunctions_{0}_list.txt" ]]; then
+    rm $SLURM_TMPDIR/$project_path/IPjunctions_{0}_list.txt
 fi
 
 # Find junctions for each samples
@@ -46,7 +43,7 @@ do
         -c $SLURM_TMPDIR/$project_path/${{sample}}_intron_calls.tsv \
         $bam_file
 
-    echo -e "$project_path/${{sample}}_intron_calls.tsv" >> $project_path/IPjunctions_{0}_list.txt
+    echo -e "$SLURM_TMPDIR/$project_path/${{sample}}_intron_calls.tsv" >> $SLURM_TMPDIR/$project_path/IPjunctions_{0}_list.txt
 
     # Make fastq files
     echo -e "\nBam to Fastq for $sample"
@@ -57,7 +54,7 @@ done
 # Merge junctions into one junctions file
 echo -e "\nMerging junction files"
 apptainer run --env PYTHONNOUSERSITE=true $flair_img $intron_prospector_tool/intronProspectorMerge \
-    -i $project_path/IPjunctions_{0}_list.txt \
+    -i $SLURM_TMPDIR/$project_path/IPjunctions_{0}_list.txt \
     -b $SLURM_TMPDIR/$project_path/IPjunctions_{0}_list_merged.bed
 
 # Generate transcriptomes with FLAIR
@@ -122,6 +119,6 @@ apptainer run --env PYTHONNOUSERSITE=true $flair_img flair diffsplice \
     --out_dir $SLURM_TMPDIR/$project_path/diffsplice \
     --out_dir_force
 
-rsync rsync -azh --no-g --no-p $SLURM_TMPDIR/$project_path/* $project_path/
+rsync -azh --no-g --no-p $SLURM_TMPDIR/$project_path $work_dir/
 
 echo -e "\nFLAIR done!"
