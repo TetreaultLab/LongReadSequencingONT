@@ -2,7 +2,8 @@
 #SBATCH -N 1 #Number of nodes
 #SBATCH -n 16 # number of cores
 #SBATCH --mem 64G # memory pool for all cores
-#SBATCH -t 3-23:00 # time (D-HH:MM)
+#SBATCH --tmp 350G # amount of temporary disk space
+#SBATCH -t 2-23:00 # time (D-HH:MM)
 #SBATCH -o {0}_flair_diff.%N.%j.log
 #SBATCH -e {0}_flair_diff.%N.%j.log
 #SBATCH --mail-type=FAIL
@@ -35,6 +36,9 @@ for sample in {5}
 do
     bam_file=$(grep -P "^${{sample}}\t" {6} | cut -f3)/alignments/${{sample}}_sorted.bam
     echo -e "\nProcessing $bam_file for junctions"
+
+    touch $SLURM_TMPDIR/$project_path/${{sample}}.IPjunctions.bed
+    touch $SLURM_TMPDIR/$project_path/${{sample}}_intron_calls.tsv
 
     apptainer run --env PYTHONNOUSERSITE=true $flair_img $intron_prospector_tool/intronProspector \
         -g $genome_fa \
