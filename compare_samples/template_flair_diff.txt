@@ -22,6 +22,9 @@ work_dir="{4}"
 manifest_combine="$work_dir/manifest_combine_{0}.txt"
 manifest_quantify="$work_dir/manifest_quantify_{0}.txt"
 
+mkdir $SLURM_TMPDIR/$project_path
+mkdir $SLURM_TMPDIR/$project_path/fastq
+
 mkdir -p $project_path
 mkdir -p $project_path/fastq
 
@@ -38,16 +41,16 @@ do
 
     apptainer run --env PYTHONNOUSERSITE=true $flair_img $intron_prospector_tool/intronProspector \
         -g $genome_fa \
-        -b $project_path/${{sample}}.IPjunctions.bed \
+        -b $SLURM_TMPDIR/$project_path/${{sample}}.IPjunctions.bed \
         -C 0.0 \
-        -c $project_path/${{sample}}_intron_calls.tsv \
+        -c $SLURM_TMPDIR/$project_path/${{sample}}_intron_calls.tsv \
         $bam_file
 
     echo -e "$project_path/${{sample}}_intron_calls.tsv" >> $project_path/IPjunctions_{0}_list.txt
 
     # Make fastq files
     echo -e "\nBam to Fastq for $sample"
-    bedtools bamtofastq -i $bam_file -fq $project_path/fastq/$sample.fastq
+    bedtools bamtofastq -i $bam_file -fq $SLURM_TMPDIR/$project_path/fastq/${{sample}}.fastq
 
 done
 
@@ -55,7 +58,7 @@ done
 echo -e "\nMerging junction files"
 apptainer run --env PYTHONNOUSERSITE=true $flair_img $intron_prospector_tool/intronProspectorMerge \
     -i $project_path/IPjunctions_{0}_list.txt \
-    -b $project_path/IPjunctions_{0}_list_merged.bed
+    -b $SLURM_TMPDIR/$project_path/IPjunctions_{0}_list_merged.bed
 
 # Generate transcriptomes with FLAIR
 for sample in {5}
@@ -70,8 +73,8 @@ do
         --threads 16 \
         --parallelmode bychrom \
         --junction_support 2 \
-        --junction_bed $project_path/IPjunctions_{0}_list_merged.bed \
-        -o $project_path/$sample
+        --junction_bed $SLURM_TMPDIR/$project_path/IPjunctions_{0}_list_merged.bed \
+        -o $SLURM_TMPDIR/$project_path/$sample
 done
 
 # Combine transcriptomes
@@ -81,33 +84,33 @@ apptainer run --env PYTHONNOUSERSITE=true $flair_img flair combine \
     --include_se \
     -p 5 \
     -f 1 \
-    -o $project_path/{0}_combined
+    -o $SLURM_TMPDIR/$project_path/{0}_combined
 
 # Quantify splicing
 echo -e "\nRunning FLAIR quantify"
 apptainer run --env PYTHONNOUSERSITE=true $flair_img flair quantify \
     -r $manifest_quantify \
-    -i $project_path/{0}_combined.fa \
+    -i $SLURM_TMPDIR/$project_path/{0}_combined.fa \
     --threads 16 \
-    --temp_dir $project_path/temp \
-    -o $project_path/{0}_quantify \
-    --isoform_bed $project_path/{0}_combined.bed \
+    --temp_dir $SLURM_TMPDIR/$project_path/temp \
+    -o $SLURM_TMPDIR/$project_path/{0}_quantify \
+    --isoform_bed $SLURM_TMPDIR/$project_path/{0}_combined.bed \
     --stringent \
     --check_splice
 
 # Run differential expression
 echo -e "\nRunning FLAIR diff expression"
 apptainer run --env PYTHONNOUSERSITE=true $flair_img flair diffexp \
-    -q $project_path/{0}_quantify.counts.tsv \
+    -q $SLURM_TMPDIR/$project_path/{0}_quantify.counts.tsv \
     --threads 16 \
-    --out_dir $project_path/diffexp \
+    --out_dir $SLURM_TMPDIR/$project_path/diffexp \
     --out_dir_force
 
 # Run differential splicing
 echo -e "\nRunning FLAIR diff splicing"
 apptainer run --env PYTHONNOUSERSITE=true $flair_img flair diffsplice \
-    -i $project_path/{0}_combined.bed \
-    -q $project_path/{0}_quantify.counts.tsv \
+    -i $SLURM_TMPDIR/$project_path/{0}_combined.bed \
+    -q $SLURM_TMPDIR/$project_path/{0}_quantify.counts.tsv \
     --threads 16 \
     --test \
     --drim1 3 \
@@ -116,7 +119,9 @@ apptainer run --env PYTHONNOUSERSITE=true $flair_img flair diffsplice \
     --drim4 3 \
     --conditionA {7} \
     --conditionB {8} \
-    --out_dir $project_path/diffsplice \
+    --out_dir $SLURM_TMPDIR/$project_path/diffsplice \
     --out_dir_force
+
+rsync rsync -azh --no-g --no-p $SLURM_TMPDIR/$project_path/* $project_path/
 
 echo -e "\nFLAIR done!"
