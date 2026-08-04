@@ -37,10 +37,9 @@ do
     bam_file=$(grep -P "^${{sample}}\t" {6} | cut -f3)/alignments/${{sample}}_sorted.bam
     echo -e "\nProcessing $bam_file for junctions"
 
-    touch $SLURM_TMPDIR/$project_path/${{sample}}.IPjunctions.bed
-    touch $SLURM_TMPDIR/$project_path/${{sample}}_intron_calls.tsv
-
-    apptainer run --env PYTHONNOUSERSITE=true $flair_img $intron_prospector_tool/intronProspector \
+    apptainer run --env PYTHONNOUSERSITE=true \
+        -B $SLURM_TMPDIR:$SLURM_TMPDIR \
+        $flair_img $intron_prospector_tool/intronProspector \
         -g $genome_fa \
         -b $SLURM_TMPDIR/$project_path/${{sample}}.IPjunctions.bed \
         -C 0.0 \
@@ -57,7 +56,9 @@ done
 
 # Merge junctions into one junctions file
 echo -e "\nMerging junction files"
-apptainer run --env PYTHONNOUSERSITE=true $flair_img $intron_prospector_tool/intronProspectorMerge \
+apptainer run --env PYTHONNOUSERSITE=true \
+    -B $SLURM_TMPDIR:$SLURM_TMPDIR \
+    $flair_img $intron_prospector_tool/intronProspectorMerge \
     -i $SLURM_TMPDIR/$project_path/IPjunctions_{0}_list.txt \
     -b $SLURM_TMPDIR/$project_path/IPjunctions_{0}_list_merged.bed
 
@@ -67,7 +68,9 @@ do
     bam_file=$(grep -P "^$sample\t" {6} | cut -f3)/alignments/${{sample}}_sorted.bam
     echo -e "\nProcessing $bam_file for FLAIR transcriptomes"
 
-    apptainer run --env PYTHONNOUSERSITE=true $flair_img flair transcriptome \
+    apptainer run --env PYTHONNOUSERSITE=true \
+        -B $SLURM_TMPDIR:$SLURM_TMPDIR \
+        $flair_img flair transcriptome \
         -g $genome_fa \
         -b $bam_file \
         -f $annotation_gtf \
@@ -80,7 +83,9 @@ done
 
 # Combine transcriptomes
 echo -e "\nMerging transcriptomes"
-apptainer run --env PYTHONNOUSERSITE=true $flair_img flair combine \
+apptainer run --env PYTHONNOUSERSITE=true \
+    -B $SLURM_TMPDIR:$SLURM_TMPDIR \
+    $flair_img flair combine \
     -m $manifest_combine \
     --include_se \
     -p 5 \
@@ -89,7 +94,9 @@ apptainer run --env PYTHONNOUSERSITE=true $flair_img flair combine \
 
 # Quantify splicing
 echo -e "\nRunning FLAIR quantify"
-apptainer run --env PYTHONNOUSERSITE=true $flair_img flair quantify \
+apptainer run --env PYTHONNOUSERSITE=true \
+    -B $SLURM_TMPDIR:$SLURM_TMPDIR \
+    $flair_img flair quantify \
     -r $manifest_quantify \
     -i $SLURM_TMPDIR/$project_path/{0}_combined.fa \
     --threads 16 \
@@ -101,7 +108,9 @@ apptainer run --env PYTHONNOUSERSITE=true $flair_img flair quantify \
 
 # Run differential expression
 echo -e "\nRunning FLAIR diff expression"
-apptainer run --env PYTHONNOUSERSITE=true $flair_img flair diffexp \
+apptainer run --env PYTHONNOUSERSITE=true \
+    -B $SLURM_TMPDIR:$SLURM_TMPDIR \
+    $flair_img flair diffexp \
     -q $SLURM_TMPDIR/$project_path/{0}_quantify.counts.tsv \
     --threads 16 \
     --out_dir $SLURM_TMPDIR/$project_path/diffexp \
@@ -109,7 +118,9 @@ apptainer run --env PYTHONNOUSERSITE=true $flair_img flair diffexp \
 
 # Run differential splicing
 echo -e "\nRunning FLAIR diff splicing"
-apptainer run --env PYTHONNOUSERSITE=true $flair_img flair diffsplice \
+apptainer run --env PYTHONNOUSERSITE=true \
+    -B $SLURM_TMPDIR:$SLURM_TMPDIR \
+    $flair_img flair diffsplice \
     -i $SLURM_TMPDIR/$project_path/{0}_combined.bed \
     -q $SLURM_TMPDIR/$project_path/{0}_quantify.counts.tsv \
     --threads 16 \
