@@ -704,8 +704,7 @@ def dorado_basecaller(toml_config, done):
         hours = int(size_str) * 0.03
 
         if toml_config["general"]["seq_type"] == "RNA":
-            if hours <= 24:
-                hours = hours * 2
+            hours = hours * 2
 
         formatted_time = format_time(hours)
 
