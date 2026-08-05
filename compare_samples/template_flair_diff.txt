@@ -27,11 +27,11 @@ mkdir $SLURM_TMPDIR/$project_path
 mkdir $SLURM_TMPDIR/$project_path/fastq
 
 # change paths in manifest to paths in SLURM_TMPDIR
-sed -i 's#/lustre10/scratch/$USER/#$SLURM_TMPDIR#g' $manifest_quantify
-sed -i 's#/lustre10/scratch/$USER/#$SLURM_TMPDIR#g' $manifest_combine
+sed -i "s#/lustre10/scratch/$USER/#$SLURM_TMPDIR#g" $manifest_quantify
+sed -i "s#/lustre10/scratch/$USER/#$SLURM_TMPDIR#g" $manifest_combine
 
-echo $manifest_combine
-echo $manifest_quantify
+cat $manifest_combine
+cat $manifest_quantify
 
 # Clear list
 if [[ -f "$SLURM_TMPDIR/$project_path/IPjunctions_{0}_list.txt" ]]; then
