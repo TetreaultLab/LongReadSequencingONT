@@ -94,7 +94,7 @@ def make_manifest_combine(df, toml_config):
     current_directory = os.getcwd()
     name = toml_config["general"]["comparison_name"]
     username = os.environ.get("USER")
-    scratch = f"/lustre10/scratch/{username}/{name}/flair_diff"
+    scratch = f"/lustre10/scratch/{username}/{name}"
 
     df["isoform"] = "isoform"
     df["bed"] = scratch + "/" + df["samples"] + ".isoforms.bed"
@@ -114,7 +114,7 @@ def make_manifest_quantify(df, toml_config):
     current_directory = os.getcwd()
     name = toml_config["general"]["comparison_name"]
     username = os.environ.get("USER")
-    scratch = f"/lustre10/scratch/{username}/{name}/flair_diff"
+    scratch = f"/lustre10/scratch/{username}/{name}"
 
     df["batch"] = (
         df["project_path"]
