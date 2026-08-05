@@ -810,7 +810,7 @@ def dorado_demux(toml_config, done):
         size_str = result.stdout.split()[0].rstrip("G")
 
         # Scale required job time based on amount of data
-        hours = int(size_str) * 0.001
+        hours = int(size_str) * 0.002
         formatted_time = format_time(hours)
 
         command = [
