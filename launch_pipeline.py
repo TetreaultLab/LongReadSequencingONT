@@ -701,7 +701,7 @@ def dorado_basecaller(toml_config, done):
         size_str = result.stdout.split()[0].rstrip("G")
 
         # Scale required job time based on amount of data
-        hours = int(size_str) * 0.03
+        hours = int(size_str) * 0.04
 
         if toml_config["general"]["seq_type"] == "RNA":
             hours = hours * 2
