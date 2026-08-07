@@ -25,6 +25,7 @@ manifest_quantify="$work_dir/manifest_quantify_{0}.txt"
 
 mkdir $SLURM_TMPDIR/$project_path
 mkdir $SLURM_TMPDIR/$project_path/fastq
+mkdir -p $work_dir/flair_diff
 
 # change paths in manifest to paths in SLURM_TMPDIR
 sed -i "s#/lustre10/scratch/$USER/#$SLURM_TMPDIR/#g" $manifest_quantify
@@ -141,6 +142,8 @@ apptainer run --env PYTHONNOUSERSITE=true \
     --out_dir $SLURM_TMPDIR/$project_path/diffsplice \
     --out_dir_force
 
-rsync -azh --no-g --no-p $SLURM_TMPDIR/$project_path $work_dir/
+rsync -azh --no-g --no-p $SLURM_TMPDIR/$project_path/$project_path_* $work_dir/flair_diff/
+rsync -azh --no-g --no-p $SLURM_TMPDIR/$project_path/diffsplice $work_dir/flair_diff/
+rsync -azh --no-g --no-p $SLURM_TMPDIR/$project_path/diffexp $work_dir/flair_diff/
 
 echo -e "\nFLAIR done!"
