@@ -20,8 +20,11 @@ project_path="{0}"
 genome_fa="{2}"
 annotation_gtf="{3}"
 work_dir="{4}"
-manifest_combine="$work_dir/manifest_combine_{0}.txt"
-manifest_quantify="$work_dir/manifest_quantify_{0}.txt"
+manifest_combine="$work_dir/manifest_combine_{0}.bak"
+manifest_quantify="$work_dir/manifest_quantify_{0}.bak"
+
+cp $work_dir/manifest_combine_{0}.txt $manifest_combine 
+cp $work_dir/manifest_quantify_{0}.txt $manifest_quantify
 
 mkdir $SLURM_TMPDIR/$project_path
 mkdir $SLURM_TMPDIR/$project_path/fastq
