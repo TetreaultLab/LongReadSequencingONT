@@ -81,7 +81,6 @@ python -u /lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongRe
     --sample {0}
 
 # Remove vep files
-rm $SLURM_TMPDIR/{0}/{0}_vep.vcf
 rm $SLURM_TMPDIR/{0}/{0}_vep.vcf.err
 rm $SLURM_TMPDIR/{0}/{0}_vep.vcf.log
 rm $SLURM_TMPDIR/{0}/{0}_vep.vcf.sqlite
