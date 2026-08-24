@@ -43,7 +43,7 @@ if [[ "$CALLER" == "deepvariant" ]]; then
         -g het \
         -f PASS \
         -e 'GT="./." || GT="0/0"' \
-        "/lustre10/scratch/$USER/{2}/results/{0}/deepvariant/{0}_deepvariant.vcf" \
+        "/lustre10/scratch/$USER/{2}/results/{0}/deepvariant/{0}_deepvariant.vcf.gz" \
         -Ov -o "$FILTERED_VCF"
 
 	VCF=$FILTERED_VCF
