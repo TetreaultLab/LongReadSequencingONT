@@ -2,8 +2,8 @@
 #SBATCH -N 1 #Number of nodes
 #SBATCH -n 16 # number of cores
 #SBATCH --mem 64G # memory pool for all cores
-#SBATCH --tmp 350G # amount of temporary disk space
-#SBATCH -t 2-23:00 # time (D-HH:MM)
+#SBATCH --tmp 1000G # amount of temporary disk space
+#SBATCH -t 4-23:00 # time (D-HH:MM)
 #SBATCH -o {0}_flair_diff.%N.%j.log
 #SBATCH -e {0}_flair_diff.%N.%j.log
 #SBATCH --mail-type=FAIL
@@ -61,6 +61,9 @@ do
     bedtools bamtofastq -i $bam_file -fq $SLURM_TMPDIR/$project_path/fastq/${{sample}}.fastq
 
 done
+
+echo "Transfering to $workdir"
+rsync -avxH --no-g --no-p --partial $SLURM_TMPDIR/$project_path/* $workdir/
 
 # Merge junctions into one junctions file
 echo -e "\nMerging junction files"
