@@ -1005,8 +1005,8 @@ def dorado(toml_config, done):
                 bam_dorado,
             )
 
-        with open(job, "w") as o:
-            o.write(slurm_filled)
+            with open(job, "w") as o:
+                o.write(slurm_filled)
 
         with open(output + "/scripts/main.sh", "a") as f:
             f.write(f"\n# Dorado Basecall for sample : {sample}")
@@ -1024,24 +1024,24 @@ def samtools(toml_config, done):
     sample = toml_config["general"]["samples"][0]
     path = f"{output}/alignments"
 
-    job = output + "/scripts/" + tool + "_" + sample + ".slurm"
-    with open(
-        TOOL_PATH
-        + "main_pipelines/long-read/LongReadSequencingONT/template_samtools.txt",
-        "r",
-    ) as f:
-        slurm = f.read()
-        slurm_filled = slurm.format(sample, email, output, path)
-
-        with open(job, "w") as o:
-            o.write(slurm_filled)
-
     fc_name = flowcell.replace("-", "_")
     samtools_name = f"samtools_{sample}"
     var_name_bc = f"dorado_basecaller_{fc_name}"
 
     if f"dorado_basecaller_{flowcell}" not in done:
         print(f"To-Do: {samtools_name}")
+        job = output + "/scripts/" + tool + "_" + sample + ".slurm"
+        with open(
+            TOOL_PATH
+            + "main_pipelines/long-read/LongReadSequencingONT/template_samtools.txt",
+            "r",
+        ) as f:
+            slurm = f.read()
+            slurm_filled = slurm.format(sample, email, output, path)
+
+            with open(job, "w") as o:
+                o.write(slurm_filled)
+
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("\n# Samtools sort and index")
             f.write(
@@ -1051,6 +1051,19 @@ def samtools(toml_config, done):
     else:
         if samtools_name not in done:
             print(f"To-Do: {samtools_name}")
+
+            job = output + "/scripts/" + tool + "_" + sample + ".slurm"
+            with open(
+                TOOL_PATH
+                + "main_pipelines/long-read/LongReadSequencingONT/template_samtools.txt",
+                "r",
+            ) as f:
+                slurm = f.read()
+                slurm_filled = slurm.format(sample, email, output, path)
+
+                with open(job, "w") as o:
+                    o.write(slurm_filled)
+
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write("\n# Samtools sort and index")
                 f.write(f"\n{samtools_name}=$(sbatch --parsable {job})\n")
@@ -1075,22 +1088,23 @@ def samtools_py(toml_config, done):
     to_dos = [x for x in all_fc if x not in done_fc]
 
     for sample in samples:
-        job = output + "/scripts/" + tool + "_" + sample + ".slurm"
-        with open(
-            TOOL_PATH
-            + "main_pipelines/long-read/LongReadSequencingONT/template_samtools_py.txt",
-            "r",
-        ) as f:
-            slurm = f.read()
-            slurm_filled = slurm.format(sample, email, output, config)
-
-            with open(job, "w") as o:
-                o.write(slurm_filled)
-
         samtools_name = f"samtools_{sample}"
 
         if len(to_dos) > 0:
             print("To-Do: " + samtools_name)
+
+            job = output + "/scripts/" + tool + "_" + sample + ".slurm"
+            with open(
+                TOOL_PATH
+                + "main_pipelines/long-read/LongReadSequencingONT/template_samtools_py.txt",
+                "r",
+            ) as f:
+                slurm = f.read()
+                slurm_filled = slurm.format(sample, email, output, config)
+
+                with open(job, "w") as o:
+                    o.write(slurm_filled)
+
             dependencies = ":".join([f"${code}" for code in to_dos])
             dependencies = dependencies.replace("-", "_")
             with open(output + "/scripts/main.sh", "a") as f:
@@ -1106,6 +1120,19 @@ def samtools_py(toml_config, done):
             # If all dorado_demux are done but samtools has not run yet
             if samtools_name not in done:
                 print("To-Do: " + samtools_name)
+
+                job = output + "/scripts/" + tool + "_" + sample + ".slurm"
+                with open(
+                    TOOL_PATH
+                    + "main_pipelines/long-read/LongReadSequencingONT/template_samtools_py.txt",
+                    "r",
+                ) as f:
+                    slurm = f.read()
+                    slurm_filled = slurm.format(sample, email, output, config)
+
+                    with open(job, "w") as o:
+                        o.write(slurm_filled)
+
                 with open(output + "/scripts/main.sh", "a") as f:
                     f.write(f"\n# Rename, merge, sort and index bams for {sample}")
                     f.write(f"\n{samtools_name}=$(sbatch --parsable {job})\n")
@@ -1237,8 +1264,6 @@ def mosdepth(toml_config, done):
     ]
     command_str += " ".join(command3) + "\n"
 
-    job = create_script(tool, threads, memory, time, output, email, command_str, "")
-
     all_fc = [f"samtools_{s}" for s in toml_config["general"]["samples"]]
     done_fc = [x for x in done if x.startswith("samtools")]
     to_dos = [x for x in all_fc if x not in done_fc]
@@ -1248,6 +1273,9 @@ def mosdepth(toml_config, done):
     # Add slurm job to main.sh
     if len(to_dos) > 0:
         print("To-Do: " + tool)
+
+        job = create_script(tool, threads, memory, time, output, email, command_str, "")
+
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("\n# Mosdepth")
             f.write(
@@ -1256,6 +1284,11 @@ def mosdepth(toml_config, done):
     else:
         if tool not in done:
             print("To-Do: " + tool)
+
+            job = create_script(
+                tool, threads, memory, time, output, email, command_str, ""
+            )
+
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write("\n# Mosdepth")
                 f.write(f"\nDEPS+=($(sbatch --parsable {job}))\n")
@@ -1373,35 +1406,36 @@ def epi2me(toml_config, done):
             todo += " " + arg_map[item]
 
     for sample in toml_config["general"]["samples"]:
-        job = output + "/scripts/" + tool + "_" + sample + ".slurm"
-        with open(
-            TOOL_PATH
-            + "main_pipelines/long-read/LongReadSequencingONT/template_epi2me.txt",
-            "r",
-        ) as f:
-            slurm = f.read()
-            slurm_filled = slurm.format(
-                cores,
-                memory,
-                time,
-                tool,
-                sample,
-                email,
-                name,
-                output,
-                todo,
-                model,
-                genome,
-            )
-
-            with open(job, "w") as o:
-                o.write(slurm_filled)
-
         samtools_name = f"samtools_{sample}"
         epi_name = f"epi2me_{sample}"
 
         if samtools_name not in done:
             print("To-Do: " + epi_name)
+
+            job = output + "/scripts/" + tool + "_" + sample + ".slurm"
+            with open(
+                TOOL_PATH
+                + "main_pipelines/long-read/LongReadSequencingONT/template_epi2me.txt",
+                "r",
+            ) as f:
+                slurm = f.read()
+                slurm_filled = slurm.format(
+                    cores,
+                    memory,
+                    time,
+                    tool,
+                    sample,
+                    email,
+                    name,
+                    output,
+                    todo,
+                    model,
+                    genome,
+                )
+
+                with open(job, "w") as o:
+                    o.write(slurm_filled)
+
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write(f"\n# Epi2me workflow human variation for {sample}")
                 if (
@@ -1418,6 +1452,31 @@ def epi2me(toml_config, done):
         else:
             if epi_name not in done:
                 print("To-Do: " + epi_name)
+
+                job = output + "/scripts/" + tool + "_" + sample + ".slurm"
+                with open(
+                    TOOL_PATH
+                    + "main_pipelines/long-read/LongReadSequencingONT/template_epi2me.txt",
+                    "r",
+                ) as f:
+                    slurm = f.read()
+                    slurm_filled = slurm.format(
+                        cores,
+                        memory,
+                        time,
+                        tool,
+                        sample,
+                        email,
+                        name,
+                        output,
+                        todo,
+                        model,
+                        genome,
+                    )
+
+                    with open(job, "w") as o:
+                        o.write(slurm_filled)
+
                 with open(output + "/scripts/main.sh", "a") as f:
                     f.write(f"\n# Epi2me workflow human variation for {sample}")
                     if (
@@ -1446,22 +1505,23 @@ def annotate_snps(toml_config, done):
         res = f"/lustre10/scratch/{username}/{name}/results/{sample}/annotated_snps"
         vcf = f"/lustre10/scratch/{username}/{name}/results/{sample}/epi2me/{sample}.wf_snp.vcf.gz"
 
-        with open(
-            TOOL_PATH
-            + "main_pipelines/long-read/LongReadSequencingONT/template_annotate_snps.txt",
-            "r",
-        ) as f:
-            slurm = f.read()
-            slurm_filled = slurm.format(sample, email, output, res, vcf)
-
-            with open(job, "w") as o:
-                o.write(slurm_filled)
-
         epi_name = f"epi2me_{sample}"
         anno_name = f"annotate_{sample}"
 
         if epi_name not in done:
             print("To-Do: " + anno_name)
+
+            with open(
+                TOOL_PATH
+                + "main_pipelines/long-read/LongReadSequencingONT/template_annotate_snps.txt",
+                "r",
+            ) as f:
+                slurm = f.read()
+                slurm_filled = slurm.format(sample, email, output, res, vcf)
+
+                with open(job, "w") as o:
+                    o.write(slurm_filled)
+
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write(f"\n# Annotate SNPs for {sample}")
                 f.write(
@@ -1470,6 +1530,18 @@ def annotate_snps(toml_config, done):
         else:
             if anno_name not in done:
                 print("To-Do: " + anno_name)
+
+                with open(
+                    TOOL_PATH
+                    + "main_pipelines/long-read/LongReadSequencingONT/template_annotate_snps.txt",
+                    "r",
+                ) as f:
+                    slurm = f.read()
+                    slurm_filled = slurm.format(sample, email, output, res, vcf)
+
+                    with open(job, "w") as o:
+                        o.write(slurm_filled)
+
                 with open(output + "/scripts/main.sh", "a") as f:
                     f.write(f"\n# Annotate SNPs for {sample}")
                     f.write(f"\nDEPS+=($(sbatch --parsable {job}))\n")
@@ -1489,19 +1561,6 @@ def trgt(toml_config, done):
     samples = toml_config["general"]["samples"]
     str_samples = " ".join(samples)
 
-    job = output + "/scripts/" + tool + ".slurm"
-    with open(
-        TOOL_PATH + "main_pipelines/long-read/LongReadSequencingONT/template_trgt.txt",
-        "r",
-    ) as f:
-        slurm = f.read()
-        slurm_filled = slurm.format(
-            email, output, genome, str_samples, name, goi, motif
-        )
-
-        with open(job, "w") as o:
-            o.write(slurm_filled)
-
     all_fc = [f"samtools_{s}" for s in samples]
     done_fc = [x for x in done if x.startswith("samtools")]
     to_dos = [x for x in all_fc if x not in done_fc]
@@ -1510,6 +1569,21 @@ def trgt(toml_config, done):
 
     if len(to_dos) > 0:
         print("To-Do: " + tool)
+
+        job = output + "/scripts/" + tool + ".slurm"
+        with open(
+            TOOL_PATH
+            + "main_pipelines/long-read/LongReadSequencingONT/template_trgt.txt",
+            "r",
+        ) as f:
+            slurm = f.read()
+            slurm_filled = slurm.format(
+                email, output, genome, str_samples, name, goi, motif
+            )
+
+            with open(job, "w") as o:
+                o.write(slurm_filled)
+
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("\n# TRGT")
             f.write(
@@ -1518,6 +1592,21 @@ def trgt(toml_config, done):
     else:
         if tool not in done:
             print("To-Do: " + tool)
+
+            job = output + "/scripts/" + tool + ".slurm"
+            with open(
+                TOOL_PATH
+                + "main_pipelines/long-read/LongReadSequencingONT/template_trgt.txt",
+                "r",
+            ) as f:
+                slurm = f.read()
+                slurm_filled = slurm.format(
+                    email, output, genome, str_samples, name, goi, motif
+                )
+
+                with open(job, "w") as o:
+                    o.write(slurm_filled)
+
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write("\n# TRGT")
                 f.write(f"\nDEPS+=($(sbatch --parsable {job}))\n")
@@ -1535,18 +1624,6 @@ def strkit(toml_config, done):
     samples = toml_config["general"]["samples"]
     str_samples = " ".join(samples)
 
-    job = output + "/scripts/" + tool + ".slurm"
-    with open(
-        TOOL_PATH
-        + "main_pipelines/long-read/LongReadSequencingONT/template_strkit.txt",
-        "r",
-    ) as f:
-        slurm = f.read()
-        slurm_filled = slurm.format(email, output, genome, str_samples, name)
-
-        with open(job, "w") as o:
-            o.write(slurm_filled)
-
     all_fc = [f"samtools_{s}" for s in samples]
     done_fc = [x for x in done if x.startswith("samtools")]
     to_dos = [x for x in all_fc if x not in done_fc]
@@ -1555,6 +1632,19 @@ def strkit(toml_config, done):
 
     if len(to_dos) > 0:
         print("To-Do: " + tool)
+
+        job = output + "/scripts/" + tool + ".slurm"
+        with open(
+            TOOL_PATH
+            + "main_pipelines/long-read/LongReadSequencingONT/template_strkit.txt",
+            "r",
+        ) as f:
+            slurm = f.read()
+            slurm_filled = slurm.format(email, output, genome, str_samples, name)
+
+            with open(job, "w") as o:
+                o.write(slurm_filled)
+
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("\n# STRkit")
             f.write(
@@ -1563,6 +1653,19 @@ def strkit(toml_config, done):
     else:
         if tool not in done:
             print("To-Do: " + tool)
+
+            job = output + "/scripts/" + tool + ".slurm"
+            with open(
+                TOOL_PATH
+                + "main_pipelines/long-read/LongReadSequencingONT/template_strkit.txt",
+                "r",
+            ) as f:
+                slurm = f.read()
+                slurm_filled = slurm.format(email, output, genome, str_samples, name)
+
+                with open(job, "w") as o:
+                    o.write(slurm_filled)
+
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write("\n# STRkit")
                 f.write(f"\nDEPS+=($(sbatch --parsable {job}))\n")
@@ -1581,18 +1684,6 @@ def ont_methyldmr_kit(toml_config, done):
     samples = toml_config["general"]["samples"]
     str_samples = " ".join(samples)
 
-    job = output + "/scripts/" + tool + ".slurm"
-    with open(
-        TOOL_PATH
-        + "main_pipelines/long-read/LongReadSequencingONT/template_ont-methyldmr-kit.txt",
-        "r",
-    ) as f:
-        slurm = f.read()
-        slurm_filled = slurm.format(email, output, str_samples, res)
-
-        with open(job, "w") as o:
-            o.write(slurm_filled)
-
     all_fc = [f"epi2me_{s}" for s in samples]
     done_fc = [x for x in done if x.startswith("epi2me_")]
     to_dos = [x for x in all_fc if x not in done_fc]
@@ -1601,6 +1692,19 @@ def ont_methyldmr_kit(toml_config, done):
 
     if len(to_dos) > 0:
         print("To-Do: " + tool)
+
+        job = output + "/scripts/" + tool + ".slurm"
+        with open(
+            TOOL_PATH
+            + "main_pipelines/long-read/LongReadSequencingONT/template_ont-methyldmr-kit.txt",
+            "r",
+        ) as f:
+            slurm = f.read()
+            slurm_filled = slurm.format(email, output, str_samples, res)
+
+            with open(job, "w") as o:
+                o.write(slurm_filled)
+
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("\n# ont-methylDMR-kit")
             f.write(
@@ -1609,6 +1713,19 @@ def ont_methyldmr_kit(toml_config, done):
     else:
         if tool not in done:
             print("To-Do: " + tool)
+
+            job = output + "/scripts/" + tool + ".slurm"
+            with open(
+                TOOL_PATH
+                + "main_pipelines/long-read/LongReadSequencingONT/template_ont-methyldmr-kit.txt",
+                "r",
+            ) as f:
+                slurm = f.read()
+                slurm_filled = slurm.format(email, output, str_samples, res)
+
+                with open(job, "w") as o:
+                    o.write(slurm_filled)
+
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write("\n# ont-methylDMR-kit")
                 f.write(f"\nDEPS+=($(sbatch --parsable {job}))\n")
@@ -1636,25 +1753,26 @@ def flair(toml_config, done):
 
         bam = f"{output}/alignments/{sample}_sorted.bam"
 
-        job = output + "/scripts/" + tool + "_" + sample + ".slurm"
-        with open(
-            TOOL_PATH
-            + "main_pipelines/long-read/LongReadSequencingONT/template_flair.txt",
-            "r",
-        ) as f:
-            slurm = f.read()
-            slurm_filled = slurm.format(
-                sample, email, name, output, genome, bam, gtf, manifest
-            )
-
-            with open(job, "w") as o:
-                o.write(slurm_filled)
-
         samtools_name = f"samtools_{sample}"
         flair_name = f"flair_{sample}"
 
         if samtools_name not in done:
             print("To-Do: " + flair_name)
+
+            job = output + "/scripts/" + tool + "_" + sample + ".slurm"
+            with open(
+                TOOL_PATH
+                + "main_pipelines/long-read/LongReadSequencingONT/template_flair.txt",
+                "r",
+            ) as f:
+                slurm = f.read()
+                slurm_filled = slurm.format(
+                    sample, email, name, output, genome, bam, gtf, manifest
+                )
+
+                with open(job, "w") as o:
+                    o.write(slurm_filled)
+
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write(f"\n# FLAIR for {sample}")
                 f.write(
@@ -1663,6 +1781,21 @@ def flair(toml_config, done):
         else:
             if flair_name not in done:
                 print("To-Do: " + flair_name)
+
+                job = output + "/scripts/" + tool + "_" + sample + ".slurm"
+                with open(
+                    TOOL_PATH
+                    + "main_pipelines/long-read/LongReadSequencingONT/template_flair.txt",
+                    "r",
+                ) as f:
+                    slurm = f.read()
+                    slurm_filled = slurm.format(
+                        sample, email, name, output, genome, bam, gtf, manifest
+                    )
+
+                    with open(job, "w") as o:
+                        o.write(slurm_filled)
+
                 with open(output + "/scripts/main.sh", "a") as f:
                     f.write(f"\n# FLAIR for {sample}")
                     f.write(f"\nDEPS+=($(sbatch --parsable {job}))\n")
@@ -1681,23 +1814,24 @@ def deepvariant(toml_config, done):
     for sample in toml_config["general"]["samples"]:
         bam = f"{output}/alignments/{sample}_sorted.bam"
 
-        job = output + "/scripts/" + tool + "_" + sample + ".slurm"
-        with open(
-            TOOL_PATH
-            + "main_pipelines/long-read/LongReadSequencingONT/template_deepvariant.txt",
-            "r",
-        ) as f:
-            slurm = f.read()
-            slurm_filled = slurm.format(sample, email, name, output, bam, genome)
-
-            with open(job, "w") as o:
-                o.write(slurm_filled)
-
         samtools_name = f"samtools_{sample}"
         deepvariant_name = f"deepvariant_{sample}"
 
         if samtools_name not in done:
             print("To-Do: " + deepvariant_name)
+
+            job = output + "/scripts/" + tool + "_" + sample + ".slurm"
+            with open(
+                TOOL_PATH
+                + "main_pipelines/long-read/LongReadSequencingONT/template_deepvariant.txt",
+                "r",
+            ) as f:
+                slurm = f.read()
+                slurm_filled = slurm.format(sample, email, name, output, bam, genome)
+
+                with open(job, "w") as o:
+                    o.write(slurm_filled)
+
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write(f"\n# DeepVariant for {sample}")
                 f.write(
@@ -1706,6 +1840,21 @@ def deepvariant(toml_config, done):
         else:
             if deepvariant_name not in done:
                 print("To-Do: " + deepvariant_name)
+
+                job = output + "/scripts/" + tool + "_" + sample + ".slurm"
+                with open(
+                    TOOL_PATH
+                    + "main_pipelines/long-read/LongReadSequencingONT/template_deepvariant.txt",
+                    "r",
+                ) as f:
+                    slurm = f.read()
+                    slurm_filled = slurm.format(
+                        sample, email, name, output, bam, genome
+                    )
+
+                    with open(job, "w") as o:
+                        o.write(slurm_filled)
+
                 with open(output + "/scripts/main.sh", "a") as f:
                     f.write(f"\n# DeepVariant for {sample}")
                     f.write(f"\nDEPS+=($(sbatch --parsable {job}))\n")
@@ -1724,18 +1873,6 @@ def cutesv(toml_config, done):
     samples = toml_config["general"]["samples"]
     str_samples = " ".join(samples)
 
-    job = output + "/scripts/" + tool + ".slurm"
-    with open(
-        TOOL_PATH
-        + "main_pipelines/long-read/LongReadSequencingONT/template_cutesv.txt",
-        "r",
-    ) as f:
-        slurm = f.read()
-        slurm_filled = slurm.format(email, output, str_samples, username, name, genome)
-
-        with open(job, "w") as o:
-            o.write(slurm_filled)
-
     all_fc = [f"samtools_{s}" for s in samples]
     done_fc = [x for x in done if x.startswith("samtools")]
     to_dos = [x for x in all_fc if x not in done_fc]
@@ -1744,6 +1881,21 @@ def cutesv(toml_config, done):
 
     if len(to_dos) > 0:
         print("To-Do: " + tool)
+
+        job = output + "/scripts/" + tool + ".slurm"
+        with open(
+            TOOL_PATH
+            + "main_pipelines/long-read/LongReadSequencingONT/template_cutesv.txt",
+            "r",
+        ) as f:
+            slurm = f.read()
+            slurm_filled = slurm.format(
+                email, output, str_samples, username, name, genome
+            )
+
+            with open(job, "w") as o:
+                o.write(slurm_filled)
+
         with open(output + "/scripts/main.sh", "a") as f:
             f.write("\n# cuteSV")
             f.write(
@@ -1752,6 +1904,21 @@ def cutesv(toml_config, done):
     else:
         if tool not in done:
             print("To-Do: " + tool)
+
+            job = output + "/scripts/" + tool + ".slurm"
+            with open(
+                TOOL_PATH
+                + "main_pipelines/long-read/LongReadSequencingONT/template_cutesv.txt",
+                "r",
+            ) as f:
+                slurm = f.read()
+                slurm_filled = slurm.format(
+                    email, output, str_samples, username, name, genome
+                )
+
+                with open(job, "w") as o:
+                    o.write(slurm_filled)
+
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write("\n# cuteSV")
                 f.write(f"\nDEPS+=($(sbatch --parsable {job}))\n")
@@ -1773,25 +1940,26 @@ def hapcut2(toml_config, done):
         caller = "clair3"
         vcf = f"/lustre10/scratch/{username}/{name}/results/{sample}/epi2me/{sample}.wf_snp.vcf"
 
-        job = output + "/scripts/" + tool + "_" + sample + ".slurm"
-        with open(
-            TOOL_PATH
-            + "main_pipelines/long-read/LongReadSequencingONT/template_hapcut2.txt",
-            "r",
-        ) as f:
-            slurm = f.read()
-            slurm_filled = slurm.format(
-                sample, email, name, genome, bam, output, caller, vcf
-            )
-
-            with open(job, "w") as o:
-                o.write(slurm_filled)
-
         epi2me_name = f"epi2me_{sample}"
         hapcut2_name = f"hapcut2_{sample}"
 
         if epi2me_name not in done:
             print("To-Do: " + hapcut2_name)
+
+            job = output + "/scripts/" + tool + "_" + sample + ".slurm"
+            with open(
+                TOOL_PATH
+                + "main_pipelines/long-read/LongReadSequencingONT/template_hapcut2.txt",
+                "r",
+            ) as f:
+                slurm = f.read()
+                slurm_filled = slurm.format(
+                    sample, email, name, genome, bam, output, caller, vcf
+                )
+
+                with open(job, "w") as o:
+                    o.write(slurm_filled)
+
             with open(output + "/scripts/main.sh", "a") as f:
                 f.write(f"\n# HapCut2 for {sample}")
                 f.write(
@@ -1800,6 +1968,21 @@ def hapcut2(toml_config, done):
         else:
             if hapcut2_name not in done:
                 print("To-Do: " + hapcut2_name)
+
+                job = output + "/scripts/" + tool + "_" + sample + ".slurm"
+                with open(
+                    TOOL_PATH
+                    + "main_pipelines/long-read/LongReadSequencingONT/template_hapcut2.txt",
+                    "r",
+                ) as f:
+                    slurm = f.read()
+                    slurm_filled = slurm.format(
+                        sample, email, name, genome, bam, output, caller, vcf
+                    )
+
+                    with open(job, "w") as o:
+                        o.write(slurm_filled)
+
                 with open(output + "/scripts/main.sh", "a") as f:
                     f.write(f"\n# HapCut2 for {sample}")
                     f.write(f"\nDEPS+=($(sbatch --parsable {job}))\n")
