@@ -34,9 +34,6 @@ mkdir -p $work_dir/flair_diff
 sed -i "s#/lustre10/scratch/$USER/#$SLURM_TMPDIR/#g" $manifest_quantify
 sed -i "s#/lustre10/scratch/$USER/#$SLURM_TMPDIR/#g" $manifest_combine
 
-cat $manifest_combine
-cat $manifest_quantify
-
 # Clear list
 if [[ -f "$SLURM_TMPDIR/$project_path/IPjunctions_{0}_list.txt" ]]; then
     rm $SLURM_TMPDIR/$project_path/IPjunctions_{0}_list.txt
