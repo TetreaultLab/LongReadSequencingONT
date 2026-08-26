@@ -6,6 +6,8 @@ import glob
 import subprocess
 import sys
 
+print("\n\nResults done transfering. Now validating all outputs.\n\n")
+
 cwd = os.getcwd()
 
 toml_config = toml.load(f"{cwd}/scripts/config_final.toml")
