@@ -2001,9 +2001,9 @@ def cleanup(toml_config, done):
     flowcells = toml_config["general"]["fc_dir_names"]
     samples = toml_config["general"]["samples"]
 
-    threads = "1"
-    memory = "4"
-    time = "00-03:00"
+    threads = "4"
+    memory = "16"
+    time = "00-06:00"
 
     # Build cleanup commands
     commands = []
@@ -2084,6 +2084,11 @@ def cleanup(toml_config, done):
         # Transfer results in scratch to projects directory
         commands.append(
             f"rsync -avxH --no-g --no-p --partial {scratch}/results/{sample} {output}/results/"
+        )
+
+        # Validate run
+        commands.append(
+            "python /lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/validate_run.py"
         )
 
     # Join all commands into a single string

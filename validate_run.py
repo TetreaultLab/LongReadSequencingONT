@@ -1,6 +1,9 @@
 import os
 import toml
 from pathlib import Path
+import glob
+import subprocess
+import sys
 
 cwd = os.getcwd()
 
@@ -13,37 +16,94 @@ flowcells = toml_config["general"]["fc_dir_names"]
 output = toml_config["general"]["project_path"]
 name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
 
-# Check alignments in flowcells. Folder "alignments" should not exist.
-for f in flowcells:
-    path = f"{cwd}/{f}/alignments"
-    if not os.path.isdir(path):
-        print(f"Directory '{f}/alignments' was previously removed to free space.")
-    elif not os.listdir(path):
-        print(f"Directory '{f}/alignments' exists but is empty. Please remove.")
-    elif os.path.isdir(path) and any(os.listdir(path)):
-        print(
-            f"WARNING! Directory '{f}/alignments' exists and is NOT empty! Please remove directory."
-        )
+# # Check alignments in flowcells. Folder "alignments" should not exist.
+# for f in flowcells:
+#     path = f"{cwd}/{f}/alignments"
+#     if not os.path.isdir(path):
+#         print(f"Directory '{f}/alignments' was previously removed to free space.")
+#     elif not os.listdir(path):
+#         print(f"Directory '{f}/alignments' exists but is empty. Please remove.")
+#     elif os.path.isdir(path) and any(os.listdir(path)):
+#         print(
+#             f"WARNING! Directory '{f}/alignments' exists and is NOT empty! Please remove directory."
+#         )
 
 # Check QC
 mosdepth = Path(f"{cwd}/qc/{name}.html")
 if mosdepth.is_file():
     print("\nMosdepth summary found!")
 
+bam_ok = True
 for s in samples:
     print(f"\n{s}")
 
     # Check alignments
     align_dir = Path(f"{cwd}/alignments")
-    bam_file = align_dir / f"{s}_sorted.bam"
+    bam_sorted_file = align_dir / f"{s}_sorted.bam"
     bai_file = align_dir / f"{s}_sorted.bam.bai"
 
-    if bam_file.is_file() and bai_file.is_file():
-        print("\tAlignments files found!")
-    else:
-        print(f"WARNING! No alignemnt for {s}!")
+    if bam_sorted_file.is_file() and bai_file.is_file():
+        # Check size of bams
+        bam_pattern = f"2*/alignments/{s}*.bam"
+        initial_bams = glob.glob(bam_pattern)
 
-    # Check results
+        threads = 4
+        total_initial_reads = 0
+
+        dirs_starting_with_2 = [p for p in Path(".").glob("2*") if p.is_dir()]
+        num_dirs = len(dirs_starting_with_2)
+
+        print(f"Found {len(initial_bams)}/{num_dirs} flowcell BAM files.")
+
+        if num_dirs == len(initial_bams):
+            continue
+        else:
+            print("WARNING! Flowcell BAM missing!")
+
+        for bam_file in initial_bams:
+            # Source the HPC module environment and run samtools view
+            # -c: count reads, -h: include header in processing, -@: threads
+            cmd = f"module load samtools && samtools view -ch -@{threads} '{bam_file}'"
+
+            result = subprocess.run(
+                ["bash", "-c", cmd], capture_output=True, text=True, check=True
+            )
+
+            count = int(result.stdout.strip())
+            total_initial_reads += count
+
+        print(f"Total Flowcell BAM Reads (Summed): {total_initial_reads:,}")
+
+        final_bam = f"alignments/{s}_sorted.bam"
+        idxstats_cmd = f"module load samtools && samtools idxstats '{final_bam}'"
+        idxstats_result = subprocess.run(
+            ["bash", "-c", idxstats_cmd], capture_output=True, text=True, check=True
+        )
+
+        final_bam_reads = 0
+        for line in idxstats_result.stdout.strip().split("\n"):
+            fields = line.split("\t")
+            if len(fields) >= 4:
+                mapped = int(fields[2])
+                unmapped = int(fields[3])
+                final_bam_reads += mapped + unmapped
+
+        print(f"Final Sorted BAM Reads:       {final_bam_reads:,}")
+
+        difference = final_bam_reads - total_initial_reads
+        if total_initial_reads == final_bam_reads:
+            print(f"Final sorted BAM found, indexed and valid for {s}.")
+        else:
+            print(
+                f"MISMATCH: Difference of {difference:,} reads (Sorted - Flowcell Sum)."
+            )
+            bam_ok = False
+
+    else:
+        print(f"WARNING! No alignment for {s}!")
+        bam_ok = False
+
+    # Check downstream results
     all_exist = True
 
     base_dir = Path(f"{cwd}/results")
@@ -226,3 +286,18 @@ for s in samples:
 
     if all_exist:
         print("\tAll results files found!")
+
+
+# If no warning for BAMs
+if bam_ok:
+    print("\tBAM files intact! Deleting flowcell alignments...")
+    alignments_dirs = [p for p in Path(".").glob("2*/alignments") if p.is_dir()]
+    for d in alignments_dirs:
+        print(d)
+        # shutil.rmtree(d)
+        print(f"Deleted folder: {d}")
+
+    print("Cleanup complete.")
+else:
+    print("Please check BAM files before continuing...")
+    sys.exit(1)
