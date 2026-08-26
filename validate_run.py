@@ -43,7 +43,7 @@ for s in samples:
     bai_file = align_dir / f"{s}_sorted.bam.bai"
 
     if bam_sorted_file.is_file() and bai_file.is_file():
-        # Check size of bams
+        # Final file found, Check size of bams
         bam_pattern = f"2*/alignments/{s}*.bam"
         initial_bams = glob.glob(bam_pattern)
 
@@ -92,7 +92,7 @@ for s in samples:
 
         difference = final_bam_reads - total_initial_reads
         if total_initial_reads == final_bam_reads:
-            print(f"Final sorted BAM found, indexed and valid for {s}.")
+            print("Found sorted BAM with. It is indexed and complete.")
         else:
             print(
                 f"MISMATCH: Difference of {difference:,} reads (Sorted - Flowcell Sum)."
@@ -290,14 +290,13 @@ for s in samples:
 
 # If no warning for BAMs
 if bam_ok:
-    print("\tBAM files intact! Deleting flowcell alignments...")
+    print("\nAll BAM files intact! Deleting flowcell alignments...")
     alignments_dirs = [p for p in Path(".").glob("2*/alignments") if p.is_dir()]
     for d in alignments_dirs:
-        print(d)
         # shutil.rmtree(d)
         print(f"Deleted folder: {d}")
 
-    print("Cleanup complete.")
+    print("\n\nCleanup complete!")
 else:
     print("Please check BAM files before continuing...")
     sys.exit(1)

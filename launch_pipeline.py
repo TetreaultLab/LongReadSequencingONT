@@ -2086,10 +2086,10 @@ def cleanup(toml_config, done):
             f"rsync -avxH --no-g --no-p --partial {scratch}/results/{sample} {output}/results/"
         )
 
-        # Validate run
-        commands.append(
-            "python /lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/validate_run.py"
-        )
+    # Validate run
+    commands.append(
+        "python /lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/validate_run.py"
+    )
 
     # Join all commands into a single string
     command_str = "\n".join(commands)
