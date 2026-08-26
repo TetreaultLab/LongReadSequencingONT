@@ -55,9 +55,7 @@ for s in samples:
 
         print(f"Found {len(initial_bams)}/{num_dirs} flowcell BAM files.")
 
-        if num_dirs == len(initial_bams):
-            continue
-        else:
+        if num_dirs > len(initial_bams):
             print("WARNING! Flowcell BAM missing!")
 
         for bam_file in initial_bams:
