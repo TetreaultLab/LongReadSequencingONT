@@ -2088,7 +2088,7 @@ def cleanup(toml_config, done):
 
     # Validate run
     commands.append(
-        "python /lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/validate_run.py"
+        "python -u /lustre09/project/6019267/shared/tools/main_pipelines/long-read/LongReadSequencingONT/validate_run.py"
     )
 
     # Join all commands into a single string
