@@ -27,10 +27,10 @@ for f in flowcells:
         print(f"Directory '{f}/alignments' was previously removed to free space.")
         skip_fc += 1
     elif not os.listdir(path):
-        print(f"Directory '{f}/alignments' exists but is empty. Please remove.")
+        print(f"Directory '{f}/alignments' exists but is empty. It will be removed.")
     elif os.path.isdir(path) and any(os.listdir(path)):
         print(
-            f"WARNING! Directory '{f}/alignments' exists and is NOT empty! Please remove directory."
+            f"Directory '{f}/alignments' exists and is NOT empty! It will be removed."
         )
 
 # Check QC
