@@ -84,7 +84,7 @@ for s in samples:
             f"{s}.wf_snp_clinvar.vcf.gz.tbi",
             f"{s}.wf_snp.vcf.gz",
             f"{s}.wf_snp.vcf.gz.tbi",
-            f"{s}_deepvariant.vcf",
+            f"{s}_deepvariant.vcf.gz",
             f"{s}_deepvariant.visual_report.html",
             f"{s}_all.tsv",
             f"{s}_pathogenic.tsv",
