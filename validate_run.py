@@ -1,4 +1,5 @@
 import os
+import shutil
 import toml
 from pathlib import Path
 import glob
@@ -291,7 +292,7 @@ if bam_ok:
     print("\nAll BAM files intact! Deleting flowcell alignments...")
     alignments_dirs = [p for p in Path(".").glob("2*/alignments") if p.is_dir()]
     for d in alignments_dirs:
-        # shutil.rmtree(d)
+        shutil.rmtree(d)
         print(f"Deleted folder: {d}")
 
     print("\n\nCleanup complete!")
