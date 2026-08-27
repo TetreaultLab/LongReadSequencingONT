@@ -29,7 +29,7 @@ dir_name="${parent_dir##*/}"
 PROJECT_NAME="${dir_name#*_}"
 
 # Set log directory (uses the target script path)
-LOG_DIR="${clean_path}/scripts"
+LOG_DIR="${clean_path}/"
 [ ! -d "$LOG_DIR" ] && LOG_DIR="."
 
 echo "[CONFIG] Project Name: $PROJECT_NAME"
