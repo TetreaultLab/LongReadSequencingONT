@@ -4,67 +4,111 @@ ORIGINAL_SCRIPT="scripts/main.sh"
 OUTPUT_SCRIPT="scripts/resubmit.sh"
 DONE_FILE="scripts/steps_done.txt"
 LOG_DIR="."
+CONFIG_FILE="config_final.toml"
 
-# Initialize output script
-echo "#!/bin/bash" > "$OUTPUT_SCRIPT"
-echo "# Generated automatically on $(date)" >> "$OUTPUT_SCRIPT"
-echo "" >> "$OUTPUT_SCRIPT"
+# ------------------------------------------------------------------------------
+# 1. Parse Project Name & Directory from TOML Config
+# ------------------------------------------------------------------------------
+if [ ! -f "$CONFIG_FILE" ]; then
+    echo "Error: Configuration file '$CONFIG_FILE' not found." >&2
+    exit 1
+fi
 
-# 1. Capture active Slurm jobs into an associative array: RUNNING_JOBS["job_name"]="job_id"
+# Extract raw project_path line
+raw_path=$(grep -E '^\s*project_path\s*=' "$CONFIG_FILE" | sed -E 's/.*"([^"]+)".*/\1/')
+
+if [ -z "$raw_path" ]; then
+    echo "Error: Could not extract project_path from $CONFIG_FILE" >&2
+    exit 1
+fi
+
+# Process path: remove trailing slash -> extract parent dir -> split date -> replace - with _
+clean_path="${raw_path%/}"
+parent_dir="${clean_path%/*}"
+dir_name="${parent_dir##*/}"
+PROJECT_NAME="${dir_name#*_}"
+
+# Set log directory (uses the target script path)
+LOG_DIR="${clean_path}/scripts"
+[ ! -d "$LOG_DIR" ] && LOG_DIR="."
+
+echo "[CONFIG] Project Name: $PROJECT_NAME"
+echo "[CONFIG] Log Directory: $LOG_DIR"
+
+# ------------------------------------------------------------------------------
+# 2. Initialize output script & insert Automatic Cleanup Cancellation
+# ------------------------------------------------------------------------------
+cat << EOF > "$OUTPUT_SCRIPT"
+#!/bin/bash
+# Generated automatically on $(date)
+
+# ------------------------------------------------------------------------------
+# Cancel existing cleanup job if running/queued to prevent premature file deletion
+# ------------------------------------------------------------------------------
+CLEANUP_PATTERN="cleanup"
+ACTIVE_CLEANUP_IDS=\$(squeue -u "\$USER" -h -o "%i %j" | awk -v pat="\$CLEANUP_PATTERN" '\$2 ~ pat {print \$1}')
+
+if [ -n "\$ACTIVE_CLEANUP_IDS" ]; then
+    for job_id in \$ACTIVE_CLEANUP_IDS; do
+        echo "[CANCELING] Canceling active cleanup job: \$job_id"
+        scancel "\$job_id"
+    done
+fi
+
+DEPS=()
+
+EOF
+
+# ------------------------------------------------------------------------------
+# 3. Fetch active Slurm jobs for current user
+# ------------------------------------------------------------------------------
 declare -A RUNNING_JOBS
 while read -r job_id job_name; do
-    if [ -n "$job_name" ]; then
-        RUNNING_JOBS["$job_name"]="$job_id"
-    fi
+    [ -n "$job_name" ] && RUNNING_JOBS["$job_name"]="$job_id"
 done < <(squeue -u "$USER" -h -o "%i %j")
 
-# Helper: Extract core tool name from log filename pattern (stripping .rc/.rg host and jobid)
-# Example: "dorado_basecaller_..._a881e64d.rg12902.17612157.log" -> "dorado_basecaller_..._a881e64d"
+# Helper functions for log processing
 extract_core_name_from_log() {
-    local log_path="$1"
-    basename "$log_path" | sed -E 's/\.(rc|rg)[0-9]+\.[0-9]+\.log$//'
+    local log_file="$1"
+    basename "$log_file" | sed -E 's/\.(rc|rg)[0-9]+\.[0-9]+\.log$//'
 }
 
-# Helper: Extract Job ID from log filename pattern
-# Example: "dorado_basecaller_..._a881e64d.rg12902.17612157.log" -> "17612157"
 extract_job_id_from_log() {
-    local log_path="$1"
-    basename "$log_path" | awk -F'.' '{print $(NF-1)}'
+    local log_file="$1"
+    basename "$log_file" | awk -F'.' '{print $(NF-1)}'
 }
 
-# Core status resolver function
+# ------------------------------------------------------------------------------
+# 4. Status Check Logic
+# ------------------------------------------------------------------------------
 check_status() {
     local tool_name="$1"
 
-    # --- Check 1: steps_done.txt ---
-    if [ -f "$DONE_FILE" ] && grep -q -F "$tool_name" "$DONE_FILE"; then
+    # Check 1: steps_done.txt (Exact line match)
+    if [ -f "$DONE_FILE" ] && grep -q -x "$tool_name" "$DONE_FILE"; then
         echo "DONE"
         return
     fi
 
-    # --- Check 2: Active in squeue ---
-    for active_name in "${!RUNNING_JOBS[@]}"; do
-        if [[ "$active_name" == *"$tool_name"* ]] || [[ "$tool_name" == *"$active_name"* ]]; then
-            echo "RUNNING:${RUNNING_JOBS[$active_name]}"
-            return
-        fi
-    done
+    # Check 2: Active in squeue (Exact Job Name match)
+    if [ -n "${RUNNING_JOBS[$tool_name]}" ]; then
+        echo "RUNNING:${RUNNING_JOBS[$tool_name]}"
+        return
+    fi
 
-    # --- Check 3: Log files in directory using regex matching ---
+    # Check 3: Check logs in scoped LOG_DIR
     local existing_log
-    existing_log=$(ls -1 "${LOG_DIR}/${tool_name}"*.log 2>/dev/null | head -n 1)
+    existing_log=$(ls -1t "${LOG_DIR}/${tool_name}".*.log 2>/dev/null | head -n 1)
 
     if [ -n "$existing_log" ]; then
         local log_core_name
         log_core_name=$(extract_core_name_from_log "$existing_log")
 
-        # Verify exact base match
         if [ "$log_core_name" = "$tool_name" ]; then
             local job_id
             job_id=$(extract_job_id_from_log "$existing_log")
 
             if [[ "$job_id" =~ ^[0-9]+$ ]]; then
-                # Check Slurm accounting history if job cleared squeue
                 local state
                 state=$(sacct -j "$job_id" -n -o State%15 2>/dev/null | head -n 1 | tr -d ' ')
 
@@ -82,12 +126,13 @@ check_status() {
     echo "NEED_RUN"
 }
 
-# 2. Process main.sh line by line
+# ------------------------------------------------------------------------------
+# 5. Parse main.sh and generate main_resubmit.sh
+# ------------------------------------------------------------------------------
 while IFS= read -r line || [ -n "$line" ]; do
 
     if [[ "$line" =~ sbatch.*\.slurm ]]; then
 
-        # Extract .slurm file name and derive the tool basename
         script_file=$(echo "$line" | grep -oE '[^/]+\.slurm')
         tool_name="${script_file%.slurm}"
 
@@ -98,11 +143,11 @@ while IFS= read -r line || [ -n "$line" ]; do
         if [[ "$line" =~ ^DEPS\+=\(\$\(sbatch ]]; then
             case "$status_type" in
                 "DONE")
-                    echo "# [COMPLETED] $tool_name" >> "$OUTPUT_SCRIPT"
+                    echo "# [SKIPPED] $tool_name (Completed)" >> "$OUTPUT_SCRIPT"
                     ;;
                 "RUNNING")
                     running_id=$(echo "$status_info" | cut -d':' -f2)
-                    echo "# [ATTACHED] $tool_name (Already Submitted - Job ID: $running_id)" >> "$OUTPUT_SCRIPT"
+                    echo "# [ATTACHED] $tool_name (Running in Slurm - Job ID: $running_id)" >> "$OUTPUT_SCRIPT"
                     echo "DEPS+=(\"${running_id}\")" >> "$OUTPUT_SCRIPT"
                     ;;
                 "NEED_RUN")
@@ -115,12 +160,12 @@ while IFS= read -r line || [ -n "$line" ]; do
             var_name="${BASH_REMATCH[1]}"
             case "$status_type" in
                 "DONE")
-                    echo "# [COMPLETED] $tool_name" >> "$OUTPUT_SCRIPT"
+                    echo "# [SKIPPED] $tool_name (Completed)" >> "$OUTPUT_SCRIPT"
                     echo "${var_name}=\"\"" >> "$OUTPUT_SCRIPT"
                     ;;
                 "RUNNING")
                     running_id=$(echo "$status_info" | cut -d':' -f2)
-                    echo "# [ATTACHED] $tool_name (Already Submitted - Job ID: $running_id)" >> "$OUTPUT_SCRIPT"
+                    echo "# [ATTACHED] $tool_name (Running in Slurm - Job ID: $running_id)" >> "$OUTPUT_SCRIPT"
                     echo "${var_name}=\"${running_id}\"" >> "$OUTPUT_SCRIPT"
                     ;;
                 "NEED_RUN")
@@ -132,7 +177,6 @@ while IFS= read -r line || [ -n "$line" ]; do
         fi
 
     else
-        # Pass through comments, empty lines, and control flow (if/else)
         echo "$line" >> "$OUTPUT_SCRIPT"
     fi
 
