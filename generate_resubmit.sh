@@ -4,7 +4,7 @@ ORIGINAL_SCRIPT="scripts/main.sh"
 OUTPUT_SCRIPT="scripts/resubmit.sh"
 DONE_FILE="scripts/steps_done.txt"
 LOG_DIR="."
-CONFIG_FILE="config_final.toml"
+CONFIG_FILE="scripts/config_final.toml"
 
 # ------------------------------------------------------------------------------
 # 1. Parse Project Name & Directory from TOML Config
