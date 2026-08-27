@@ -32,21 +32,17 @@ PROJECT_NAME="${dir_name#*_}"
 LOG_DIR="${clean_path}/"
 [ ! -d "$LOG_DIR" ] && LOG_DIR="."
 
-echo "[CONFIG] Project Name: $PROJECT_NAME"
-echo "[CONFIG] Log Directory: $LOG_DIR"
+echo "Project Name: $PROJECT_NAME"
 
 # ------------------------------------------------------------------------------
-# 2. Initialize output script & insert Automatic Cleanup Cancellation
+# 2. Initialize Output Script
 # ------------------------------------------------------------------------------
 cat << EOF > "$OUTPUT_SCRIPT"
 #!/bin/bash
 # Generated automatically on $(date)
 
-# ------------------------------------------------------------------------------
-# Cancel existing cleanup job if running/queued to prevent premature file deletion
-# ------------------------------------------------------------------------------
-CLEANUP_PATTERN="cleanup_${PROJECT_NAME}"
-ACTIVE_CLEANUP_IDS=\$(squeue -u "\$USER" -h -o "%i %200j" | awk -v pat="\$CLEANUP_PATTERN" '\$2 ~ pat {print \$1}')
+CLEANUP_PATTERN="cleanup"
+ACTIVE_CLEANUP_IDS=\$(squeue -u "\$USER" -h -o "%i %j" | awk -v pat="\$CLEANUP_PATTERN" '\$2 ~ pat {print \$1}')
 
 if [ -n "\$ACTIVE_CLEANUP_IDS" ]; then
     for job_id in \$ACTIVE_CLEANUP_IDS; do
@@ -60,14 +56,17 @@ DEPS=()
 EOF
 
 # ------------------------------------------------------------------------------
-# 3. Fetch active Slurm jobs for current user
+# 3. Fetch Active Slurm Jobs (Using %200j to prevent name truncation!)
 # ------------------------------------------------------------------------------
 declare -A RUNNING_JOBS
 while read -r job_id job_name; do
-    [ -n "$job_name" ] && RUNNING_JOBS["$job_name"]="$job_id"
+    if [ -n "$job_name" ]; then
+        # Store exact job name
+        RUNNING_JOBS["$job_name"]="$job_id"
+    fi
 done < <(squeue -u "$USER" -h -o "%i %200j")
 
-# Helper functions for log processing
+# Helper functions
 extract_core_name_from_log() {
     local log_file="$1"
     basename "$log_file" | sed -E 's/\.(rc|rg)[0-9]+\.[0-9]+\.log$//'
@@ -79,32 +78,40 @@ extract_job_id_from_log() {
 }
 
 # ------------------------------------------------------------------------------
-# 4. Status Check Logic
+# 4. Status Check Logic with Substring/Fuzzy Slurm Matching
 # ------------------------------------------------------------------------------
 check_status() {
-    local tool_name="$1"
+    local tool_name="$1" # e.g., samtools_2C_CTL_SCD5
 
-    # Check 1: steps_done.txt (Exact line match)
-    if [ -f "$DONE_FILE" ] && grep -q -x "$tool_name" "$DONE_FILE"; then
+    # Check 1: steps_done.txt (Exact or substring match)
+    if [ -f "$DONE_FILE" ] && grep -q -E "(^|[^a-zA-Z0-9_])${tool_name}([^a-zA-Z0-9_]|$)" "$DONE_FILE"; then
         echo "DONE"
         return
     fi
 
-    # Check 2: Active in squeue (Exact Job Name match)
+    # Check 2: Active in squeue (Direct lookup or partial name match)
     if [ -n "${RUNNING_JOBS[$tool_name]}" ]; then
         echo "RUNNING:${RUNNING_JOBS[$tool_name]}"
         return
     fi
 
-    # Check 3: Check logs in scoped LOG_DIR
+    # Substring search in active jobs (handles custom SBATCH --job-name overrides)
+    for active_name in "${!RUNNING_JOBS[@]}"; do
+        if [[ "$active_name" == *"$tool_name"* ]] || [[ "$tool_name" == *"$active_name"* ]]; then
+            echo "RUNNING:${RUNNING_JOBS[$active_name]}"
+            return
+        fi
+    done
+
+    # Check 3: Check log directory for matching logs
     local existing_log
-    existing_log=$(ls -1t "${LOG_DIR}/${tool_name}".*.log 2>/dev/null | head -n 1)
+    existing_log=$(ls -1t "${LOG_DIR}/${tool_name}"*.log 2>/dev/null | head -n 1)
 
     if [ -n "$existing_log" ]; then
         local log_core_name
         log_core_name=$(extract_core_name_from_log "$existing_log")
 
-        if [ "$log_core_name" = "$tool_name" ]; then
+        if [[ "$log_core_name" == *"$tool_name"* ]]; then
             local job_id
             job_id=$(extract_job_id_from_log "$existing_log")
 
@@ -127,12 +134,13 @@ check_status() {
 }
 
 # ------------------------------------------------------------------------------
-# 5. Parse main.sh and generate main_resubmit.sh
+# 5. Parse main.sh line by line
 # ------------------------------------------------------------------------------
 while IFS= read -r line || [ -n "$line" ]; do
 
     if [[ "$line" =~ sbatch.*\.slurm ]]; then
 
+        # Extract script filename without directory path
         script_file=$(echo "$line" | grep -oE '[^/]+\.slurm')
         tool_name="${script_file%.slurm}"
 
