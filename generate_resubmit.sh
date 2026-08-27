@@ -9,8 +9,6 @@ LOG_DIR="."
 echo "#!/bin/bash" > "$OUTPUT_SCRIPT"
 echo "# Generated automatically on $(date)" >> "$OUTPUT_SCRIPT"
 echo "" >> "$OUTPUT_SCRIPT"
-echo "DEPS=()" >> "$OUTPUT_SCRIPT"
-echo "" >> "$OUTPUT_SCRIPT"
 
 # 1. Capture active Slurm jobs into an associative array: RUNNING_JOBS["job_name"]="job_id"
 declare -A RUNNING_JOBS
@@ -74,7 +72,7 @@ check_status() {
                     echo "DONE"
                     return
                 elif [[ "$state" == "RUNNING" || "$state" == "PENDING" ]]; then
-                    echo "RUNNING:${job_id}"
+                    echo "SLURM:${job_id}"
                     return
                 fi
             fi
@@ -104,7 +102,7 @@ while IFS= read -r line || [ -n "$line" ]; do
                     ;;
                 "RUNNING")
                     running_id=$(echo "$status_info" | cut -d':' -f2)
-                    echo "# [ATTACHED] $tool_name (Running in Slurm - Job ID: $running_id)" >> "$OUTPUT_SCRIPT"
+                    echo "# [ATTACHED] $tool_name (Already Submitted - Job ID: $running_id)" >> "$OUTPUT_SCRIPT"
                     echo "DEPS+=(\"${running_id}\")" >> "$OUTPUT_SCRIPT"
                     ;;
                 "NEED_RUN")
@@ -122,7 +120,7 @@ while IFS= read -r line || [ -n "$line" ]; do
                     ;;
                 "RUNNING")
                     running_id=$(echo "$status_info" | cut -d':' -f2)
-                    echo "# [ATTACHED] $tool_name (Running in Slurm - Job ID: $running_id)" >> "$OUTPUT_SCRIPT"
+                    echo "# [ATTACHED] $tool_name (Already Submitted - Job ID: $running_id)" >> "$OUTPUT_SCRIPT"
                     echo "${var_name}=\"${running_id}\"" >> "$OUTPUT_SCRIPT"
                     ;;
                 "NEED_RUN")
