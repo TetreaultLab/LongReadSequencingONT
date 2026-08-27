@@ -46,7 +46,7 @@ cat << EOF > "$OUTPUT_SCRIPT"
 # Cancel existing cleanup job if running/queued to prevent premature file deletion
 # ------------------------------------------------------------------------------
 CLEANUP_PATTERN="cleanup_${PROJECT_NAME}"
-ACTIVE_CLEANUP_IDS=\$(squeue -u "\$USER" -h -o "%i %j" | awk -v pat="\$CLEANUP_PATTERN" '\$2 ~ pat {print \$1}')
+ACTIVE_CLEANUP_IDS=\$(squeue -u "\$USER" -h -o "%i %200j" | awk -v pat="\$CLEANUP_PATTERN" '\$2 ~ pat {print \$1}')
 
 if [ -n "\$ACTIVE_CLEANUP_IDS" ]; then
     for job_id in \$ACTIVE_CLEANUP_IDS; do
@@ -65,7 +65,7 @@ EOF
 declare -A RUNNING_JOBS
 while read -r job_id job_name; do
     [ -n "$job_name" ] && RUNNING_JOBS["$job_name"]="$job_id"
-done < <(squeue -u "$USER" -h -o "%i %j")
+done < <(squeue -u "$USER" -h -o "%i %200j")
 
 # Helper functions for log processing
 extract_core_name_from_log() {
