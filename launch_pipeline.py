@@ -1206,13 +1206,15 @@ def longReadSum(toml_config, done):
 
 
 def mosdepth(toml_config, done):
-    tool = "mosdepth"
+
     output = toml_config["general"]["project_path"]
     name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
     threads = "4"
     memory = "8"
     time = "00-03:00"
     email = toml_config["general"]["email"]
+
+    tool = f"mosdepth_{name}"
 
     command_str = ""
     for sample in toml_config["general"]["samples"]:
@@ -1492,7 +1494,7 @@ def epi2me(toml_config, done):
 
 
 def annotate_snps(toml_config, done):
-    tool = "annotate"
+    tool = "annotate_snps"
 
     output = toml_config["general"]["project_path"]
     email = toml_config["general"]["email"]
@@ -1550,7 +1552,6 @@ def annotate_snps(toml_config, done):
 
 
 def trgt(toml_config, done):
-    tool = "trgt"
 
     output = toml_config["general"]["project_path"]
     email = toml_config["general"]["email"]
@@ -1560,6 +1561,8 @@ def trgt(toml_config, done):
     motif = toml_config["trgt"]["repeat_motif"]
     samples = toml_config["general"]["samples"]
     str_samples = " ".join(samples)
+
+    tool = f"trgt_{name}"
 
     all_fc = [f"samtools_{s}" for s in samples]
     done_fc = [x for x in done if x.startswith("samtools")]
@@ -1615,8 +1618,6 @@ def trgt(toml_config, done):
 
 
 def strkit(toml_config, done):
-    tool = "strkit"
-
     output = toml_config["general"]["project_path"]
     email = toml_config["general"]["email"]
     genome = get_reference(toml_config["general"]["reference"])["fasta"]
@@ -1627,6 +1628,8 @@ def strkit(toml_config, done):
     all_fc = [f"samtools_{s}" for s in samples]
     done_fc = [x for x in done if x.startswith("samtools")]
     to_dos = [x for x in all_fc if x not in done_fc]
+
+    tool = f"strkit_{name}"
 
     dependencies = ":".join([f"${code}" for code in to_dos])
 
@@ -1674,8 +1677,6 @@ def strkit(toml_config, done):
 
 
 def ont_methyldmr_kit(toml_config, done):
-    tool = "ont_methyldmr_kit"
-
     output = toml_config["general"]["project_path"]
     email = toml_config["general"]["email"]
     name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
@@ -1683,6 +1684,8 @@ def ont_methyldmr_kit(toml_config, done):
     res = f"/lustre10/scratch/{username}/{name}/results/"
     samples = toml_config["general"]["samples"]
     str_samples = " ".join(samples)
+
+    tool = f"ont_methyldmr_kit_{name}"
 
     all_fc = [f"epi2me_{s}" for s in samples]
     done_fc = [x for x in done if x.startswith("epi2me_")]
@@ -1863,8 +1866,6 @@ def deepvariant(toml_config, done):
 
 
 def cutesv(toml_config, done):
-    tool = "cutesv"
-
     output = toml_config["general"]["project_path"]
     email = toml_config["general"]["email"]
     genome = get_reference(toml_config["general"]["reference"])["fasta"]
@@ -1872,6 +1873,8 @@ def cutesv(toml_config, done):
     username = os.environ.get("USER")
     samples = toml_config["general"]["samples"]
     str_samples = " ".join(samples)
+
+    tool = f"cutesv_{name}"
 
     all_fc = [f"samtools_{s}" for s in samples]
     done_fc = [x for x in done if x.startswith("samtools")]
@@ -1992,7 +1995,6 @@ def hapcut2(toml_config, done):
 
 def cleanup(toml_config, done):
     # Simple function to remove redundant files and cleanup structure
-    tool = "cleanup"
     output = toml_config["general"]["project_path"]
     name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
     username = os.environ.get("USER")
@@ -2000,6 +2002,8 @@ def cleanup(toml_config, done):
     email = toml_config["general"]["email"]
     flowcells = toml_config["general"]["fc_dir_names"]
     samples = toml_config["general"]["samples"]
+
+    tool = f"cleanup_{name}"
 
     threads = "4"
     memory = "16"
