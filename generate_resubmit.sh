@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ORIGINAL_SCRIPT="scripts/main.sh"
-OUTPUT_SCRIPT="scripts/main_resubmit.sh"
+OUTPUT_SCRIPT="scripts/resubmit.sh"
 DONE_FILE="scripts/steps_done.txt"
 LOG_DIR="."
 
