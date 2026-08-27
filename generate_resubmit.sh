@@ -45,7 +45,7 @@ cat << EOF > "$OUTPUT_SCRIPT"
 # ------------------------------------------------------------------------------
 # Cancel existing cleanup job if running/queued to prevent premature file deletion
 # ------------------------------------------------------------------------------
-CLEANUP_PATTERN="cleanup"
+CLEANUP_PATTERN="cleanup_${PROJECT_NAME}"
 ACTIVE_CLEANUP_IDS=\$(squeue -u "\$USER" -h -o "%i %j" | awk -v pat="\$CLEANUP_PATTERN" '\$2 ~ pat {print \$1}')
 
 if [ -n "\$ACTIVE_CLEANUP_IDS" ]; then
