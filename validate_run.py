@@ -41,6 +41,8 @@ if mosdepth.is_file():
 bam_ok = True
 for s in samples:
     print(f"\n{s}")
+    print("=" * len(s))
+    print("")
 
     # Check alignments
     align_dir = Path(f"{cwd}/alignments")
@@ -78,7 +80,7 @@ for s in samples:
                 count = int(result.stdout.strip())
                 total_initial_reads += count
 
-            print(f"Total Flowcell BAM Reads:\t{total_initial_reads:,}")
+            print(f"Total Flowcell BAM Reads:{total_initial_reads:,}")
 
             final_bam = f"alignments/{s}_sorted.bam"
             idxstats_cmd = f"module load samtools && samtools idxstats '{final_bam}'"
@@ -88,13 +90,13 @@ for s in samples:
 
             final_bam_reads = 0
             for line in idxstats_result.stdout.strip().split("\n"):
-                fields = line.split("\t")
+                fields = line.split("")
                 if len(fields) >= 4:
                     mapped = int(fields[2])
                     unmapped = int(fields[3])
                     final_bam_reads += mapped + unmapped
 
-            print(f"Final Sorted BAM Reads:\t{final_bam_reads:,}")
+            print(f"Final Sorted BAM Reads:{final_bam_reads:,}")
 
             difference = final_bam_reads - total_initial_reads
             if total_initial_reads == final_bam_reads:
@@ -139,7 +141,7 @@ for s in samples:
             if matching_files:
                 continue
             else:
-                print(f"\tWARNING! Missing epi2me results : {file_name}")
+                print(f"WARNING! Missing epi2me results : {file_name}")
                 all_exist = False
 
     ## SNP
@@ -163,7 +165,7 @@ for s in samples:
             if matching_files:
                 continue
             else:
-                print(f"\tWARNING! Missing SNPs results : {file_name}")
+                print(f"WARNING! Missing SNPs results : {file_name}")
                 all_exist = False
 
     ## SV
@@ -181,7 +183,7 @@ for s in samples:
             if matching_files:
                 continue
             else:
-                print(f"\tWARNING! Missing SVs results : {file_name}")
+                print(f"WARNING! Missing SVs results : {file_name}")
                 all_exist = False
 
     ## CNV
@@ -197,7 +199,7 @@ for s in samples:
             if matching_files:
                 continue
             else:
-                print(f"\tWARNING! Missing CNVs results : {file_name}")
+                print(f"WARNING! Missing CNVs results : {file_name}")
                 all_exist = False
 
     ## repeats
@@ -220,7 +222,7 @@ for s in samples:
             if matching_files:
                 continue
             else:
-                print(f"\tWARNING! Missing repeat expansions results: {file_name}")
+                print(f"WARNING! Missing repeat expansions results: {file_name}")
                 all_exist = False
 
     ## methylation
@@ -235,7 +237,7 @@ for s in samples:
             if matching_files:
                 continue
             else:
-                print(f"\tWARNING! Missing methylation files: {file_name}")
+                print(f"WARNING! Missing methylation files: {file_name}")
                 all_exist = False
 
     ## phasing
@@ -266,7 +268,7 @@ for s in samples:
             if matching_files:
                 continue
             else:
-                print(f"\tWARNING! Missing phased results : {file_name}")
+                print(f"WARNING! Missing phased results : {file_name}")
                 all_exist = False
 
     ## splicing
@@ -287,7 +289,7 @@ for s in samples:
             if matching_files:
                 continue
             else:
-                print(f"\tWARNING! Missing splicing results : {file_name}")
+                print(f"WARNING! Missing splicing results : {file_name}")
                 all_exist = False
 
     if all_exist:
