@@ -72,7 +72,7 @@ check_status() {
                     echo "DONE"
                     return
                 elif [[ "$state" == "RUNNING" || "$state" == "PENDING" ]]; then
-                    echo "SLURM:${job_id}"
+                    echo "RUNNING:${job_id}"
                     return
                 fi
             fi
