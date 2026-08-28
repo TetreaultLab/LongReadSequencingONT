@@ -8,9 +8,9 @@ import sys
 
 print("\n\nResults done transfering. Now validating all outputs.\n\n")
 
-cwd = os.getcwd()
+config_path = sys.argv[1]
 
-toml_config = toml.load(f"{cwd}/scripts/config_final.toml")
+toml_config = toml.load(config_path)
 
 samples = toml_config["general"]["samples"]
 analyses = toml_config["general"]["analysis"]
@@ -22,7 +22,7 @@ name = output.rstrip("/").split("/")[-2].split("_", 1)[1]
 # Check alignments in flowcells. Folder "alignments" should not exist.
 skip_fc = 0
 for f in flowcells:
-    path = f"{cwd}/{f}/alignments"
+    path = f"{output}/{f}/alignments"
     if not os.path.isdir(path):
         print(f"Directory '{f}/alignments' was previously removed to free space.")
         skip_fc += 1
@@ -34,7 +34,7 @@ for f in flowcells:
         )
 
 # Check QC
-mosdepth = Path(f"{cwd}/qc/{name}.html")
+mosdepth = Path(f"{output}/qc/{name}.html")
 if mosdepth.is_file():
     print("\nMosdepth summary found!")
 
@@ -45,13 +45,13 @@ for s in samples:
     print("")
 
     # Check alignments
-    align_dir = Path(f"{cwd}/alignments")
+    align_dir = Path(f"{output}/alignments")
     bam_sorted_file = align_dir / f"{s}_sorted.bam"
     bai_file = align_dir / f"{s}_sorted.bam.bai"
 
     if bam_sorted_file.is_file() and bai_file.is_file():
         # Final file found, Check size of bams
-        bam_pattern = f"2*/alignments/{s}*.bam"
+        bam_pattern = f"{output}/2*/alignments/{s}*.bam"
         initial_bams = glob.glob(bam_pattern)
 
         if skip_fc == len(initial_bams):
@@ -82,7 +82,7 @@ for s in samples:
 
             print(f"Total Flowcell BAM Reads:{total_initial_reads:,}")
 
-            final_bam = f"alignments/{s}_sorted.bam"
+            final_bam = f"{output}/alignments/{s}_sorted.bam"
             idxstats_cmd = f"module load samtools && samtools idxstats '{final_bam}'"
             idxstats_result = subprocess.run(
                 ["bash", "-c", idxstats_cmd], capture_output=True, text=True, check=True
@@ -114,7 +114,7 @@ for s in samples:
     # Check downstream results
     all_exist = True
 
-    base_dir = Path(f"{cwd}/results")
+    base_dir = Path(f"{output}/results")
 
     ## General EPI2ME
     if (
@@ -299,7 +299,7 @@ for s in samples:
 # If no warning for BAMs
 if bam_ok:
     print("\nAll BAM files intact! Deleting flowcell alignments...")
-    alignments_dirs = [p for p in Path(".").glob("2*/alignments") if p.is_dir()]
+    alignments_dirs = [p for p in Path(output).glob("2*/alignments") if p.is_dir()]
     for d in alignments_dirs:
         shutil.rmtree(d)
         print(f"Deleted folder: {d}")
