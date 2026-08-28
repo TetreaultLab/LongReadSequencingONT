@@ -1,10 +1,6 @@
 #!/bin/bash
 
-ORIGINAL_SCRIPT="scripts/main.sh"
-OUTPUT_SCRIPT="scripts/resubmit.sh"
-DONE_FILE="scripts/steps_done.txt"
-LOG_DIR="."
-CONFIG_FILE="scripts/config_final.toml"
+CONFIG_FILE="$1"
 
 # ------------------------------------------------------------------------------
 # 1. Parse Project Name & Directory from TOML Config
@@ -13,6 +9,13 @@ if [ ! -f "$CONFIG_FILE" ]; then
     echo "Error: Configuration file '$CONFIG_FILE' not found." >&2
     exit 1
 fi
+
+PROJECT_PATH=$(grep -E '^\s*project_path\s*=' "$CONFIG_FILE" | cut -d'=' -f2 | tr -d ' "' | head -n 1)
+
+ORIGINAL_SCRIPT="${PROJECT_PATH}/scripts/main.sh"
+OUTPUT_SCRIPT="${PROJECT_PATH}/scripts/resubmit.sh"
+DONE_FILE="${PROJECT_PATH}/scripts/steps_done.txt"
+LOG_DIR="."
 
 # Extract raw project_path line
 raw_path=$(grep -E '^\s*project_path\s*=' "$CONFIG_FILE" | sed -E 's/.*"([^"]+)".*/\1/')
@@ -28,9 +31,12 @@ parent_dir="${clean_path%/*}"
 dir_name="${parent_dir##*/}"
 PROJECT_NAME="${dir_name#*_}"
 
-# Set log directory (uses the target script path)
-LOG_DIR="${clean_path}/"
-[ ! -d "$LOG_DIR" ] && LOG_DIR="."
+# Set log directory
+if ls "${PROJECT_PATH}/scripts"/*.log >/dev/null 2>&1; then
+    LOG_DIR="${PROJECT_PATH}/scripts"
+else
+    LOG_DIR="${PROJECT_PATH}"
+fi
 
 echo "Project Name: $PROJECT_NAME"
 
