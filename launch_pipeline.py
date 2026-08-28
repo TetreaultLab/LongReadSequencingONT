@@ -1724,7 +1724,7 @@ def ont_methyldmr_kit(toml_config, done):
                 "r",
             ) as f:
                 slurm = f.read()
-                slurm_filled = slurm.format(email, output, str_samples, res)
+                slurm_filled = slurm.format(email, output, str_samples, res, name)
 
                 with open(job, "w") as o:
                     o.write(slurm_filled)
