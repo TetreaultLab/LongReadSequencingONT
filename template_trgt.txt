@@ -3,8 +3,8 @@
 #SBATCH --cpus-per-task 1 # number of cores
 #SBATCH --mem 2G # memory pool for all cores
 #SBATCH -t 0-01:00 # time (D-HH:MM)
-#SBATCH -o trgt.%N.%j.log
-#SBATCH -e trgt.%N.%j.log
+#SBATCH -o trgt_{4}.%N.%j.log
+#SBATCH -e trgt_{4}.%N.%j.log
 #SBATCH --mail-type=FAIL
 #SBATCH --account=def-tetreaum
 #SBATCH --mail-user={0}
@@ -62,5 +62,5 @@ do
 done
 
 if [ $? -eq 0 ]; then
-    echo "trgt" >> "$STEPS_DONE"
+    echo "trgt_{4}" >> "$STEPS_DONE"
 fi

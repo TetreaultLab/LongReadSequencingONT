@@ -3,8 +3,8 @@
 #SBATCH --cpus-per-task 4 # number of cores
 #SBATCH --mem 48G # memory pool for all cores
 #SBATCH -t 0-06:00 # time (D-HH:MM)
-#SBATCH -o cutesv.%N.%j.log
-#SBATCH -e cutesv.%N.%j.log
+#SBATCH -o cutesv_{4}.%N.%j.log
+#SBATCH -e cutesv_{4}.%N.%j.log
 #SBATCH --mail-type=FAIL
 #SBATCH --account=def-tetreaum
 #SBATCH --mail-user={0}
@@ -48,5 +48,5 @@ do
 done
 
 if [ $? -eq 0 ]; then
-    echo "cutesv" >> "$STEPS_DONE"
+    echo "cutesv_{4}" >> "$STEPS_DONE"
 fi
