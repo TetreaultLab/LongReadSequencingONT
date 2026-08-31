@@ -176,7 +176,7 @@ while IFS= read -r line || [ -n "$line" ]; do
                     ;;
                 "RUNNING")
                     running_id=$(echo "$status_info" | cut -d':' -f2)
-                    echo "# [RUNNING] $tool_name (Running in Slurm - Job ID: $running_id)" >> "$OUTPUT_SCRIPT"
+                    echo "# [RUNNING] $tool_name (Job ID: $running_id)" >> "$OUTPUT_SCRIPT"
                     echo "DEPS+=(\"${running_id}\")" >> "$OUTPUT_SCRIPT"
                     ;;
                 "NEED_RUN")
@@ -196,7 +196,7 @@ while IFS= read -r line || [ -n "$line" ]; do
                     ;;
                 "RUNNING")
                     running_id=$(echo "$status_info" | cut -d':' -f2)
-                    echo "# [RUNNING] $tool_name (Running in Slurm - Job ID: $running_id)" >> "$OUTPUT_SCRIPT"
+                    echo "# [RUNNING] $tool_name (Job ID: $running_id)" >> "$OUTPUT_SCRIPT"
                     echo "${var_name}=\"${running_id}\"" >> "$OUTPUT_SCRIPT"
                     ;;
                 "NEED_RUN")
