@@ -143,16 +143,16 @@ check_status() {
 sanitize_line() {
     local line="$1"
 
-    # Step 1: Replace multiple colons with a single colon
-    line=$(echo "$line" | sed -E 's/:+/:/g')
+    # 1. Collapse 2 or more colons anywhere in the line to a single colon
+    line=$(echo "$line" | sed -E 's/:{2,}/:/g')
 
-    # Step 2: Remove a leading colon right after afterok: (e.g. afterok::job -> afterok:job)
+    # 2. Remove leading colon directly after 'afterok:' (handles empty initial variables)
     line=$(echo "$line" | sed -E 's/afterok::*/afterok:/g')
 
-    # Step 3: Remove a trailing colon before a space (e.g. job: /path -> job /path)
-    line=$(echo "$line" | sed -E 's/:[[:space:]]/ /g')
+    # 3. Remove trailing colon before space/end-of-arguments (handles empty final variables)
+    line=$(echo "$line" | sed -E 's/:([[:space:]])/\1/g')
 
-    # Step 4: If ALL dependencies were empty, remove the orphan flag completely
+    # 4. If all variables were empty (leaves 'afterok:' with nothing following), strip the flag entirely
     line=$(echo "$line" | sed -E 's/--dependency=afterok:[[:space:]]/ /g')
 
     echo "$line"
