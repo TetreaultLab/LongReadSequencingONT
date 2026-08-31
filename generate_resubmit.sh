@@ -141,14 +141,21 @@ check_status() {
 # 5. Parse main.sh line by line
 # ------------------------------------------------------------------------------
 sanitize_line() {
-    local raw="$1"
-    echo "$raw" | sed -E \
-        -e 's/:+/:/g' \
-        -e 's/afterok:/afterok___TAG___/g' \
-        -e 's/___TAG___:/___TAG___/g' \
-        -e 's/: / /g' \
-        -e 's/___TAG___/afterok:/g' \
-        -e 's/--dependency=afterok:[[:space:]]/ /g'
+    local line="$1"
+
+    # Step 1: Replace multiple colons with a single colon
+    line=$(echo "$line" | sed -E 's/:+/:/g')
+
+    # Step 2: Remove a leading colon right after afterok: (e.g. afterok::job -> afterok:job)
+    line=$(echo "$line" | sed -E 's/afterok::*/afterok:/g')
+
+    # Step 3: Remove a trailing colon before a space (e.g. job: /path -> job /path)
+    line=$(echo "$line" | sed -E 's/:[[:space:]]/ /g')
+
+    # Step 4: If ALL dependencies were empty, remove the orphan flag completely
+    line=$(echo "$line" | sed -E 's/--dependency=afterok:[[:space:]]/ /g')
+
+    echo "$line"
 }
 
 while IFS= read -r line || [ -n "$line" ]; do
