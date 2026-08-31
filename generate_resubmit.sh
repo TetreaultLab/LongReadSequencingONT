@@ -140,46 +140,22 @@ check_status() {
 # ------------------------------------------------------------------------------
 # 5. Parse main.sh line by line
 # ------------------------------------------------------------------------------
-rebuild_sbatch_line() {
-    local raw_line="$1"
+sanitize_line() {
+    local line="$1"
 
-    # If line doesn't have a dependency flag, return it as-is
-    if [[ "$raw_line" != *"--dependency=afterok:"* ]]; then
-        echo "$raw_line"
-        return
-    fi
+    # Step 1: Replace multiple colons with a single colon
+    line=$(echo "$line" | sed -E 's/:+/:/g')
 
-    # Extract everything before '--dependency=afterok:'
-    local prefix="${raw_line%%--dependency=afterok:*}"
+    # Step 2: Remove a leading colon right after afterok: (e.g. afterok::job -> afterok:job)
+    line=$(echo "$line" | sed -E 's/afterok::*/afterok:/g')
 
-    # Extract the dependency string and the rest of the line (script path)
-    local match="${raw_line#*--dependency=afterok:}"
-    local dep_list="${match%% *}"
-    local suffix="${match#* }"
+    # Step 3: Remove a trailing colon before a space (e.g. job: /path -> job /path)
+    line=$(echo "$line" | sed -E 's/:[[:space:]]/ /g')
 
-    # Split dependencies by colon
-    IFS=':' read -ra DEPS_ARRAY <<< "$dep_list"
+    # Step 4: If ALL dependencies were empty, remove the orphan flag completely
+    line=$(echo "$line" | sed -E 's/--dependency=afterok:[[:space:]]/ /g')
 
-    local valid_deps=()
-    for dep in "${DEPS_ARRAY[@]}"; do
-        # Extract clean variable name (strip leading '$')
-        var_name="${dep#\$}"
-        
-        # Check if variable has a value set in the current environment
-        # (i.e., it was NOT marked DONE/empty)
-        if [[ -n "${!var_name}" ]]; then
-            valid_deps+=("\$$var_name")
-        fi
-    done
-
-    # Reconstruct the dependency argument
-    if [[ ${#valid_deps[@]} -gt 0 ]]; then
-        local joined_deps=$(IFS=:; echo "${valid_deps[*]}")
-        echo "${prefix}--dependency=afterok:${joined_deps} ${suffix}"
-    else
-        # If ALL dependencies were DONE/empty, omit the --dependency flag entirely
-        echo "${prefix}${suffix}"
-    fi
+    echo "$line"
 }
 
 while IFS= read -r line || [ -n "$line" ]; do
@@ -200,12 +176,12 @@ while IFS= read -r line || [ -n "$line" ]; do
                     ;;
                 "RUNNING")
                     running_id=$(echo "$status_info" | cut -d':' -f2)
-                    echo "# [RUNNING] $tool_name (Job ID: $running_id)" >> "$OUTPUT_SCRIPT"
+                    echo "# [RUNNING] $tool_name (Running in Slurm - Job ID: $running_id)" >> "$OUTPUT_SCRIPT"
                     echo "DEPS+=(\"${running_id}\")" >> "$OUTPUT_SCRIPT"
                     ;;
                 "NEED_RUN")
-                    # Dynamically filter out DONE dependencies from the sbatch line
-                    cleaned_line=$(rebuild_sbatch_line "$line")
+                    # Clean empty dependency slots before writing
+                    cleaned_line=$(sanitize_line "$line")
                     echo "$cleaned_line" >> "$OUTPUT_SCRIPT"
                     ;;
             esac
@@ -220,12 +196,12 @@ while IFS= read -r line || [ -n "$line" ]; do
                     ;;
                 "RUNNING")
                     running_id=$(echo "$status_info" | cut -d':' -f2)
-                    echo "# [RUNNING] $tool_name (Job ID: $running_id)" >> "$OUTPUT_SCRIPT"
+                    echo "# [RUNNING] $tool_name (Running in Slurm - Job ID: $running_id)" >> "$OUTPUT_SCRIPT"
                     echo "${var_name}=\"${running_id}\"" >> "$OUTPUT_SCRIPT"
                     ;;
                 "NEED_RUN")
-                    # Dynamically filter out DONE dependencies from the sbatch line
-                    cleaned_line=$(rebuild_sbatch_line "$line")
+                    # Clean empty dependency slots before writing
+                    cleaned_line=$(sanitize_line "$line")
                     echo "$cleaned_line" >> "$OUTPUT_SCRIPT"
                     ;;
             esac
@@ -240,5 +216,5 @@ while IFS= read -r line || [ -n "$line" ]; do
 done < "$ORIGINAL_SCRIPT"
 
 chmod +x "$OUTPUT_SCRIPT"
-echo "Generated executable."
+echo "Generated executable"
 echo "Launch with 'bash $OUTPUT_SCRIPT'"
