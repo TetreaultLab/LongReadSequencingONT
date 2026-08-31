@@ -216,5 +216,5 @@ while IFS= read -r line || [ -n "$line" ]; do
 done < "$ORIGINAL_SCRIPT"
 
 chmod +x "$OUTPUT_SCRIPT"
-echo "Done! Generated executable."
+echo "Generated executable."
 echo "Launch with 'bash $OUTPUT_SCRIPT'"
