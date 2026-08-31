@@ -80,7 +80,7 @@ for s in samples:
                 count = int(result.stdout.strip())
                 total_initial_reads += count
 
-            print(f"Total Flowcell BAM Reads:{total_initial_reads:,}")
+            print(f"Total Flowcell BAM Reads:\t{total_initial_reads:,}")
 
             final_bam = f"{output}/alignments/{s}_sorted.bam"
             idxstats_cmd = f"module load samtools && samtools idxstats '{final_bam}'"
@@ -96,7 +96,7 @@ for s in samples:
                     unmapped = int(fields[3])
                     final_bam_reads += mapped + unmapped
 
-            print(f"Final Sorted BAM Reads:{final_bam_reads:,}")
+            print(f"Final Sorted BAM Reads:\t{final_bam_reads:,}")
 
             difference = final_bam_reads - total_initial_reads
             if total_initial_reads == final_bam_reads:
