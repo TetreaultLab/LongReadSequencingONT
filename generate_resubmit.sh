@@ -143,6 +143,13 @@ check_status() {
 sanitize_line() {
     local line="$1"
 
+    # Step 0: Strip out any completed variable names from the dependency list
+    for done_var in "${COMPLETED_VARS[@]}"; do
+        if [[ -n "$done_var" ]]; then
+            line=$(echo "$line" | sed "s/\\\$$done_var//g")
+        fi
+    done
+
     # Step 1: Replace multiple colons with a single colon
     line=$(echo "$line" | sed -E 's/:+/:/g')
 
@@ -157,6 +164,8 @@ sanitize_line() {
 
     echo "$line"
 }
+
+COMPLETED_VARS=()
 
 while IFS= read -r line || [ -n "$line" ]; do
 
@@ -180,7 +189,6 @@ while IFS= read -r line || [ -n "$line" ]; do
                     echo "DEPS+=(\"${running_id}\")" >> "$OUTPUT_SCRIPT"
                     ;;
                 "NEED_RUN")
-                    # Clean empty dependency slots before writing
                     cleaned_line=$(sanitize_line "$line")
                     echo "$cleaned_line" >> "$OUTPUT_SCRIPT"
                     ;;
@@ -193,6 +201,8 @@ while IFS= read -r line || [ -n "$line" ]; do
                 "DONE")
                     echo "# [COMPLETED] $tool_name" >> "$OUTPUT_SCRIPT"
                     echo "${var_name}=\"\"" >> "$OUTPUT_SCRIPT"
+                    # Track completed variable name
+                    COMPLETED_VARS+=("$var_name")
                     ;;
                 "RUNNING")
                     running_id=$(echo "$status_info" | cut -d':' -f2)
@@ -200,7 +210,6 @@ while IFS= read -r line || [ -n "$line" ]; do
                     echo "${var_name}=\"${running_id}\"" >> "$OUTPUT_SCRIPT"
                     ;;
                 "NEED_RUN")
-                    # Clean empty dependency slots before writing
                     cleaned_line=$(sanitize_line "$line")
                     echo "$cleaned_line" >> "$OUTPUT_SCRIPT"
                     ;;
