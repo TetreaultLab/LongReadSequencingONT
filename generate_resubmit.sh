@@ -57,8 +57,6 @@ if [ -n "\$ACTIVE_CLEANUP_IDS" ]; then
     done
 fi
 
-DEPS=()
-
 EOF
 
 # ------------------------------------------------------------------------------
@@ -142,11 +140,21 @@ check_status() {
 # ------------------------------------------------------------------------------
 # 5. Parse main.sh line by line
 # ------------------------------------------------------------------------------
+sanitize_line() {
+    local raw="$1"
+    echo "$raw" | sed -E \
+        -e 's/:+/:/g' \
+        -e 's/afterok:/afterok___TAG___/g' \
+        -e 's/___TAG___:/___TAG___/g' \
+        -e 's/: / /g' \
+        -e 's/___TAG___/afterok:/g' \
+        -e 's/--dependency=afterok:[[:space:]]/ /g'
+}
+
 while IFS= read -r line || [ -n "$line" ]; do
 
     if [[ "$line" =~ sbatch.*\.slurm ]]; then
 
-        # Extract script filename without directory path
         script_file=$(echo "$line" | grep -oE '[^/]+\.slurm')
         tool_name="${script_file%.slurm}"
 
@@ -165,7 +173,9 @@ while IFS= read -r line || [ -n "$line" ]; do
                     echo "DEPS+=(\"${running_id}\")" >> "$OUTPUT_SCRIPT"
                     ;;
                 "NEED_RUN")
-                    echo "$line" >> "$OUTPUT_SCRIPT"
+                    # Clean empty dependency slots before writing
+                    cleaned_line=$(sanitize_line "$line")
+                    echo "$cleaned_line" >> "$OUTPUT_SCRIPT"
                     ;;
             esac
 
@@ -183,7 +193,9 @@ while IFS= read -r line || [ -n "$line" ]; do
                     echo "${var_name}=\"${running_id}\"" >> "$OUTPUT_SCRIPT"
                     ;;
                 "NEED_RUN")
-                    echo "$line" >> "$OUTPUT_SCRIPT"
+                    # Clean empty dependency slots before writing
+                    cleaned_line=$(sanitize_line "$line")
+                    echo "$cleaned_line" >> "$OUTPUT_SCRIPT"
                     ;;
             esac
         else
