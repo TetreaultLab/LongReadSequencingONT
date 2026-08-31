@@ -90,8 +90,8 @@ for s in samples:
 
             final_bam_reads = 0
             for line in idxstats_result.stdout.strip().split("\n"):
+                print(line)
                 fields = line.split("")
-                print(fields)
                 if len(fields) >= 4:
                     mapped = int(fields[2])
                     unmapped = int(fields[3])
