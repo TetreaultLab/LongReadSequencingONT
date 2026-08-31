@@ -87,6 +87,7 @@ for s in samples:
             idxstats_result = subprocess.run(
                 ["bash", "-c", idxstats_cmd], capture_output=True, text=True, check=True
             )
+            print(idxstats_result)
 
             final_bam_reads = 0
             for line in idxstats_result.stdout.strip().split("\n"):
