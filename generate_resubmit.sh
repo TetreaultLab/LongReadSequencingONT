@@ -140,6 +140,48 @@ check_status() {
 # ------------------------------------------------------------------------------
 # 5. Parse main.sh line by line
 # ------------------------------------------------------------------------------
+rebuild_sbatch_line() {
+    local raw_line="$1"
+
+    # If line doesn't have a dependency flag, return it as-is
+    if [[ "$raw_line" != *"--dependency=afterok:"* ]]; then
+        echo "$raw_line"
+        return
+    fi
+
+    # Extract everything before '--dependency=afterok:'
+    local prefix="${raw_line%%--dependency=afterok:*}"
+
+    # Extract the dependency string and the rest of the line (script path)
+    local match="${raw_line#*--dependency=afterok:}"
+    local dep_list="${match%% *}"
+    local suffix="${match#* }"
+
+    # Split dependencies by colon
+    IFS=':' read -ra DEPS_ARRAY <<< "$dep_list"
+
+    local valid_deps=()
+    for dep in "${DEPS_ARRAY[@]}"; do
+        # Extract clean variable name (strip leading '$')
+        var_name="${dep#\$}"
+        
+        # Check if variable has a value set in the current environment
+        # (i.e., it was NOT marked DONE/empty)
+        if [[ -n "${!var_name}" ]]; then
+            valid_deps+=("\$$var_name")
+        fi
+    done
+
+    # Reconstruct the dependency argument
+    if [[ ${#valid_deps[@]} -gt 0 ]]; then
+        local joined_deps=$(IFS=:; echo "${valid_deps[*]}")
+        echo "${prefix}--dependency=afterok:${joined_deps} ${suffix}"
+    else
+        # If ALL dependencies were DONE/empty, omit the --dependency flag entirely
+        echo "${prefix}${suffix}"
+    fi
+}
+
 while IFS= read -r line || [ -n "$line" ]; do
 
     if [[ "$line" =~ sbatch.*\.slurm ]]; then
