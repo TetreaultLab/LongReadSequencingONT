@@ -140,24 +140,6 @@ check_status() {
 # ------------------------------------------------------------------------------
 # 5. Parse main.sh line by line
 # ------------------------------------------------------------------------------
-sanitize_line() {
-    local line="$1"
-
-    # 1. Collapse 2 or more colons anywhere in the line to a single colon
-    line=$(echo "$line" | sed -E 's/:{2,}/:/g')
-
-    # 2. Remove leading colon directly after 'afterok:' (handles empty initial variables)
-    line=$(echo "$line" | sed -E 's/afterok::*/afterok:/g')
-
-    # 3. Remove trailing colon before space/end-of-arguments (handles empty final variables)
-    line=$(echo "$line" | sed -E 's/:([[:space:]])/\1/g')
-
-    # 4. If all variables were empty (leaves 'afterok:' with nothing following), strip the flag entirely
-    line=$(echo "$line" | sed -E 's/--dependency=afterok:[[:space:]]/ /g')
-
-    echo "$line"
-}
-
 while IFS= read -r line || [ -n "$line" ]; do
 
     if [[ "$line" =~ sbatch.*\.slurm ]]; then
@@ -180,8 +162,8 @@ while IFS= read -r line || [ -n "$line" ]; do
                     echo "DEPS+=(\"${running_id}\")" >> "$OUTPUT_SCRIPT"
                     ;;
                 "NEED_RUN")
-                    # Clean empty dependency slots before writing
-                    cleaned_line=$(sanitize_line "$line")
+                    # Dynamically filter out DONE dependencies from the sbatch line
+                    cleaned_line=$(rebuild_sbatch_line "$line")
                     echo "$cleaned_line" >> "$OUTPUT_SCRIPT"
                     ;;
             esac
@@ -200,8 +182,8 @@ while IFS= read -r line || [ -n "$line" ]; do
                     echo "${var_name}=\"${running_id}\"" >> "$OUTPUT_SCRIPT"
                     ;;
                 "NEED_RUN")
-                    # Clean empty dependency slots before writing
-                    cleaned_line=$(sanitize_line "$line")
+                    # Dynamically filter out DONE dependencies from the sbatch line
+                    cleaned_line=$(rebuild_sbatch_line "$line")
                     echo "$cleaned_line" >> "$OUTPUT_SCRIPT"
                     ;;
             esac
