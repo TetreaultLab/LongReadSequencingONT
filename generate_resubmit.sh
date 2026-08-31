@@ -165,11 +165,11 @@ while IFS= read -r line || [ -n "$line" ]; do
         if [[ "$line" =~ ^DEPS\+=\(\$\(sbatch ]]; then
             case "$status_type" in
                 "DONE")
-                    echo "# [SKIPPED] $tool_name (Completed)" >> "$OUTPUT_SCRIPT"
+                    echo "# [COMPLETED] $tool_name" >> "$OUTPUT_SCRIPT"
                     ;;
                 "RUNNING")
                     running_id=$(echo "$status_info" | cut -d':' -f2)
-                    echo "# [ATTACHED] $tool_name (Running in Slurm - Job ID: $running_id)" >> "$OUTPUT_SCRIPT"
+                    echo "# [RUNNING] $tool_name (Running in Slurm - Job ID: $running_id)" >> "$OUTPUT_SCRIPT"
                     echo "DEPS+=(\"${running_id}\")" >> "$OUTPUT_SCRIPT"
                     ;;
                 "NEED_RUN")
@@ -184,12 +184,12 @@ while IFS= read -r line || [ -n "$line" ]; do
             var_name="${BASH_REMATCH[1]}"
             case "$status_type" in
                 "DONE")
-                    echo "# [SKIPPED] $tool_name (Completed)" >> "$OUTPUT_SCRIPT"
+                    echo "# [COMPLETED] $tool_name" >> "$OUTPUT_SCRIPT"
                     echo "${var_name}=\"\"" >> "$OUTPUT_SCRIPT"
                     ;;
                 "RUNNING")
                     running_id=$(echo "$status_info" | cut -d':' -f2)
-                    echo "# [ATTACHED] $tool_name (Running in Slurm - Job ID: $running_id)" >> "$OUTPUT_SCRIPT"
+                    echo "# [RUNNING] $tool_name (Running in Slurm - Job ID: $running_id)" >> "$OUTPUT_SCRIPT"
                     echo "${var_name}=\"${running_id}\"" >> "$OUTPUT_SCRIPT"
                     ;;
                 "NEED_RUN")
