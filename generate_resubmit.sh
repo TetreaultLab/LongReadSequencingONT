@@ -143,24 +143,25 @@ check_status() {
 sanitize_line() {
     local line="$1"
 
-    # Step 0: Strip out any completed variable names from the dependency list
+    # 1. Remove completed variable names stored in COMPLETED_VARS
     for done_var in "${COMPLETED_VARS[@]}"; do
         if [[ -n "$done_var" ]]; then
             line=$(echo "$line" | sed "s/\\\$$done_var//g")
         fi
     done
 
-    # Step 1: Replace multiple colons with a single colon
+    # 2. Collapse multiple colons into a single colon
     line=$(echo "$line" | sed -E 's/:+/:/g')
 
-    # Step 2: Remove a leading colon right after afterok: (e.g. afterok::job -> afterok:job)
+    # 3. Clean leading colon after afterok: (afterok::job -> afterok:job)
     line=$(echo "$line" | sed -E 's/afterok::*/afterok:/g')
 
-    # Step 3: Remove a trailing colon before a space (e.g. job: /path -> job /path)
+    # 4. Clean trailing colon before space (job: /path -> job /path)
     line=$(echo "$line" | sed -E 's/:[[:space:]]/ /g')
 
-    # Step 4: If ALL dependencies were empty, remove the orphan flag completely
-    line=$(echo "$line" | sed -E 's/--dependency=afterok:[[:space:]]/ /g')
+    # 5. REMOVE ORPHAN FLAG: If afterok has no IDs left, remove --dependency=afterok entirely
+    line=$(echo "$line" | sed -E 's/--dependency=afterok:[[:space:]]+/ /g')
+    line=$(echo "$line" | sed -E 's/--dependency=afterok:[[:space:]]*$//g')
 
     echo "$line"
 }
