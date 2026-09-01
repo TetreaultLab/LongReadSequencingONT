@@ -156,12 +156,12 @@ sanitize_line() {
     # 3. Clean leading colon after afterok: (afterok::job -> afterok:job)
     line=$(echo "$line" | sed -E 's/afterok::*/afterok:/g')
 
-    # 4. Clean trailing colon before space (job: /path -> job /path)
-    line=$(echo "$line" | sed -E 's/:[[:space:]]/ /g')
+    # 4. Clean trailing colon before space or end-of-line (job: /path -> job /path)
+    line=$(echo "$line" | sed -E 's/:([[:space:]])/\1/g; s/:$//')
 
-    # 5. REMOVE ORPHAN FLAG: If afterok has no IDs left, remove --dependency=afterok entirely
-    line=$(echo "$line" | sed -E 's/--dependency=afterok:[[:space:]]+/ /g')
-    line=$(echo "$line" | sed -E 's/--dependency=afterok:[[:space:]]*$//g')
+    # 5. REMOVE ORPHAN FLAG (Handles both afterok: and afterok without colon)
+    line=$(echo "$line" | sed -E 's/--dependency=afterok:?[[:space:]]+/ /g')
+    line=$(echo "$line" | sed -E 's/--dependency=afterok:?[[:space:]]*$//g')
 
     echo "$line"
 }
