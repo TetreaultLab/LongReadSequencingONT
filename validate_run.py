@@ -42,7 +42,6 @@ bam_ok = True
 for s in samples:
     print(f"\n{s}")
     print("=" * len(s))
-    print("")
 
     # Check alignments
     align_dir = Path(f"{output}/alignments")
