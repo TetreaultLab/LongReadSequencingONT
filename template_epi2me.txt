@@ -31,7 +31,7 @@ STEPS_DONE="{7}/scripts/steps_done.txt"
 
 mkdir -p $OUT
 
-nextflow run epi2me-labs/wf-human-variation \
+nextflow run epi2me-labs/wf-human-variation -r v2.8.0 \
     {8} \
     --bam_min_coverage 4 \
     --override_basecaller_cfg {9} \
