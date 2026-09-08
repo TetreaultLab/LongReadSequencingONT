@@ -38,7 +38,7 @@ nextflow run epi2me-labs/wf-human-variation \
     -w $SLURM_TMPDIR \
     --bam $BAM \
     --ref {10} \
-    --modkit_args="--cpg --combine-strands --filter-threshold 0.70" \
+    --modkit_args="--cpg --combine-strands --filter-threshold 0.8" \
     --sample_name {4} \
     --out_dir $OUT \
     --threads 1 \
