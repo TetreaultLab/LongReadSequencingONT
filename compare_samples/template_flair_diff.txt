@@ -62,8 +62,8 @@ do
 
 done
 
-echo "Transfering to $workdir"
-rsync -avxH --no-g --no-p --partial $SLURM_TMPDIR/$project_path/* $workdir/
+echo "Transfering to $work_dir"
+rsync -avxH --no-g --no-p --partial $SLURM_TMPDIR/$project_path/* $work_dir/
 
 # Merge junctions into one junctions file
 echo -e "\nMerging junction files"
