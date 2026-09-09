@@ -742,8 +742,9 @@ def dorado_basecaller(toml_config, done):
                 "Yes",
             ]:
                 command.extend(["--barcode-both-ends"])
-            # Different model that includes base modification
-            if "methylation" in toml_config["general"]["analysis"]:
+
+            # WGS include base modification
+            if toml_config["general"]["seq_type"] == "WGS":
                 command.extend(
                     [
                         "--modified-bases-models",
@@ -754,6 +755,7 @@ def dorado_basecaller(toml_config, done):
                         str(toml_config["dorado"]["modified_bases_threshold"]),
                     ]
                 )
+
             # For transcriptomic data, when activated
             if "polya" in toml_config["general"]["analysis"]:
                 command.extend(["--estimate-poly-a"])
